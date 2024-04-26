@@ -1,0 +1,42 @@
+@startuml
+
+      class Role {
+            ID
+            Name           
+      }
+
+      class User {
+            ID
+            Name
+            E-Mail
+
+      }
+      
+      class Process{
+            ID
+            Name
+            Discription      
+      }
+
+      class RunningProcess{
+            ID
+            Name
+            RelatedDate       
+      }
+
+      class Task {
+            ID
+            Name
+      }
+
+      Role "*" -- "1..*" User : < has 
+      Role "*" -- "1..*" Process : > can edit
+      Process "*" -- "*" Task : > contains
+      RunningProcess ---|> Process
+      User "*" -- "*" Task : > completes
+      Task "*" -- "*" Role : > is tasked with
+      RunningProcess "1" -- "*" User :> is about
+
+
+
+@enduml
