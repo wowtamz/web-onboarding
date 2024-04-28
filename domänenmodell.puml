@@ -1,5 +1,5 @@
 @startuml
-
+      
       class Role {
             ID
             Name           
@@ -9,33 +9,58 @@
             ID
             Name
             E-Mail
+            isLocked
 
       }
+
+      class Administrator {}
       
       class Process{
             ID
             Name
-            Discription      
+            Description
       }
+
 
       class RunningProcess{
             ID
             Name
-            RelatedDate       
+            RelatedDate
       }
 
       class Task {
             ID
             Name
+            Instructions
+            Status
+            DueByDate
+            
       }
 
-      Role "*" -- "1..*" User : < has 
-      Role "*" -- "1..*" Process : > can edit
-      Process "*" -- "*" Task : > contains
-      RunningProcess ---|> Process
-      User "*" -- "*" Task : > completes
-      Task "*" -- "*" Role : > is tasked with
+      class Department {
+            ID
+            Name
+      }
+
+      User "1" -- "1..*" Role : > has
+      User "1" -- "1" Department : > has
+      User "1" -- "*" Task : > completes
+      
+      Administrator ---|> Role
+      Administrator "1" -- "*" Process : > manages
+      Administrator "1" -- "*" User : > manages
+
+      Process "*" -- "*" Role : < can edit
+      Process "1" -- "1..*" Task : > contains
+      
+      RunningProcess "1" -- "*" User :< supervises
       RunningProcess "1" -- "*" User :> is about
+      RunningProcess ---|> Process
+
+      Task "1" -- "*" User : > assigned to
+      Task "1" -- "*" Role : > assigned to
+      Task "1" -- "*" Department : > assigned to
+
 
 
 
