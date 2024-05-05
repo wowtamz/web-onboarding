@@ -1,68 +1,84 @@
 @startuml
+    object Rolle
+        Rolle : ID
+        Rolle : Name
+
+    object Benutzer
+        Benutzer : ID
+        Benutzer : Name
+        Benutzer : E-Mail
+        Benutzer : Gesperrt
+
+    object Administrator
+
+    object Mitarbeiter
+        Mitarbeiter : ID
+        Mitarbeiter : Name
+
+    
+    object Bezugsperson
+    
+    object Aufgabenzuständiger
+    
+    object Vorgangsverantwortliche    
+    
+
+
+    object Prozess
+        Prozess : ID
+        Prozess : Name
+        Prozess : Beschreibung
+
+
+
+    object Vorgang
+        Vorgang : ID
+        Vorgang : Name
+        Vorgang : Vertragstyp
+        Vorgang : ErstelltAm
+        Vorgang : Zieldatum
+
+
+    object Aufgabe
+        Aufgabe : ID
+        Aufgabe : Name
+        Aufgabe : Anleitung
+        Aufgabe : Vertragsart
+        Aufgabe : Status
+        Aufgabe : Zieldatum
+
+
+    object Abteilung
+        Abteilung : ID
+        Abteilung : Name
+
+    Benutzer "1" -- "1..*" Rolle : > hat
+    Benutzer "1" -- "1" Abteilung : > hat
+    Benutzer "1" -- "*" Aufgabe : > erledigt
+    Benutzer "1" -- "1" Mitarbeiter : > ist ein
+
+    Mitarbeiter "1" -- "1..*" Rolle : > hat
+    Mitarbeiter "1" -- "1" Abteilung : > gehört zu
+    Mitarbeiter "1" -- "*" Aufgabe : > erledigt
+    Mitarbeiter <|--- Bezugsperson
+    Mitarbeiter <|--- Aufgabenzuständiger
+    Mitarbeiter <|--- Vorgangsverantwortliche
+    
       
-      class Rolle {
-            ID
-            Name           
-      }
+    Administrator ---|> Rolle
+    Administrator "1" -- "*" Prozess : > verwaltet
+    Administrator "1" -- "*" Benutzer : > verwaltet
 
-      class Benutzer {
-            ID
-            Name
-            E-Mail
-            Gesperrt
-
-      }
-
-      class Administrator {}
+    Prozess "*" -- "*" Rolle : < hat Zugriff auf
+    Prozess "1" -- "1..*" Aufgabe : > enthält
       
-      class Prozess{
-            ID
-            Name
-            Beschreibung
-      }
+    Vorgang "1" -- "1" Vorgangsverantwortliche
+    Vorgang "1" -- "1" Bezugsperson
+    Vorgang "1" -- "1..*" Aufgabe : > enthält
 
-
-      class Vorgang{
-            ID
-            Name
-            ErstelltAm
-            FertigBis
-      }
-
-      class Aufgabe {
-            ID
-            Name
-            Anleitung
-            Status
-            ZuErledigenBis
-            
-      }
-
-      class Abteilung {
-            ID
-            Name
-      }
-
-      Benutzer "1" -- "1..*" Rolle : > hat
-      Benutzer "1" -- "1" Abteilung : > hat
-      Benutzer "1" -- "*" Aufgabe : > erledigt
-      
-      Administrator ---|> Rolle
-      Administrator "1" -- "*" Prozess : > verwaltet
-      Administrator "1" -- "*" Benutzer : > verwaltet
-
-      Prozess "*" -- "*" Rolle : < verwaltet
-      Prozess "1" -- "1..*" Aufgabe : > erhält
-      
-      Vorgang "1" -- "*" Benutzer :< zuständig für
-      Vorgang "1" -- "*" Benutzer :< Bezugsperson von
-      Vorgang ---|> Prozess
-
-      Aufgabe "1" -- "*" Benutzer : < bekommt
-      Aufgabe "1" -- "*" Rolle : < bekommt
-      Aufgabe "1" -- "*" Abteilung : < bekommt
-
-
-
-
+    Aufgabe "1" -- "*" Benutzer : < erhält
+    Aufgabe "1" -- "*" Rolle : < zuständig für
+    Aufgabe "1" -- "*" Abteilung : > eingeschränkt auf
+    Aufgabe "1" -- "1..*" Aufgabenzuständiger : < verwaltet
+    Aufgabe  --  Vorgangsverantwortliche : < verwaltet
 @enduml
