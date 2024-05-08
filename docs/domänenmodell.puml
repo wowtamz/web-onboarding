@@ -1,19 +1,18 @@
 @startuml
+!pragma layout elk
+
     object Rolle
-        Rolle : ID
         Rolle : Name
 
     object Benutzer
-        Benutzer : ID
         Benutzer : Name
         Benutzer : E-Mail
         Benutzer : Gesperrt
 
     object Administrator
 
-    object Mitarbeiter
-        Mitarbeiter : ID
-        Mitarbeiter : Name
+    ' object Mitarbeiter
+    '     Mitarbeiter : Name
 
     
     object Bezugsperson
@@ -25,14 +24,12 @@
 
 
     object Prozess
-        Prozess : ID
         Prozess : Name
         Prozess : Beschreibung
 
 
 
     object Vorgang
-        Vorgang : ID
         Vorgang : Name
         Vorgang : Vertragstyp
         Vorgang : ErstelltAm
@@ -40,7 +37,6 @@
 
 
     object Aufgabe
-        Aufgabe : ID
         Aufgabe : Name
         Aufgabe : Anleitung
         Aufgabe : Vertragsart
@@ -49,20 +45,23 @@
 
 
     object Abteilung
-        Abteilung : ID
         Abteilung : Name
 
     Benutzer "1" -- "1..*" Rolle : > hat
     Benutzer "1" -- "1" Abteilung : > hat
-    Benutzer "1" -- "*" Aufgabe : > erledigt
-    Benutzer "1" -- "1" Mitarbeiter : > ist ein
+    ' Benutzer "1" -- "*" Aufgabe : > erledigt
+    ' Benutzer "1" -- "1" Mitarbeiter : > ist ein
+    Benutzer <|--- Bezugsperson
+    Benutzer --- Aufgabenzuständiger  : < ist ein
+    Benutzer --- Vorgangsverantwortliche  : < ist ein
 
-    Mitarbeiter "1" -- "1..*" Rolle : > hat
-    Mitarbeiter "1" -- "1" Abteilung : > gehört zu
-    Mitarbeiter "1" -- "*" Aufgabe : > erledigt
-    Mitarbeiter <|--- Bezugsperson
-    Mitarbeiter <|--- Aufgabenzuständiger
-    Mitarbeiter <|--- Vorgangsverantwortliche
+
+    ' Mitarbeiter "1" -- "1..*" Rolle : > hat
+    ' Mitarbeiter "1" -- "1" Abteilung : > gehört zu
+    ' Mitarbeiter "1" -- "*" Aufgabe : > erledigt
+    ' Mitarbeiter <|--- Bezugsperson
+    ' Mitarbeiter <|--- Aufgabenzuständiger
+    ' Mitarbeiter <|--- Vorgangsverantwortliche
     
       
     Administrator ---|> Rolle
@@ -70,13 +69,14 @@
     Administrator "1" -- "*" Benutzer : > verwaltet
 
     Prozess "*" -- "*" Rolle : < hat Zugriff auf
-    Prozess "1" -- "1..*" Aufgabe : > enthält
+    Prozess "1..*" -- "1..*" Aufgabe : > enthält
+    Prozess "1" -- "*" Vorgang : < hat als vorlage
       
-    Vorgang "1" -- "1" Vorgangsverantwortliche
+    Vorgang "1" -- "1" Vorgangsverantwortliche : < verwaltet
     Vorgang "1" -- "1" Bezugsperson
     Vorgang "1" -- "1..*" Aufgabe : > enthält
 
-    Aufgabe "1" -- "*" Benutzer : < erhält
+    Aufgabe "1" -- "*" Benutzer : < zuständig für und erledigt
     Aufgabe "1" -- "*" Rolle : < zuständig für
     Aufgabe "1" -- "*" Abteilung : > eingeschränkt auf
     Aufgabe "1" -- "1..*" Aufgabenzuständiger : < verwaltet
