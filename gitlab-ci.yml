@@ -8,7 +8,7 @@ kaniko-build:
     # Additional options for Kaniko executor.
     # For more details see https://github.com/GoogleContainerTools/kaniko/blob/master/README.md#additional-flags
     KANIKO_ARGS: "--single-snapshot"
-    KANIKO_BUILD_CONTEXT: $CI_PROJECT_DIR/-/tree/Blatt4-Tornquist/Abgaben/Uebungsblatt4/Einzelabgaben/Tornquist/SoPro24Team06
+    KANIKO_BUILD_CONTEXT: $CI_PROJECT_DIR/Abgaben/Uebungsblatt4/Einzelabgaben/Tornquist/SoPro24Team06
     IMAGE_TAG_NAME: blatt_4:tornquist
   stage: deploy
   image:
