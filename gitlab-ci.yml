@@ -17,7 +17,7 @@ kaniko-build:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
-    - export IMAGE_TAG=${CI_REGISTRY_IMAGE}/team06/${IMAGE_TAG_NAME}
+    - export IMAGE_TAG=${CI_REGISTRY_IMAGE}/team06:${IMAGE_TAG_NAME}
     - echo $IMAGE_TAG
     - mkdir -p /kaniko/.docker
     # Write credentials to access Gitlab Container Registry within the runner/ci
