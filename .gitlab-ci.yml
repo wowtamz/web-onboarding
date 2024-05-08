@@ -9,7 +9,7 @@ kaniko-build:
     # For more details see https://github.com/GoogleContainerTools/kaniko/blob/master/README.md#additional-flags
     KANIKO_ARGS: "--single-snapshot"
     KANIKO_BUILD_CONTEXT: $CI_PROJECT_DIR/Abgaben/Uebungsblatt4/Einzelabgaben/Tornquist/SoPro24Team06
-    IMAGE_TAG_NAME: blatt_4:tornquist
+    IMAGE_TAG_NAME: gitlab.isse.de:5050/lehre/sopro/2024-sose/gruppen/team-06/blatt_4:tornquist
   stage: deploy
   image:
     # For latest releases see https://github.com/GoogleContainerTools/kaniko/releases
