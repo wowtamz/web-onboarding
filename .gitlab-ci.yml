@@ -1,2 +1,2 @@
-using:
+include:
   local: "/Abgaben/Uebungsblatt4/Einzelabgaben/Tornquist/SoPro24Team06/.gitlab-ci.yml"
