@@ -9,7 +9,7 @@ kaniko-build:
     # For more details see https://github.com/GoogleContainerTools/kaniko/blob/master/README.md#additional-flags
     KANIKO_ARGS: "--single-snapshot"
     KANIKO_BUILD_CONTEXT: $CI_PROJECT_DIR/Abgaben/Uebungsblatt4/Einzelabgaben/Tornquist/SoPro24Team06
-    IMAGE_TAG_NAME: gitlab.isse.de:5050/lehre/sopro/2024-sose/gruppen/team-06/blatt_4:tornquist
+    IMAGE_TAG_NAME: tornquist
   stage: deploy
   image:
     # For latest releases see https://github.com/GoogleContainerTools/kaniko/releases
@@ -17,7 +17,7 @@ kaniko-build:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   script:
-    - export IMAGE_TAG=${CI_REGISTRY_IMAGE}/team06:${IMAGE_TAG_NAME}
+    - export IMAGE_TAG=${CI_REGISTRY_IMAGE}/blatt_4:${IMAGE_TAG_NAME}
     - echo $IMAGE_TAG
     - mkdir -p /kaniko/.docker
     # Write credentials to access Gitlab Container Registry within the runner/ci
@@ -25,7 +25,6 @@ kaniko-build:
     # Build and push the container. To disable push add --no-push
     - DOCKERFILE_PATH=${DOCKERFILE_PATH:-"$KANIKO_BUILD_CONTEXT/Dockerfile"}
     - /kaniko/executor --context $KANIKO_BUILD_CONTEXT --dockerfile $DOCKERFILE_PATH --destination $IMAGE_TAG $KANIKO_ARGS
-  # Run this job in a branch/tag where a Dockerfile exists
   rules:
     - exists:
         - Dockerfile
