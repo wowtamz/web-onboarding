@@ -25,3 +25,6 @@ kaniko-build:
     # Build and push the container. To disable push add --no-push
     - DOCKERFILE_PATH=${DOCKERFILE_PATH:-"$KANIKO_BUILD_CONTEXT/Dockerfile"}
     - /kaniko/executor --context $KANIKO_BUILD_CONTEXT --dockerfile $DOCKERFILE_PATH --destination $IMAGE_TAG $KANIKO_ARGS
+  rules:
+    - exists:
+        - Dockerfile
