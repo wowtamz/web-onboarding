@@ -4,6 +4,17 @@
 
 
 
+# Noch zu Erledigende Aufgaben Qualitätssicherung
+
+-  [ ] **Styleguide**: Beispiele Hinzufügen
+-  [ ] **Styleguide**: Regelungen zu Variablenbenennung nochmals Besprechen
+-  [ ] **E2E Test**: Regelungen für E2E Testverfahren Festlegen
+-  [ ] **Unit Test**: Regelungen für E2E Testverfahren Festlegen
+-  [ ] **Funktionsumfang**: wenn das Design-Klassendiagramm fertig ist, den Funktionsumfang nochmals genau aktualisieren
+
+ 
+
+
 
 
 # Funktionsumfang
@@ -22,7 +33,6 @@ Folgende Klassen und deren dazugehörigen ViewModels (soweit in den Desing Klass
 +  Contract
 +  Role
 +  Administrator
-+  
 
 # Tests und Reviews
 
