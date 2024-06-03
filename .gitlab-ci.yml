@@ -2,4 +2,4 @@ include:
   - local: "/Abgaben/Uebungsblatt6/Einzelabgaben/Tornquist/SoPro24Team06/.gitlab-ci.yml"
   - local: "/Abgaben/Uebungsblatt5/Einzelabgaben/Adolf/SoPro24Team06/.gitlab-ci.yml"
   - local: "/Abgaben/Uebungsblatt6/Einzelabgaben/Pfluger/SoPro24Team06/.gitlab-ci.yml"
-  - local: "/Abgaben/Uebungsblatt7/Einzelabgaben/Varadi/SoPro24Team06/.gitlab-ci.yml"
+
