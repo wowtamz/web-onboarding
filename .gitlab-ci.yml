@@ -15,7 +15,7 @@ unit_test_project:
   - echo "Unit test job."
 
 e2e_test_project:
-  stage: test-2e2
+  stage: test-e2e
   script:
   - echo "E2E test job."
 
