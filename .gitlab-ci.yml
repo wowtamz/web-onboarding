@@ -10,21 +10,29 @@ default:
     entrypoint: [""]
 
 unit_test_project:
+  tags:
+    - sopro
   stage: test-unit
   script:
   - echo "Unit test job."
 
 e2e_test_project:
+  tags:
+    - sopro
   stage: test-e2e
   script:
   - echo "E2E test job."
 
 build_project:
+  tags:
+    - sopro
   stage: build
   script:
   - echo "Build project job."
 
 deploy_project:
+  tags:
+    - sopro
   stage: deploy
   script:
   - echo "Deploy project job."
