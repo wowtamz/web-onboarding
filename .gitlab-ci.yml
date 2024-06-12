@@ -4,43 +4,59 @@ stages:
   - build
   - deploy
 
-default:
-  image:
-    name: mcr.microsoft.com/dotnet/aspnet:6.0-focal
-    entrypoint: [""]
+variables:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
 
 unit_test_project:
   tags:
     - sopro
   stage: test-unit
+  image: mcr.microsoft.com/dotnet/sdk:6.0
   script:
-  - echo "Unit test job."
+    - echo "Unit test job."
+    - cd ./Projekt/SoPro24Team06.XUnit
+    - dotnet restore
+    - dotnet test --logger "trx;LogFileName=test_results.trx"
 
 e2e_test_project:
   tags:
     - sopro
   stage: test-e2e
+  image: mcr.microsoft.com/dotnet/sdk:6.0
   script:
-  - echo "E2E test job."
+    - echo "E2E test job."
+    - sh ./e2e-install-dep.sh
+    - cd ./Projekt/SoPro24Team06.XUnit
+    - dotnet restore
+    - dotnet test --logger "trx;LogFileName=test_results.trx"
 
 build_project:
   tags:
     - sopro
   stage: build
+  image: mcr.microsoft.com/dotnet/sdk:6.0
   script:
-  - echo "Build project job."
+    - echo "Build project job."
+    - cd ./Projekt/SoPro24Team06
+    - dotnet restore
+    - dotnet build -c Release
 
 deploy_project:
   tags:
     - sopro
   stage: deploy
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  variables:
+    KANIKO_ARGS: "--single-snapshot"
+    KANIKO_BUILD_CONTEXT: $CI_PROJECT_DIR/Projekt/SoPro24Team06
+    IMAGE_TAG_NAME: latest
   script:
-  - echo "Deploy project job."
-
-
-include:
-  - local: "/Abgaben/Uebungsblatt6/Einzelabgaben/Tornquist/SoPro24Team06/.gitlab-ci.yml"
-  - local: "/Abgaben/Uebungsblatt5/Einzelabgaben/Adolf/SoPro24Team06/.gitlab-ci.yml"
-  - local: "/Abgaben/Uebungsblatt6/Einzelabgaben/Pfluger/SoPro24Team06/.gitlab-ci.yml"
-  - local: "/Abgaben/Uebungsblatt7/Einzelabgaben/Varadi/SoPro24Team06/.gitlab-ci.yml"
-  - local: "/Abgaben/Uebungsblatt6/Einzelabgaben/Steiner/SoPro24Team06/.gitlab-ci.yml"
+    - export IMAGE_TAG=${CI_REGISTRY_IMAGE}/project:${IMAGE_TAG_NAME}
+    - echo $IMAGE_TAG
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(echo -n ${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD} | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - DOCKERFILE_PATH=${DOCKERFILE_PATH:-"$KANIKO_BUILD_CONTEXT/Dockerfile"}
+    - /kaniko/executor --context $KANIKO_BUILD_CONTEXT --dockerfile $DOCKERFILE_PATH --destination $IMAGE_TAG $KANIKO_ARGS
