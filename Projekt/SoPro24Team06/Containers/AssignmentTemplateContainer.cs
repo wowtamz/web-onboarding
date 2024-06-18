@@ -1,9 +1,9 @@
 using SoPro24Team06.Models;
 using SoPro24Team06.Data;
-using System.Collections.Generic;
 using SoPro24Team06.Enums;
+using SoPro24Team06.Models.SoPro24Team06.Models;
 
-namespace SoPro24Team06.Container;
+namespace SoPro24Team06.Containers;
 
 public class AssignmentTemplateContainer
 {
@@ -11,7 +11,7 @@ public class AssignmentTemplateContainer
 
     public void AddAssignmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneType, List<Role>? assignedRoles)
     {
-        db.Add(new AssignmentTemplate { Title = title, Instructions = instructions, DueIn = dueIn, ForDepartmentList = forDepartmentList, ForContractList = forContractList, AssigneType = assigneType, AssignedRoles = assignedRoles });
+        db.Add(new AssignmentTemplate { Title = title, Instructions = instructions, DueIn = dueIn, ForDepartmentsList = forDepartmentsList, ForContractsList = forContractsList, AssigneeType = assigneType, AssignedRolesList = assignedRoles });
         db.SaveChanges();
     }
     public void DeleteAssignmentTemplate(int id)
@@ -26,11 +26,11 @@ public class AssignmentTemplateContainer
             }
         }
     }
-    public void EditAssignmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneeType, List<Role>? assignedRoles)
+    public void EditAssignmentTemplate(int id, string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneeType, List<Role>? assignedRoles)
     {
         if (db.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.id == id);
+            AssignmentTemplate? assignmentTemplate = db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
             if (assignmentTemplate != null)
             {
                 assignmentTemplate.Title = title;
@@ -49,7 +49,7 @@ public class AssignmentTemplateContainer
     {
         if (db.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.id == id);
+            AssignmentTemplate? assignmentTemplate = db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
             if (assignmentTemplate != null)
             {
                 return assignmentTemplate!;

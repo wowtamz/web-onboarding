@@ -11,7 +11,7 @@ namespace SoPro24Team06.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; }
         [Required(ErrorMessage = "Name is required")]
-        public string Name { get; set; }
+        public string Title { get; set; }
 
         public string? Description { get; set; }
 
