@@ -1,0 +1,112 @@
+@model SoPro24Team06.Models.UserManagementViewModel
+
+<!-- Start: Banner Heading -->
+    <section class="py-4 py-xl-5" style="padding: 32px 0;">
+        <div class="container">
+            <div class="text-white bg-dark border rounded border-0 p-4 p-md-5" style="background: linear-gradient(162deg, rgb(0,0,0) 0%, rgb(55,58,62) 62%, white 100%, rgb(230, 29, 71) 100%, rgb(245,165,182) 100%), rgb(13, 63, 148);color: rgb(255, 255, 255);">
+                <h2 class="fw-bold text-white mb-3">Verwaltung</h2>
+                <p class="text-white mb-4" style="font-size: 20px;">Kreieren Sie neue Rollen. S Erstellen, bearbeiten oder sperren Sie Nutzer.</p>
+                <div class="my-3"><a class="btn btn-primary btn-lg me-2" role="button" href="UserCreate.html" style="background: rgb(204, 212, 217);border-style: none;">Nutzer erstellen</a><button class="btn btn-primary btn-lg me-2" type="button" style="background: rgb(204, 212, 217);border-style: none;" data-bs-target="#modal-1" data-bs-toggle="modal">Rollenübersicht</button></div>
+            </div>
+        </div>
+    </section>
+<!-- End: Banner Heading -->
+
+<!-- Create User Form -->
+<h3>Nutzererstellung</h3>
+<form asp-action="CreateUser" method="post">
+    <div class="form-group">
+        <label asp-for="CreateUserViewModel.Email"></label>
+        <input asp-for="CreateUserViewModel.Email" class="form-control" />
+        <span asp-validation-for="CreateUserViewModel.Email" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CreateUserViewModel.Password"></label>
+        <input asp-for="CreateUserViewModel.Password" class="form-control" />
+        <span asp-validation-for="CreateUserViewModel.Password" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CreateUserViewModel.FullName"></label>
+        <input asp-for="CreateUserViewModel.FullName" class="form-control" />
+        <span asp-validation-for="CreateUserViewModel.FullName" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Nutzer Erstellen</button>
+</form>
+
+<hr />
+
+<!-- List of Users -->
+<h3>Alle Nutzer</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Voller Name</th>
+            <th>Rollen</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.UserRoles)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>@user.FullName</td>
+                <td>
+                    @foreach (var role in user.Roles)
+                    {
+                        <span>@role </span>
+                    }
+                </td>
+                <td>
+                    @if (user.Email != "admin@example.com")
+                    {
+                        <form asp-action="DeleteUser" method="post" style="display:inline">
+                            <input type="hidden" name="userId" value="@user.UserId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Löschen</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Start: RollenModal -->
+    <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Rollenübersicht</h4><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <fieldset>
+                            <legend>Rolle<input class="form-control" type="text"><button class="btn btn-light d-xxl-flex justify-content-xxl-end align-items-xxl-center" type="button" data-bs-dismiss="modal" style="margin-top: 12px;">Hinzufügen</button></legend>
+                        </fieldset>
+                    </form>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Werkstudent</td>
+                                    <td class="d-flex flex-row justify-content-evenly"><button class="btn-close" type="button" aria-label="Close"></button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button></div>
+            </div>
+        </div>
+    </div><!-- End: RollenModal -->
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
