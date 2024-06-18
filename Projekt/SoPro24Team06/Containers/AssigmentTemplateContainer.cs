@@ -3,59 +3,59 @@ using SoPro24Team06.Data;
 using System.Collections.Generic;
 
 namespace SoPro24Team06.Containers;
-public class AssigmentTemplateContainer
+public class AssignmentTemplateContainer
 {
     private Context db = new();
 
-    public void AddAssigmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneType assigneType, List<Role>? assignedRoles)
+    public void AddAssignmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneType assigneType, List<Role>? assignedRoles)
     {
-        db.Add(new AssigmentTemplate{Title = title, Instructions = instructions, DueIn = dueIn, ForDepartmentList = forDepartmentList, ForContractList = forContractList, AssigneType = assigneType, AssignedRoles = assignedRoles});
+        db.Add(new AssignmentTemplate{Title = title, Instructions = instructions, DueIn = dueIn, ForDepartmentList = forDepartmentList, ForContractList = forContractList, AssigneType = assigneType, AssignedRoles = assignedRoles});
         db.SaveChanges();
     }
-    public void DeleteAssigmentTemplate(int id)
+    public void DeleteAssignmentTemplate(int id)
     {
-        if(db.AssigmentTemplates != null){
-            AssigmentTemplate? assigmentTemplate= db.AssigmentTemplates.FirstOrDefault(assigmentTemplate => assigmentTemplate.id == id);
-            if(assigmentTemplate != null){
-                db.Remove(assigmentTemplate!);
+        if(db.AssignmentTemplates != null){
+            AssignmentTemplate? assignmentTemplate= db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.id == id);
+            if(assignmentTemplate != null){
+                db.Remove(assignmentTemplate!);
                 db.SaveChanges();
             }
         }
     }
-    public void EditAssigmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneeType, List<Role>? assignedRoles)
+    public void EditAssignmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneeType, List<Role>? assignedRoles)
     {
-        if(db.AssigmentTemplates != null){
-            AssigmentTemplate? assigmentTemplate = db.AssigmentTemplates.FirstOrDefault(assigmentTemplate => assigmentTemplate.id == id);
-            if(assigmentTemplate != null){
-                assigmentTemplate.Title = title;
-                assigmentTemplate.Instructions = instructions;
-                assigmentTemplate.DueIn = dueIn;
-                assigmentTemplate.ForDepartmentsList = forDepartmentsList;
-                assigmentTemplate.ForContractsList = forContractsList;
-                assigmentTemplate.AssigneeType = assigneeType;
-                assigmentTemplate.AssignedRoles = assignedRoles;
-                db.Update(assigmentTemplate);
+        if(db.AssignmentTemplates != null){
+            AssignmentTemplate? assignmentTemplate = db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.id == id);
+            if(assignmentTemplate != null){
+                assignmentTemplate.Title = title;
+                assignmentTemplate.Instructions = instructions;
+                assignmentTemplate.DueIn = dueIn;
+                assignmentTemplate.ForDepartmentsList = forDepartmentsList;
+                assignmentTemplate.ForContractsList = forContractsList;
+                assignmentTemplate.AssigneeType = assigneeType;
+                assignmentTemplate.AssignedRoles = assignedRoles;
+                db.Update(assignmentTemplate);
                 db.SaveChanges();
             }
         }
     }
-    public AssigmentTemplate GetAssigmentTemplate(int id)
+    public AssignmentTemplate GetAssignmentTemplate(int id)
     {
-         if(db.AssigmentTemplates != null){
-            AssigmentTemplate? assigmentTemplate = db.AssigmentTemplates.FirstOrDefault(assigmentTemplate => assigmentTemplate.id == id);
-            if(assigmentTemplate != null){
-                return assigmentTemplate!;
+         if(db.AssignmentTemplates != null){
+            AssignmentTemplate? assignmentTemplate = db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.id == id);
+            if(assignmentTemplate != null){
+                return assignmentTemplate!;
             }
         }
         return null;
     }
 
-     public List<AssigmentTemplate> GetAllAssigmentTemplate()
+     public List<AssignmentTemplate> GetAllAssignmentTemplate()
     {
-        List<AssigmentTemplate> assigmentTemplateList = new List<AssigmentTemplate>();
-        if(db.AssigmentTemplates != null){
-            lessons = db.AssigmentTemplates.ToList();
+        List<AssignmentTemplate> assignmentTemplateList = new List<AssignmentTemplate>();
+        if(db.AssignmentTemplates != null){
+            lessons = db.AssignmentTemplates.ToList();
         }
-        return assigmentTemplateList;
+        return assignmentTemplateList;
     }
 }

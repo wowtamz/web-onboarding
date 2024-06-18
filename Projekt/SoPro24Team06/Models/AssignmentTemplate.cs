@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace SoPro24Team06.Models {
-    public class AssigmentTemplate
+    public class AssignmentTemplate
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -27,7 +27,7 @@ namespace SoPro24Team06.Models {
 
     }
 
-    public Assigment ToAssigment(AssigmentTemplate template)
+    public Assignment ToAssignment(AssignmentTemplate template)
     {
 
     }
