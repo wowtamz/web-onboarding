@@ -2,6 +2,7 @@ using SoPro24Team06.Models;
 using SoPro24Team06.Data;
 using System.Collections.Generic;
 
+namespace SoPro24Team06.Containers;
 public class AssigmentTemplateContainer
 {
     private Context db = new();

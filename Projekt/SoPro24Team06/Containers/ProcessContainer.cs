@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
 
+namespace SoPro24Team06.Containers;
 public class ProcessContainer 
 {
     private readonly context;

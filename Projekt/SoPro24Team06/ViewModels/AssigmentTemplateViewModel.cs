@@ -1,7 +1,7 @@
 using SoPro24Team06.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace SoPro24Team06.ViewModels 
+namespace SoPro24Team06.ViewModels;
 {
     
     public class AssigmentTemplateViewModel
