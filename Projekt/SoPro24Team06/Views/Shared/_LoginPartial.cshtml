@@ -1,0 +1,19 @@
+@using Microsoft.AspNetCore.Identity
+@using SoPro24Team06.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="nav navbar-nav navbar-right">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li>
+            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home")" method="post" id="logoutForm" class="navbar-right">
+                <button type="submit" class="btn btn-link navbar-btn navbar-link">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li><a asp-area="Identity" asp-page="/Account/Login">Login</a></li>
+    }
+</ul>
