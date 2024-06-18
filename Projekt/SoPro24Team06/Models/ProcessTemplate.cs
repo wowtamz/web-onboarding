@@ -1,9 +1,9 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+
 namespace SoPro24Team06.Models;
-public class Process
+
+public class ProcessTemplate
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -18,17 +18,25 @@ public class Process
     public List<AssignmentTemplate> AssignmentTemplates { get; set; }
 
     [Required(ErrorMessage = "Vertrag ist erforderlich")]
-    public Contract ContractOfRefWorker
+    public Contract ContractOfRefWorker { get; set; }
 
     [Required(ErrorMessage = "Abteilung ist erforderlich")]
-    public Department DepartmentOfRefWorker
+    public Department DepartmentOfRefWorker { get; set; }
 
-    public Process(string title, string description, List<AssignmentTemplate> assignmentTemplates, Contract contractOfRefWorker, Department departmentOfRefWorker)
+    public List<Role> RolesWithAccess { get; set; }
+
+    public ProcessTemplate(string title, string description, List<AssignmentTemplate> assignmentTemplates, Contract contractOfRefWorker, Department departmentOfRefWorker, List<Role> rolesWithAccess)
     {
         this.Title = title;
         this.Description = description;
         this.AssignmentTemplates = assignmentTemplates;
         this.ContractOfRefWorker = contractOfRefWorker;
         this.DepartmentOfRefWorker = departmentOfRefWorker;
+        this.RolesWithAccess = rolesWithAccess;
+    }
+
+    public Process ToProcess()
+    {
+        return new Process(this);
     }
 }

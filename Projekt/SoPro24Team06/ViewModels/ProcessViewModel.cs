@@ -2,7 +2,7 @@ using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels;
 
-public class ProcessViewModel 
+public class ProcessViewModel
 {
     public int? Id { get; set; }
     public string Title { get; set; }
@@ -15,10 +15,10 @@ public class ProcessViewModel
     public Contract ContractOfRefWorker { get; set; }
     public Department DepartmentOfRefWorker { get; set; }
 
-    public ProcessViewModel(Process process) 
+    public ProcessViewModel(Process process)
     {
         this.Id = process.Id;
-        this.Title = process.Title;
+        this.Title = process.Name;
         this.Description = process.Description;
         this.Assignments = process.Assignments;
         this.StartDate = process.StartDate;

@@ -1,11 +1,19 @@
 using Microsoft.EntityFrameworkCore;
+using SoPro24Team06.Data;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
 
-namespace SoPro24Team06.Containers;
-public class ProcessContainer 
+
+namespace SoPro24Team06.Container;
+
+public class ProcessContainer
 {
-    private readonly context;
+    private readonly ModelContext context;
+
+    public ProcessContainer(ModelContext context)
+    {
+        this.context = context;
+    }
 
     public async Task<List<Process>> GetProcessesAsync()
     {
@@ -26,7 +34,7 @@ public class ProcessContainer
         await context.SaveChangesAsync();
     }
 
-    public async Task UpdateProcessAsync(int id, string title, string description, List<Assignment> assignments,  User supervisor, User workerOfRef, Contract contractOfRefWorker, Department departmentOfRefWorker)
+    public async Task UpdateProcessAsync(int id, string title, string description, List<Assignment> assignments, User supervisor, User workerOfRef, Contract contractOfRefWorker, Department departmentOfRefWorker)
     {
         Process processToUpdate = await context.Processes.FirstOrDefaultAsync(x => x.Id.Equals(id)) ?? throw new InvalidOperationException($"No Process found with Id {id}");
 

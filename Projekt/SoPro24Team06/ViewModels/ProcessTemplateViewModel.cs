@@ -2,7 +2,7 @@ using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels;
 
-public class ProcessViewModel
+public class ProcessTemplateViewModel
 {
     public int? Id { get; }
 
