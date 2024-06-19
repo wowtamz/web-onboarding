@@ -14,14 +14,14 @@ namespace SoPro24Team06.Models
 
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Title ist erforderlich")]
+        [Required(ErrorMessage = "Titel ist erforderlich")]
         [JsonProperty("title")]
         public string? Title { get; set; }
 
         [JsonProperty("instructions")]
         public string? Instructions { get; set; }
 
-        [Required(ErrorMessage = "Zeit bis wann die Aufgabe erledigt werden muss ist erforderlich.")]
+        [Required(ErrorMessage = "Fälligkeit ist erforderlich.")]
         [JsonProperty("dueTime")]
         public DueTime DueIn { get; set; }
 
