@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels;
@@ -10,21 +11,22 @@ public class ProcessTemplateViewModel
 
     public string? Description { get; set; }
 
-    public ApplicationUser WorkerOfReference { get; set; }
-
     public List<AssignmentTemplate> AssignmentTemplates { get; set; }
 
     public Contract ContractOfRefWorker { get; set; }
 
     public Department DepartmentOfRefWorker { get; set; }
 
-    public ProcessTemplateViewModel(string title, string description, ApplicationUser workerOfReference, List<AssignmentTemplate> assignmentTemplates, Contract contractOfRefWorker, Department departmentOfRefWorker)
+    public List<IdentityRole> RolesWithAccess { get; set; }
+
+    public ProcessTemplateViewModel(ProcessTemplate processTemplate)
     {
-        this.Title = title;
-        this.Description = description;
-        this.WorkerOfReference = workerOfReference;
-        this.AssignmentTemplates = assignmentTemplates;
-        this.ContractOfRefWorker = contractOfRefWorker;
-        this.DepartmentOfRefWorker = departmentOfRefWorker;
+        Id = processTemplate.Id;
+        Title = processTemplate.Title;
+        Description = processTemplate.Description;
+        AssignmentTemplates = processTemplate.AssignmentTemplates;
+        ContractOfRefWorker = processTemplate.ContractOfRefWorker;
+        DepartmentOfRefWorker = processTemplate.DepartmentOfRefWorker;
+        RolesWithAccess = processTemplate.RolesWithAccess;
     }
 }
