@@ -37,6 +37,17 @@ namespace SoPro24Team06.Models
         [JsonProperty("assignedRoles")]
         public List<IdentityRole> AssignedRolesList { get; set; }
 
+        public AssignmentTemplate(string title, string instructions, DueTime dueIn, List<Department> forDepartmentsList, List<Contract> forContractsList, AssigneeType assigneeType, List<IdentityRole> assignedRolesList)
+        {
+            this.Title = title;
+            this.Instructions = instructions;
+            this.DueIn = dueIn;
+            this.ForDepartmentsList = forDepartmentsList;
+            this.ForContractsList = forContractsList;
+            this.AssigneeType = assigneeType;
+            this.AssignedRolesList = assignedRolesList;
+        }
+
         public Assignment ToAssignment(AssignmentTemplate template)
         {
             DateTime dueDate = DateTime.Now; // sollte berechnet werden
