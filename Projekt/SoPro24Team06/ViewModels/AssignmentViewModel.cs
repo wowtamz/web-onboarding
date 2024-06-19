@@ -38,6 +38,9 @@ public class AssignmentViewModel
     [JsonProperty("assignee")]
     public ApplicationUser Assignee { get; set; }
 
+    [JsonProperty("status")]
+    public AssignmentStatus Status { get; set; }
+
     // #TODO: Additional Attributes
     public AssignmentViewModel(AssignmentTemplate template)
     {
@@ -52,7 +55,7 @@ public class AssignmentViewModel
         this.AssignedRolesList = assignment.AssignedRolesList;
     }
 
-    public AssignmentViewModel(string title, string instructions, DateTime dueDate, List<Department> forDepartmentsList, List<Contract> forContractsList, AssigneeType assigneeType, List<IdentityRole> assignedRolesList, ApplicationUser assignee)
+    public AssignmentViewModel(string title, string instructions, DateTime dueDate, List<Department> forDepartmentsList, List<Contract> forContractsList, AssigneeType assigneeType, List<IdentityRole> assignedRolesList, ApplicationUser assignee, AssignmentStatus status)
     {
         this.Title = title;
         this.Instructions = instructions;
@@ -62,6 +65,7 @@ public class AssignmentViewModel
         this.AssigneeType = assigneeType;
         this.AssignedRolesList = assignedRolesList;
         this.Assignee = assignee;
+        this.Status = status;
     }
 }
 
