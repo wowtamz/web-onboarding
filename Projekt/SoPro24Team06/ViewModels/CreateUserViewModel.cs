@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SoPro24Team06.Models
+namespace SoPro24Team06.ViewModels
 {
     public class CreateUserViewModel
     {

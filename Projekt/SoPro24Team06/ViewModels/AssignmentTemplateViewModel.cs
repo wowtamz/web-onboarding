@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Identity;
+using SoPro24Team06.Enums;
 using SoPro24Team06.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SoPro24Team06.ViewModels;
-public class AssignmentTemplateViewModel
+
+
+public class AssigmentTemplateViewModel
 {
     public int Id { get; set; }
     [Required(ErrorMessage = "Der Titel ist erforderlich")]
@@ -14,5 +18,17 @@ public class AssignmentTemplateViewModel
     public List<Contract> ForContractsList { get; set; }
     [Required(ErrorMessage = "Ein Aufgabenverantwortlicher ist erforderlich")]
     public AssigneeType AssigneeType { get; set; }
-    public List<Role>AssignedRolesList { get; set; }
+    public List<IdentityRole> AssignedRolesList { get; set; }
+
+    public AssigmentTemplateViewModel(AssignmentTemplate assignmentTemplate)
+    {
+        Id = assignmentTemplate.Id;
+        Title = assignmentTemplate.Title ?? "";
+        Instructions = assignmentTemplate.Instructions;
+        DueIn = assignmentTemplate.DueIn;
+        ForDepartmentsList = assignmentTemplate.ForDepartmentsList;
+        ForContractsList = assignmentTemplate.ForContractsList;
+        AssigneeType = assignmentTemplate.AssigneeType;
+        AssignedRolesList = assignmentTemplate.AssignedRolesList;
+    }
 }

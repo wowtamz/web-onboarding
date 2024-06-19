@@ -2,9 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SoPro24Team06.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using SoPro24Team06.ViewModels;
 
 namespace SoPro24Team06.Controllers
 {
@@ -44,7 +42,7 @@ namespace SoPro24Team06.Controllers
                 UserRoles = userRolesViewModel
             };
 
-            return View("~/Views/Admin/UserManagement.cshtml", model); 
+            return View("~/Views/Admin/UserManagement.cshtml", model);
         }
 
         [HttpPost]
@@ -65,7 +63,7 @@ namespace SoPro24Team06.Controllers
                 {
                     // User ist default rolle
                     await _userManager.AddToRoleAsync(user, "User");
-                    return RedirectToAction("UserManagement"); 
+                    return RedirectToAction("UserManagement");
                 }
 
                 foreach (var error in result.Errors)

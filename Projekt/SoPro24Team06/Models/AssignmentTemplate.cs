@@ -1,34 +1,59 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using SoPro24Team06.Enums;
 
-namespace SoPro24Team06.Models {
+namespace SoPro24Team06.Models
+{
     public class AssignmentTemplate
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonProperty("id")]
+
         public int Id { get; set; }
-        [JsonProperty ("title")]
+
+        [Required(ErrorMessage = "Titel ist erforderlich")]
+        [JsonProperty("title")]
         public string? Title { get; set; }
-        [JsonProperty ("instructions")]
+
+        [JsonProperty("instructions")]
         public string? Instructions { get; set; }
-        [JsonProperty ("dueTime")]
+
+        [Required(ErrorMessage = "Fälligkeit ist erforderlich.")]
+        [JsonProperty("dueTime")]
         public DueTime DueIn { get; set; }
-        [JsonProperty ("forDepartments")]
+
+        [JsonProperty("forDepartments")]
         public List<Department> ForDepartmentsList { get; set; }
-        [JsonProperty ("forContract")]
+
+        [JsonProperty("forContract")]
         public List<Contract> ForContractsList { get; set; }
-        [JsonProperty ("assigneeType")]
+
+        [JsonProperty("assigneeType")]
         public AssigneeType AssigneeType { get; set; }
-         [JsonProperty ("assignedRoles")]
-        public List<Role>AssignedRolesList { get; set; }
+
+        [JsonProperty("assignedRoles")]
+        public List<IdentityRole> AssignedRolesList { get; set; }
+
+        public AssignmentTemplate(string title, string instructions, DueTime dueIn, List<Department> forDepartmentsList, List<Contract> forContractsList, AssigneeType assigneeType, List<IdentityRole> assignedRolesList)
+        {
+            this.Title = title;
+            this.Instructions = instructions;
+            this.DueIn = dueIn;
+            this.ForDepartmentsList = forDepartmentsList;
+            this.ForContractsList = forContractsList;
+            this.AssigneeType = assigneeType;
+            this.AssignedRolesList = assignedRolesList;
+        }
+
+        public Assignment ToAssignment(AssignmentTemplate template)
+        {
+            DateTime dueDate = DateTime.Now; // sollte berechnet werden
+            return new Assignment(template, dueDate);
+        }
 
     }
 
-    public Assignment ToAssignment(AssignmentTemplate template)
-    {
-
-    }
 }
