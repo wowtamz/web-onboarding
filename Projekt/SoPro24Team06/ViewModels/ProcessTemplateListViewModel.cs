@@ -10,4 +10,9 @@ public class ProcessTemplateListViewModel
     {
         this.ProcessTemplateList = processTemplateList;
     }
+
+    public ProcessTemplateListViewModel()
+    {
+        this.ProcessTemplateList = new List<ProcessTemplate>();
+    }
 }

@@ -1,0 +1,68 @@
+@model SoPro24Team06.ViewModels.AssigmentTemplateViewModel
+
+<form>
+    <fieldset>
+        <legend>Titel</legend><input class="form-control" type="text">
+    </fieldset>
+    <fieldset style="margin-top: 8px;">
+        <legend>Anweisungen</legend>
+        <textarea class="form-control" placeholder="Schritt 1... "></textarea>
+    </fieldset>
+    <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
+    <div class="dropdown show">
+        <button class="btn btn-primary dropdown-toggle" aria-expanded="true" data-bs-toggle="dropdown" type="button"
+            style="margin-top: 0px;margin-bottom: 0px;margin-right: 0;">
+            Aufgabenzuständiger&nbsp;
+        </button>
+        <div class="dropdown-menu" data-bs-popper="none">
+            <a class="dropdown-item">Vorgangsverantwortlicher</a>
+            <a class="dropdown-item">Bezugsperson</a>
+            <a class="dropdown-item">Rollen</a>
+        </div>
+    </div>
+    <fieldset style="margin-top: 8px;">
+        <legend style="margin-top: 4px;">Fälligkeit</legend>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown"
+                type="button" style="margin-top: 0px;margin-bottom: 4px;margin-right: 12px;">
+                ASAP
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item">ASAP</a>
+                <a class="dropdown-item">2 Wochen vor Start</a>
+                <a class="dropdown-item">Am ersten Arbeitstag</a>
+                <a class="dropdown-item">3 Wochen nach Arbeitsbeginn</a>
+                <a class="dropdown-item">3 Monate nach Arbeitsbeginn</a>
+                <a class="dropdown-item">6 Monate nach Arbeitsbeginn</a>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset style="margin-top: 8px;">
+        <legend style="margin-top: 4px;">Vertragsart</legend>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown"
+                type="button" style="margin-bottom: 4px;">
+                Vertragsart&nbsp;
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item">First Item</a>
+                <a class="dropdown-item">Second Item</a>
+                <a class="dropdown-item">Third Item</a>
+            </div>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend style="margin-top: 4px;">Abteilung</legend>
+        <div class="dropdown"><button class="btn btn-primary dropdown-toggle" aria-expanded="false"
+                data-bs-toggle="dropdown" type="button" style="margin-top: 0px;margin-bottom: 12px;">
+                Abteilung&nbsp;
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item">First Item</a>
+                <a class="dropdown-item">Second Item</a>
+                <a class="dropdown-item">Third Item</a>
+            </div>
+        </div>
+    </fieldset>
+    <button class="btn btn-dark" type="submit" style="margin-top: 12px;">Erstellen</button>
+</form>

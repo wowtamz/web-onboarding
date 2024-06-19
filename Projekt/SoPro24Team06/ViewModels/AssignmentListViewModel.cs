@@ -10,4 +10,9 @@ public class AssignmentListViewModel
     {
         this.AssignmentList = assignmentList;
     }
+
+    public AssignmentListViewModel()
+    {
+        this.AssignmentList = new List<Assignment>();
+    }
 }

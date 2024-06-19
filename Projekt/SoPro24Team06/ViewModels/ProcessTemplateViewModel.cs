@@ -29,4 +29,15 @@ public class ProcessTemplateViewModel
         DepartmentOfRefWorker = processTemplate.DepartmentOfRefWorker;
         RolesWithAccess = processTemplate.RolesWithAccess;
     }
+
+    public ProcessTemplateViewModel()
+    {
+        Id = null;
+        Title = "";
+        Description = "";
+        AssignmentTemplates = new List<AssignmentTemplate>();
+        ContractOfRefWorker = new Contract();
+        DepartmentOfRefWorker = new Department();
+        RolesWithAccess = new List<IdentityRole>();
+    }
 }
