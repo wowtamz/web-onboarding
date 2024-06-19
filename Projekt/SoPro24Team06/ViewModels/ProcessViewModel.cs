@@ -28,4 +28,18 @@ public class ProcessViewModel
         this.ContractOfRefWorker = process.ContractOfRefWorker;
         this.DepartmentOfRefWorker = process.DepartmentOfRefWorker;
     }
+
+    public ProcessViewModel()
+    {
+        this.Id = null;
+        this.Title = "";
+        this.Description = "";
+        this.Assignments = new List<Assignment> {};
+        this.StartDate = DateTime.Now;
+        this.DueDate = DateTime.Now.AddDays(7);
+        this.Supervisor = new ApplicationUser{ FullName = "Der Verantwortlicher"};
+        this.WorkerOfReference = new ApplicationUser { FullName = "Der Bezugsperson"};
+        this.ContractOfRefWorker = new Contract("Vollzeit");
+        this.DepartmentOfRefWorker = new Department("Operations");
+    }
 }
