@@ -47,6 +47,7 @@ namespace SoPro24Team06.Models
             this.AssigneeType = template.AssigneeType;
             this.AssignedRolesList = template.AssignedRolesList;
             this.DueDate = dueDate;
+            this.Status = AssignmentStatus.UNASSIGNED;
         }
     }
 
