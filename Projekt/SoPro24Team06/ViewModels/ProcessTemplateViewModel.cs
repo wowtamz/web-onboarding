@@ -10,7 +10,7 @@ public class ProcessTemplateViewModel
 
     public string? Description { get; set; }
 
-    public User WorkerOfReference { get; set; }
+    public ApplicationUser WorkerOfReference { get; set; }
 
     public List<AssignmentTemplate> AssignmentTemplates { get; set; }
 
@@ -18,10 +18,11 @@ public class ProcessTemplateViewModel
 
     public Department DepartmentOfRefWorker { get; set; }
 
-    public ProcessTemplateViewModel(string title, string description, List<AssignmentTemplate> assignmentTemplates, Contract contractOfRefWorker, Department departmentOfRefWorker)
+    public ProcessTemplateViewModel(string title, string description, ApplicationUser workerOfReference, List<AssignmentTemplate> assignmentTemplates, Contract contractOfRefWorker, Department departmentOfRefWorker)
     {
         this.Title = title;
         this.Description = description;
+        this.WorkerOfReference = workerOfReference;
         this.AssignmentTemplates = assignmentTemplates;
         this.ContractOfRefWorker = contractOfRefWorker;
         this.DepartmentOfRefWorker = departmentOfRefWorker;

@@ -11,13 +11,13 @@ public class Contract
     [JsonProperty("id")]
     public int Id { get; set; }
 
-    [Required(ErrorMessage = "Term is required")]
-    [JsonProperty("term")]
-    public string Term { get; set; }
+    [Required(ErrorMessage = "Label is required")]
+    [JsonProperty("label")]
+    public string Label { get; set; }
 
 
-    public Contract(string term)
+    public Contract(string label)
     {
-        this.Term = term;
+        this.Label = label;
     }
 }

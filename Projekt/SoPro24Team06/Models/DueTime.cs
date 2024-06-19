@@ -1,31 +1,32 @@
-using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace SoPro24Team06.Models;
 
-namespace SoPro24Team06.Models
+public class DueTime
 {
-    using System;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 
-    namespace SoPro24Team06.Models
+    [Required]
+    public string Label { get; set; }
+
+    [Range(int.MinValue, int.MaxValue)]
+    public int Days { get; set; }
+
+    [Range(int.MinValue, int.MaxValue)]
+    public int Weeks { get; set; }
+
+    [Range(int.MinValue, int.MaxValue)]
+    public int Months { get; set; }
+
+    public DueTime(string label, int days, int weeks, int months)
     {
-        public class DueTime
-        {
-            [Key]
-            [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-            public int Id { get; set; }
-
-            [Required]
-            public string Name { get; set; }
-
-            [Range(0, int.MaxValue)]
-            public int Days { get; set; }
-
-            [Range(0, int.MaxValue)]
-            public int Weeks { get; set; }
-
-            [Range(0, int.MaxValue)]
-            public int Months { get; set; }
-        }
+        this.Label = label;
+        this.Days = days;
+        this.Weeks = weeks;
+        this.Months = months;
     }
 }
+

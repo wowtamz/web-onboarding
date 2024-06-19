@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using SoPro24Team06.Enums;
-using SoPro24Team06.Models.SoPro24Team06.Models;
 
 namespace SoPro24Team06.Models
 {
@@ -13,12 +13,15 @@ namespace SoPro24Team06.Models
         [JsonProperty("id")]
 
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Title ist erforderlich")]
         [JsonProperty("title")]
         public string? Title { get; set; }
 
         [JsonProperty("instructions")]
         public string? Instructions { get; set; }
 
+        [Required(ErrorMessage = "Zeit bis wann die Aufgabe erledigt werden muss ist erforderlich.")]
         [JsonProperty("dueTime")]
         public DueTime DueIn { get; set; }
 
@@ -32,11 +35,12 @@ namespace SoPro24Team06.Models
         public AssigneeType AssigneeType { get; set; }
 
         [JsonProperty("assignedRoles")]
-        public List<Role> AssignedRolesList { get; set; }
+        public List<IdentityRole> AssignedRolesList { get; set; }
 
         public Assignment ToAssignment(AssignmentTemplate template)
         {
-            return new Assignment(template);
+            DateTime dueDate = DateTime.Now; // sollte berechnet werden
+            return new Assignment(template, dueDate);
         }
 
     }

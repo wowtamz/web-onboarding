@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace SoPro24Team06.Models
 {
     public class UserRolesViewModel

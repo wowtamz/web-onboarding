@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace SoPro24Team06.Models;
 
@@ -23,9 +24,9 @@ public class ProcessTemplate
     [Required(ErrorMessage = "Abteilung ist erforderlich")]
     public Department DepartmentOfRefWorker { get; set; }
 
-    public List<Role> RolesWithAccess { get; set; }
+    public List<IdentityRole> RolesWithAccess { get; set; }
 
-    public ProcessTemplate(string title, string description, List<AssignmentTemplate> assignmentTemplates, Contract contractOfRefWorker, Department departmentOfRefWorker, List<Role> rolesWithAccess)
+    public ProcessTemplate(string title, string description, List<AssignmentTemplate> assignmentTemplates, Contract contractOfRefWorker, Department departmentOfRefWorker, List<IdentityRole> rolesWithAccess)
     {
         this.Title = title;
         this.Description = description;
@@ -37,6 +38,7 @@ public class ProcessTemplate
 
     public Process ToProcess()
     {
-        return new Process(this);
+        /** #TODO: Roles with Access?? */
+        return new Process(this, null, null, this.ContractOfRefWorker, null, this.DepartmentOfRefWorker);
     }
 }

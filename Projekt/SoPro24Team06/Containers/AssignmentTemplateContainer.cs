@@ -1,36 +1,41 @@
 using SoPro24Team06.Models;
 using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
-using SoPro24Team06.Models.SoPro24Team06.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace SoPro24Team06.Containers;
 
 public class AssignmentTemplateContainer
 {
-    private ModelContext db = new ModelContext();
+    private readonly ModelContext _context;
 
-    public void AddAssignmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneType, List<Role>? assignedRoles)
+    public AssignmentTemplateContainer(ModelContext context)
     {
-        db.Add(new AssignmentTemplate { Title = title, Instructions = instructions, DueIn = dueIn, ForDepartmentsList = forDepartmentsList, ForContractsList = forContractsList, AssigneeType = assigneType, AssignedRolesList = assignedRoles });
-        db.SaveChanges();
+        _context = context;
+    }
+
+    public void AddAssignmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneType, List<IdentityRole>? assignedRoles)
+    {
+        _context.Add(new AssignmentTemplate { Title = title, Instructions = instructions, DueIn = dueIn, ForDepartmentsList = forDepartmentsList, ForContractsList = forContractsList, AssigneeType = assigneType, AssignedRolesList = assignedRoles });
+        _context.SaveChanges();
     }
     public void DeleteAssignmentTemplate(int id)
     {
-        if (db.AssignmentTemplates != null)
+        if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.id == id);
+            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
             if (assignmentTemplate != null)
             {
-                db.Remove(assignmentTemplate!);
-                db.SaveChanges();
+                _context.Remove(assignmentTemplate!);
+                _context.SaveChanges();
             }
         }
     }
-    public void EditAssignmentTemplate(int id, string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneeType, List<Role>? assignedRoles)
+    public void EditAssignmentTemplate(int id, string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneeType, List<IdentityRole>? assignedRoles)
     {
-        if (db.AssignmentTemplates != null)
+        if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
+            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
             if (assignmentTemplate != null)
             {
                 assignmentTemplate.Title = title;
@@ -40,16 +45,16 @@ public class AssignmentTemplateContainer
                 assignmentTemplate.ForContractsList = forContractsList;
                 assignmentTemplate.AssigneeType = assigneeType;
                 assignmentTemplate.AssignedRolesList = assignedRoles;
-                db.Update(assignmentTemplate);
-                db.SaveChanges();
+                _context.Update(assignmentTemplate);
+                _context.SaveChanges();
             }
         }
     }
     public AssignmentTemplate GetAssignmentTemplate(int id)
     {
-        if (db.AssignmentTemplates != null)
+        if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = db.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
+            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
             if (assignmentTemplate != null)
             {
                 return assignmentTemplate!;
@@ -61,9 +66,9 @@ public class AssignmentTemplateContainer
     public List<AssignmentTemplate> GetAllAssignmentTemplate()
     {
         List<AssignmentTemplate> assignmentTemplateList = new List<AssignmentTemplate>();
-        if (db.AssignmentTemplates != null)
+        if (_context.AssignmentTemplates != null)
         {
-            lessons = db.AssignmentTemplates.ToList();
+            assignmentTemplateList = _context.AssignmentTemplates.ToList();
         }
         return assignmentTemplateList;
     }
