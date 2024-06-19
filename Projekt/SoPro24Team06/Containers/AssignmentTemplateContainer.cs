@@ -63,7 +63,7 @@ public class AssignmentTemplateContainer
         return null;
     }
 
-    public List<AssignmentTemplate> GetAllAssignmentTemplate()
+    public List<AssignmentTemplate> GetAllAssignmentTemplates()
     {
         List<AssignmentTemplate> assignmentTemplateList = new List<AssignmentTemplate>();
         if (_context.AssignmentTemplates != null)
