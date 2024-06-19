@@ -9,5 +9,9 @@ namespace SoPro24Team06.Models
         {
             Name = name;
         }
+
+        public Department()
+        {
+        }
     }
 }

@@ -20,4 +20,8 @@ public class Contract
     {
         this.Label = label;
     }
+
+    public Contract()
+    {
+    }
 }

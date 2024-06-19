@@ -11,4 +11,9 @@ public class AssigmentTemplateListViewModel
     {
         this.AssignmentTemplateList = assignmentTemplateList;
     }
+
+    public AssigmentTemplateListViewModel()
+    {
+        this.AssignmentTemplateList = new List<AssignmentTemplate>();
+    }
 }
