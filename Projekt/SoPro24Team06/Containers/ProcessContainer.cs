@@ -26,10 +26,9 @@ public class ProcessContainer
         return process;
     }
 
-    public async Task AddProcessAsync(ProcessTemplate template, ApplicationUser supervisor, ApplicationUser workerOfRef, Contract contractOfRefWorker, Department departmentOfRefWorker)
+    public async Task AddProcessAsync(Process processToAdd)
     {
-        Process newProcess = new Process(template, workerOfRef, supervisor, contractOfRefWorker, departmentOfRefWorker);
-        _context.Processes.Add(newProcess);
+        _context.Processes.Add(processToAdd);
         await _context.SaveChangesAsync();
     }
 

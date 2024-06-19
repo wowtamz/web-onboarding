@@ -33,18 +33,27 @@ namespace SoPro24Team06.Models
         [Required(ErrorMessage = "Department is required")]
         public Department DepartmentOfRefWorker { get; set; }
 
-        public Process(ProcessTemplate Template, ApplicationUser? WorkerOfReference, ApplicationUser? Supervisor, Contract contractOfRefWorker, Department departmentOfRefWorker)
+        public Process(ProcessTemplate Template)
         {
             this.Title = Template.Title;
             this.Description = Template.Description;
             this.Assignments = Template.AssignmentTemplates.ConvertAll(template => template.ToAssignment(template));
             this.ContractOfRefWorker = Template.ContractOfRefWorker;
             this.DepartmentOfRefWorker = Template.DepartmentOfRefWorker;
-            this.WorkerOfReference = WorkerOfReference;
-            this.Supervisor = Supervisor;
             this.DueDate = this.Assignments.Max(assignment => assignment.DueDate);
-            this.DepartmentOfRefWorker = departmentOfRefWorker;
+        }
+
+        public Process(string title, string description, List<Assignment> assignments, ApplicationUser workerOfReference, ApplicationUser supervisor, Contract contractOfRefWorker, Department departmentOfRefWorker)
+        {
+            this.Title = title;
+            this.Description = description;
+            this.Assignments = assignments;
+            this.WorkerOfReference = workerOfReference;
+            this.Supervisor = supervisor;
             this.ContractOfRefWorker = contractOfRefWorker;
+            this.DepartmentOfRefWorker = departmentOfRefWorker;
+            this.StartDate = DateTime.Now;
+            this.DueDate = this.Assignments.Max(assignment => assignment.DueDate);
         }
     }
 }

@@ -16,7 +16,7 @@ public class AssignmentTemplateContainer
 
     public void AddAssignmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneType, List<IdentityRole>? assignedRoles)
     {
-        _context.Add(new AssignmentTemplate { Title = title, Instructions = instructions, DueIn = dueIn, ForDepartmentsList = forDepartmentsList, ForContractsList = forContractsList, AssigneeType = assigneType, AssignedRolesList = assignedRoles });
+        _context.Add(new AssignmentTemplate(title, instructions, dueIn, forDepartmentsList, forContractsList, assigneType, assignedRoles) { Title = title, Instructions = instructions, DueIn = dueIn, ForDepartmentsList = forDepartmentsList, ForContractsList = forContractsList, AssigneeType = assigneType, AssignedRolesList = assignedRoles });
         _context.SaveChanges();
     }
     public void DeleteAssignmentTemplate(int id)

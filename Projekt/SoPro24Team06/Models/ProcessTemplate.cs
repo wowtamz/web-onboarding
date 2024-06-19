@@ -39,6 +39,6 @@ public class ProcessTemplate
     public Process ToProcess()
     {
         /** #TODO: Roles with Access?? */
-        return new Process(this, null, null, this.ContractOfRefWorker, null, this.DepartmentOfRefWorker);
+        return new Process(this);
     }
 }

@@ -19,10 +19,10 @@ public class ProcessViewModel
     {
         this.Id = process.Id;
         this.Title = process.Title;
-        this.Description = process.Description;
+        this.Description = process.Description ?? "";
         this.Assignments = process.Assignments;
         this.StartDate = process.StartDate;
-        this.DueDate = (DateTime)process.DueDate;
+        this.DueDate = process.Assignments.Max(a => a.DueDate);
         this.Supervisor = process.Supervisor;
         this.WorkerOfReference = process.WorkerOfReference;
         this.ContractOfRefWorker = process.ContractOfRefWorker;
