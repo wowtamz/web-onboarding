@@ -20,14 +20,15 @@ public class AssigmentTemplateViewModel
     public AssigneeType AssigneeType { get; set; }
     public List<IdentityRole> AssignedRolesList { get; set; }
 
-    public AssigmentTemplateViewModel(string title, string instructions, DueTime dueIn, List<Department> forDepartmentsList, List<Contract> forContractsList, AssigneeType assigneeType, List<IdentityRole> assignedRolesList)
+    public AssigmentTemplateViewModel(AssignmentTemplate assignmentTemplate)
     {
-        this.Title = title;
-        this.Instructions = instructions;
-        this.DueIn = dueIn;
-        this.ForDepartmentsList = forDepartmentsList;
-        this.ForContractsList = forContractsList;
-        this.AssigneeType = assigneeType;
-        this.AssignedRolesList = assignedRolesList;
+        Id = assignmentTemplate.Id;
+        Title = assignmentTemplate.Title ?? "";
+        Instructions = assignmentTemplate.Instructions;
+        DueIn = assignmentTemplate.DueIn;
+        ForDepartmentsList = assignmentTemplate.ForDepartmentsList;
+        ForContractsList = assignmentTemplate.ForContractsList;
+        AssigneeType = assignmentTemplate.AssigneeType;
+        AssignedRolesList = assignmentTemplate.AssignedRolesList;
     }
 }
