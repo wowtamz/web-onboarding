@@ -26,10 +26,10 @@ namespace SoPro24Team06.Models
         public DueTime DueIn { get; set; }
 
         [JsonProperty("forDepartments")]
-        public List<Department> ForDepartmentsList { get; set; }
+        public List<Department>? ForDepartmentsList { get; set; }
 
         [JsonProperty("forContract")]
-        public List<Contract> ForContractsList { get; set; }
+        public List<Contract>? ForContractsList { get; set; }
 
         [JsonProperty("assigneeType")]
         public AssigneeType AssigneeType { get; set; }
@@ -37,6 +37,7 @@ namespace SoPro24Team06.Models
         [JsonProperty("assignedRoles")]
         public List<IdentityRole> AssignedRolesList { get; set; }
 
+        public AssignmentTemplate() {}
         public AssignmentTemplate(string title, string instructions, DueTime dueIn, List<Department> forDepartmentsList, List<Contract> forContractsList, AssigneeType assigneeType, List<IdentityRole> assignedRolesList)
         {
             this.Title = title;

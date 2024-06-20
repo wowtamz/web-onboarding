@@ -8,7 +8,7 @@ public class ProcessTemplate
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; }
+    public int Id { get; set; }
 
     [Required(ErrorMessage = "Title ist erforderlich")]
     public string Title { get; set; }
@@ -34,6 +34,16 @@ public class ProcessTemplate
         this.ContractOfRefWorker = contractOfRefWorker;
         this.DepartmentOfRefWorker = departmentOfRefWorker;
         this.RolesWithAccess = rolesWithAccess;
+    }
+
+    public ProcessTemplate()
+    {
+        this.Title = "Title";
+        this.Description = "Description";
+        this.AssignmentTemplates = new List<AssignmentTemplate> {};
+        this.ContractOfRefWorker = new Contract("Contract");
+        this.DepartmentOfRefWorker = new Department("Department");
+        this.RolesWithAccess = new List<IdentityRole> {};
     }
 
     public Process ToProcess()
