@@ -7,7 +7,7 @@ namespace SoPro24Team06.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; }
+        public int Id { get; set; }
         [Required(ErrorMessage = "Name is required")]
         public string Title { get; set; }
 
@@ -54,6 +54,19 @@ namespace SoPro24Team06.Models
             this.DepartmentOfRefWorker = departmentOfRefWorker;
             this.StartDate = DateTime.Now;
             this.DueDate = this.Assignments.Max(assignment => assignment.DueDate);
+        }
+
+        public Process()
+        {
+            this.Title = "";
+            this.Description = "";
+            this.Assignments = new List<Assignment>{};
+            this.WorkerOfReference = new ApplicationUser { FullName = "Bob"};
+            this.Supervisor = new ApplicationUser{ FullName = "Jenny"};
+            this.ContractOfRefWorker = new Contract("None");
+            this.DepartmentOfRefWorker = new Department("None");
+            this.StartDate = DateTime.Now;
+            this.DueDate = DateTime.Now.AddDays(14);
         }
     }
 }

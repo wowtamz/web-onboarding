@@ -49,6 +49,8 @@ namespace SoPro24Team06.Models
             this.DueDate = dueDate;
             this.Status = AssignmentStatus.UNASSIGNED;
         }
+
+        public Assignment() {}
     }
 
 }
