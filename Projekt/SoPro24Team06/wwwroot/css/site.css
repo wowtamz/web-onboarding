@@ -46,3 +46,10 @@ body {
   --galaxy: #20304c;
   /** Makandra fonts**/
 }
+
+/** Override bootstrap btn-primary */
+.btn-primary {
+  background-color: var(--silver) !important; 
+  color: var(--licorice) !important;
+  border-color: var(--silver) !important;
+}
