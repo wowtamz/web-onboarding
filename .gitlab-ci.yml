@@ -46,6 +46,8 @@ deploy_project:
   tags:
     - sopro
   stage: deploy
+  only:
+    - main
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
