@@ -19,17 +19,17 @@ unit_test_project:
     - dotnet restore
     - dotnet test --logger "trx;LogFileName=test_results.trx"
 
-#e2e_test_project:
-#  tags:
-#    - sopro
-#  stage: test-e2e
-#  image: mcr.microsoft.com/dotnet/sdk:6.0
-#  script:
-#    - echo "E2E test job."
-#    - sh ./e2e-install-dep.sh
-#    - cd ./Projekt/SoPro24Team06.XUnit
-#    - dotnet restore
-#    - dotnet test --logger "trx;LogFileName=test_results.trx"
+e2e_test_project:
+  tags:
+    - sopro
+  stage: test-e2e
+  image: mcr.microsoft.com/dotnet/sdk:6.0
+  script:
+    - echo "E2E test job."
+    - sh ./e2e-install-dep.sh
+    - cd ./Projekt/SoPro24Team06.E2E
+    - dotnet restore
+    - dotnet test --logger "trx;LogFileName=test_results.trx"
 
 build_project:
   tags:
