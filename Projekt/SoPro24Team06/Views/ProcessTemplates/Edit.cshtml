@@ -1,39 +1,44 @@
 @model SoPro24Team06.ViewModels.ProcessTemplateViewModel
 
-<form>
+<form asp-controller="ProcessTemplate" asp-action="Edit" method="post">
   <fieldset style="margin-top: 8px">
     <legend>Prozesstitel</legend>
-    <input class="form-control" type="text" />
+    <input class="form-control" type="text" asp-for="Title" />
+    <span asp-validation-for="Title" class="text-danger"></span>
   </fieldset>
   <fieldset style="margin-top: 8px">
     <legend>Vertragstyp</legend>
-    <button class="btn btn-primary" type="button" data-bs-target="#modal-1" data-bs-toggle="modal"
+    <button class="btn btn-primary" type="button" data-bs-target="#modal-contract" data-bs-toggle="modal"
       style="margin-top: 0px; margin-bottom: 0px">
       Vertragstyp
     </button>
+    <span asp-validation-for="ContractOfRefWorker" class="text-danger"></span>
   </fieldset>
   <fieldset style="margin-top: 8px">
     <legend>Rolle</legend>
-    <button class="btn btn-primary" type="button" data-bs-target="#modal-2" data-bs-toggle="modal"
+    <button class="btn btn-primary" type="button" data-bs-target="#modal-role" data-bs-toggle="modal"
       style="margin-top: 0px; margin-bottom: 0px; margin-right: 12px">
       Rolle
     </button>
+    <span asp-validation-for="RolesWithAccess" class="text-danger"></span>
   </fieldset>
   <fieldset style="margin-top: 8px">
     <legend>Abteilung</legend>
-    <button class="btn btn-primary" type="button" data-bs-target="#modal-1" data-bs-toggle="modal"
+    <button class="btn btn-primary" type="button" data-bs-target="#modal-department" data-bs-toggle="modal"
       style="margin-top: 0px; margin-bottom: 0px">
       Abteilung
     </button>
+    <span asp-validation-for="DepartmentOfRefWorker" class="text-danger"></span>
   </fieldset>
   <fieldset style="margin-top: 8px">
     <legend>Beschreibung</legend>
-    <textarea class="form-control"></textarea>
+    <textarea class="form-control" asp-for="Description"></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
   </fieldset>
   <fieldset style="margin-top: 8px">
     <legend>
       Aufgaben
-      <button class="btn btn-primary" type="button" style="margin-left: 16px" data-bs-target="#modal-1"
+      <button class="btn btn-primary" type="button" style="margin-left: 16px" data-bs-target="#modal-task"
         data-bs-toggle="modal">
         Aufgaben hinzufügen
       </button>
@@ -51,11 +56,25 @@
           </tr>
         </thead>
         <tbody>
-          @if (Model.AssignmentTemplates.Count == 0)
+          @if (Model.SelectedAssignmentTemplates.Count == 0)
           {
             <tr>
-              <td colspan="8">Keine Aufgaben vorhanden</td>
+              <td colspan="6">Keine Aufgaben vorhanden</td>
             </tr>
+          }
+          else
+          {
+            @foreach (var assignment in Model.SelectedAssignmentTemplates)
+            {
+              <tr>
+                <td>@assignment.Title</td>
+                <td>@assignment.Instructions</td>
+                <td>@assignment.AssigneeType</td>
+                <td>
+                  <button type="button" class="btn btn-danger" onclick="removeTask(@assignment.Id)">Entfernen</button>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>
@@ -65,8 +84,9 @@
     Erstellen
   </button>
 </form>
+
 <!-- Start: AufgabenModal -->
-<div class="modal fade visible" role="dialog" tabindex="-1" id="modal-1">
+<div class="modal fade" role="dialog" tabindex="-1" id="modal-task">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -83,40 +103,29 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>SSH Key erstellen</td>
-                <td class="text-center">
-                  <svg></svg>
-                </td>
-              </tr>
-              <tr>
-                <td>Laptop einrichten</td>
-                <td class="text-center">
-                  <svg></svg>
-                </td>
-              </tr>
-              <tr>
-                <td>Vertrag abschließen</td>
-                <td class="text-center">
-                  <svg></svg>
-                </td>
-              </tr>
+              @foreach (var task in Model.AssignmentTemplates)
+              {
+                <tr>
+                  <td>@task.Title</td>
+                  <td class="text-center">
+                    <button class="btn btn-primary" type="button" onclick="addTask(@task.Id)">Hinzufügen</button>
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-light" type="button" data-bs-dismiss="modal">
-          Zurück
-        </button>
-        <button class="btn btn-primary" type="button">Speichern</button>
+        <button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button>
       </div>
     </div>
   </div>
 </div>
 <!-- End: AufgabenModal -->
+
 <!-- Start: RollenModal -->
-<div class="modal fade visible" role="dialog" tabindex="-1" id="modal-2">
+<div class="modal fade" role="dialog" tabindex="-1" id="modal-role">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -133,35 +142,87 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Developer</td>
-                <td class="text-center">
-                  <svg></svg>
-                </td>
-              </tr>
-              <tr>
-                <td>Personaler</td>
-                <td class="text-center">
-                  <svg></svg>
-                </td>
-              </tr>
-              <tr>
-                <td>Externer</td>
-                <td class="text-center">
-                  <svg></svg>
-                </td>
-              </tr>
+              @foreach (var role in Model.Roles)
+              {
+                <tr>
+                  <td>@role.Name</td>
+                  <td class="text-center">
+                    <button class="btn btn-primary" type="button" onclick="addRole('@role.Id')">Hinzufügen</button>
+                  </td>
+                </tr>
+              }
             </tbody>
           </table>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-light" type="button" data-bs-dismiss="modal">
-          Zurück
-        </button>
-        <button class="btn btn-primary" type="button">Speichern</button>
+        <button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button>
       </div>
     </div>
   </div>
 </div>
 <!-- End: RollenModal -->
+
+<!-- Start: AbteilungModal -->
+<div class="modal fade" role="dialog" tabindex="-1" id="modal-department">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Füge weitere Abteilungen hinzu</h4>
+        <button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Abteilung</th>
+                <th>Aktion</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach (var department in Model.Departments)
+              {
+                <tr>
+                  <td>@department.Name</td>
+                  <td class="text-center">
+                    <button class="btn btn-primary" type="button"
+                      onclick="addDepartment('@department.Id')">Hinzufügen</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End: RollenModal -->
+
+<script>
+  function addTask(id) {
+    // Logic to add the task to the form
+  }
+
+  function removeTask(id) {
+    // Logic to remove the task from the form
+  }
+
+  function addRole(id) {
+    // Logic to add the role to the form
+  }
+
+  function addDepartment(id) {
+    // Logic to add the role to the form
+  }
+</script>
+
+@section Scripts {
+  @{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+  }
+}

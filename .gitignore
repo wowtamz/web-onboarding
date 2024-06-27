@@ -1,1 +1,4 @@
 .vscode
+
+database.db-shm
+database.db-wal

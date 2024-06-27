@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
+using Newtonsoft.Json;
 
 namespace SoPro24Team06.Models;
 
@@ -8,25 +9,39 @@ public class ProcessTemplate
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [JsonProperty("id")]
     public int Id { get; set; }
 
-    [Required(ErrorMessage = "Title ist erforderlich")]
+    [Required(ErrorMessage = "Titel ist erforderlich")]
+    [JsonProperty("title")]
     public string Title { get; set; }
 
+    [JsonProperty("description")]
     public string? Description { get; set; }
 
     [Required(ErrorMessage = "Mindestens eine Aufgabe ist erforderlich")]
+    [JsonProperty("assignmentTemplates")]
     public List<AssignmentTemplate> AssignmentTemplates { get; set; }
 
     [Required(ErrorMessage = "Vertrag ist erforderlich")]
+    [JsonProperty("contractOfRefWorker")]
     public Contract ContractOfRefWorker { get; set; }
 
     [Required(ErrorMessage = "Abteilung ist erforderlich")]
+    [JsonProperty("departmentOfRefWorker")]
     public Department DepartmentOfRefWorker { get; set; }
 
+    [JsonProperty("rolesWithAccess")]
     public List<IdentityRole> RolesWithAccess { get; set; }
 
-    public ProcessTemplate(string title, string description, List<AssignmentTemplate> assignmentTemplates, Contract contractOfRefWorker, Department departmentOfRefWorker, List<IdentityRole> rolesWithAccess)
+    public ProcessTemplate(
+        string title,
+        string description,
+        List<AssignmentTemplate> assignmentTemplates,
+        Contract contractOfRefWorker,
+        Department departmentOfRefWorker,
+        List<IdentityRole> rolesWithAccess
+    )
     {
         this.Title = title;
         this.Description = description;
@@ -40,10 +55,10 @@ public class ProcessTemplate
     {
         this.Title = "Title";
         this.Description = "Description";
-        this.AssignmentTemplates = new List<AssignmentTemplate> {};
-        this.ContractOfRefWorker = new Contract("Contract");
-        this.DepartmentOfRefWorker = new Department("Department");
-        this.RolesWithAccess = new List<IdentityRole> {};
+        this.AssignmentTemplates = new List<AssignmentTemplate> { };
+        this.ContractOfRefWorker = new Contract();
+        this.DepartmentOfRefWorker = new Department();
+        this.RolesWithAccess = new List<IdentityRole> { };
     }
 
     public Process ToProcess()

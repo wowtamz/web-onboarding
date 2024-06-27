@@ -13,12 +13,14 @@ if (!Directory.Exists(dataDirectory))
 
 var connectionString = builder.Configuration.GetConnectionString("UserConnection");
 builder.Services.AddDbContext<UserDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlite(connectionString + ";Pooling=False")
+); // Disable pooling
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => 
-{
-    options.SignIn.RequireConfirmedAccount = false; // email confirmation!
-})
+builder
+    .Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false; // email confirmation!
+    })
     .AddEntityFrameworkStores<UserDbContext>()
     .AddDefaultTokenProviders();
 
@@ -39,7 +41,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    await SeedData.Initialize(userManager, roleManager);
+    await SeedData.Initialize(userManager, roleManager, new ModelContext());
 }
 
 if (!app.Environment.IsDevelopment())
@@ -56,9 +58,13 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}"
+    );
+});
 
 app.MapRazorPages();
 

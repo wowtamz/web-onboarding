@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using SoPro24Team06.Enums;
 
 namespace SoPro24Team06.ViewModels
 {
-    public class CreateUserViewModel
+    public class UserDetailsViewModel
     {
         [Required]
         [Display(Name = "Voller Name")]
@@ -16,10 +15,7 @@ namespace SoPro24Team06.ViewModels
         [Display(Name = "Email Adresse")]
         public string Email { get; set; }
 
-        [Required]
-        [DataType(DataType.Password)]
-        [Display(Name = "Passwort")]
-        public string Password { get; set; } = String.Empty;
+        public string OriginalEmail { get; set; }
 
         [Required]
         public UserStatus Status { get; set; }

@@ -23,10 +23,10 @@ namespace SoPro24Team06.Models
         public DateTime DueDate { get; set; }
 
         [JsonProperty("forDepartments")]
-        public List<Department> ForDepartmentsList { get; set; }
+        public List<Department> ForDepartmentsList { get; set; } = new List<Department>();
 
         [JsonProperty("forContract")]
-        public List<Contract> ForContractsList { get; set; }
+        public List<Contract> ForContractsList { get; set; } = new List<Contract>();
 
         [JsonProperty("assigneeType")]
         public AssigneeType AssigneeType { get; set; }
@@ -37,20 +37,18 @@ namespace SoPro24Team06.Models
         [JsonProperty("status")]
         public AssignmentStatus Status { get; set; }
 
-        // #TODO: Additional Attributes
         public Assignment(AssignmentTemplate template, DateTime dueDate)
         {
             this.Title = template.Title;
             this.Instructions = template.Instructions;
-            this.ForDepartmentsList = template.ForDepartmentsList;
-            this.ForContractsList = template.ForContractsList;
+            this.ForDepartmentsList = template.ForDepartmentsList ?? new List<Department>();
+            this.ForContractsList = template.ForContractsList ?? new List<Contract>();
             this.AssigneeType = template.AssigneeType;
             this.AssignedRolesList = template.AssignedRolesList;
             this.DueDate = dueDate;
             this.Status = AssignmentStatus.UNASSIGNED;
         }
 
-        public Assignment() {}
+        public Assignment() { }
     }
-
 }

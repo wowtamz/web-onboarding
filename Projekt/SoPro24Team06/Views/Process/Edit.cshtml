@@ -1,14 +1,15 @@
-﻿@model SoPro24Team06.ViewModels.ProcessListViewModel
+﻿@model SoPro24Team06.ViewModels.ProcessViewModel
 @{
     ViewData["Title"] = "Vorgang bearbeiten";
 }
 
-<form>
+<form asp-action="Edit" method="post">
     <fieldset style="margin-top: 8px;">
-        <legend class="d-xxl-flex justify-content-xxl-start align-items-xxl-center">Prozess<button class="btn btn-primary" type="submit" style="margin-top: 12px;margin-left: 12px;margin-bottom: 8px;" data-bs-target="#modal-2" data-bs-toggle="modal">Auswählen</button></legend><input class="form-control" type="text">
+        <legend class="d-xxl-flex justify-content-xxl-start align-items-xxl-center">Prozess<button class="btn btn-primary" type="button" style="margin-top: 12px;margin-left: 12px;margin-bottom: 8px;" data-bs-target="#modal-2" data-bs-toggle="modal">Auswählen</button></legend><input class="form-control" type="text">
     </fieldset>
+    <input type="hidden" asp-for="Id" />
     <fieldset style="margin-top: 8px;">
-        <legend>Titel</legend><input class="form-control" type="text">
+        <legend>Titel</legend><input asp-for="Title" class="form-control" type="text">
     </fieldset>
     <fieldset style="margin-top: 8px;">
         <legend>Vertragstyp</legend><button class="btn btn-primary" type="button" data-bs-target="#modal-1" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;">Vertragstyp</button>
@@ -17,10 +18,11 @@
         <legend>Abteilung</legend><button class="btn btn-primary" type="button" data-bs-target="#modal-1" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;">Abteilung</button>
     </fieldset>
     <fieldset style="margin-top: 8px;">
-        <legend>Beschreibung</legend><textarea class="form-control"></textarea>
+        <legend>Beschreibung</legend><textarea asp-for="Description" class="form-control"></textarea>
     </fieldset>
     <fieldset style="margin-top: 8px;">
         <legend>Aufgaben<button class="btn btn-primary" type="button" style="margin-left: 16px;" data-bs-target="#modal-1" data-bs-toggle="modal">Aufgaben hinzufügen</button></legend>
+
         <div class="table-responsive">
             <table class="table">
                 <thead>
@@ -74,7 +76,11 @@
                 </tbody>
             </table>
         </div>
-    </fieldset><button class="btn btn-primary" type="submit" style="margin-top: 12px;">Bearbeiten</button>
+    </fieldset>
+    <input type="hidden" asp-for="Assignments" />
+
+    <button class="btn btn-primary" type="submit" style="margin-top: 12px;">Bearbeiten</button>
+
 </form><!-- Start: AufgabenModal -->
 <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-1">
     <div class="modal-dialog" role="document">
