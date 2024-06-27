@@ -1,26 +1,38 @@
-﻿@model SoPro24Team06.ViewModels.ProcessListViewModel
+﻿@model SoPro24Team06.ViewModels.ComposeProcessViewModel
 @{
     ViewData["Title"] = "Vorgang starten";
 }
 
-<form>
+<form id="form" asp-action="Start" method="post">
         <fieldset style="margin-top: 8px;">
-            <legend class="d-xxl-flex justify-content-xxl-start align-items-xxl-center">Prozess<button class="btn btn-primary" type="submit" style="margin-top: 12px;margin-left: 12px;margin-bottom: 8px;" data-bs-target="#modal-2" data-bs-toggle="modal">Auswählen</button></legend><input class="form-control" type="text">
+            <legend class="d-xxl-flex justify-content-xxl-start align-items-xxl-center">Prozess<button class="btn btn-primary" type="button" style="margin-top: 12px;margin-left: 12px;margin-bottom: 8px;" data-bs-target="#modal-2" data-bs-toggle="modal">Auswählen</button></legend>
+            <input id="templateTitle" name="templateTitle" type="text" class="form-control" placeholder="Bitte Vorgangvorlage wählen" value="" readonly>
+            <input id="processTemplateId" name="processTemplateId" type="hidden" />
         </fieldset>
+        <input id="" name="" type="hidden" asp-for="Id" />
         <fieldset style="margin-top: 8px;">
-            <legend>Titel</legend><input class="form-control" type="text">
+            <legend>Titel</legend>
+            <input id="title" name="title" asp-for="Title" class="form-control" type="text">
         </fieldset>
         <fieldset style="margin-top: 8px;">
             <legend>Vertragstyp</legend>
-        </fieldset><button class="btn btn-primary" type="button" data-bs-target="#modal-1" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;">Vertragstyp</button>
+            <button id="contractType" name="contractType" class="btn btn-primary" type="button" data-bs-target="#modal-contract" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;" >Vertragstyp wählen</button>
+            <input id="contractId" name="contractId" type="hidden" />
+        </fieldset>
+        
         <fieldset style="margin-top: 8px;">
-            <legend>Abteilung</legend><button class="btn btn-primary" type="button" data-bs-target="#modal-1" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;">Abteilung</button>
+            <legend>Abteilung</legend>
+            <button id="department" name="department" class="btn btn-primary" type="button" data-bs-target="#modal-department" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;">Abteilung wählen</button>
+            <input id="departmentId" name="departmentId" type="hidden" />
         </fieldset>
         <fieldset style="margin-top: 8px;">
-            <legend>Beschreibung</legend><textarea class="form-control"></textarea>
+            <legend>Beschreibung</legend>
+            <textarea id="processDescription" name="processDescription" asp-for="Description" class="form-control"></textarea>
         </fieldset>
         <fieldset style="margin-top: 8px;">
-            <legend>Aufgaben<button class="btn btn-primary" type="button" style="margin-left: 16px;" data-bs-target="#modal-1" data-bs-toggle="modal">Aufgaben hinzufügen</button></legend>
+            <legend>Aufgaben
+                <button class="btn btn-primary" type="button" style="margin-left: 16px;" data-bs-target="#modal-assignment" data-bs-toggle="modal">Aufgaben hinzufügen</button>
+            </legend> 
             <div class="table-responsive">
                 <table class="table">
                     <thead>
@@ -34,76 +46,78 @@
                             <th>Aktionen</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="assignments" name="assignments">
+                        @if(@Model.AssignmentTemplates != null && @Model.AssignmentTemplates.Count > 0)
+                        {
+                            @foreach(int templateId in @Model.AssignmentTemplates)
+                            {
+                                var title = @Model.AvailableAssignmentTemplates[templateId].Title;
+                                var description = @Model.AvailableAssignmentTemplates[templateId].Instructions;
+                                var assignee = @Model.AvailableAssignmentTemplates[templateId].AssigneeType;
+                                var due_in = @Model.AvailableAssignmentTemplates[templateId].DueIn;
+
+
+                                <tr>
+                                    <td>title</td>
+                                    <td><a href="#">Mehr anzeigen</a></td>
+                                    <td>@assignee</td>
+                                    <td>Vollzeit</td>
+                                    <td>Personal</td>
+                                    <td>@due_in.Label</td>
+                                    <td class="d-flex flex-row justify-content-evenly"><a data-bs-target="#modal-1" data-bs-toggle="modal"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
+                                                <path fill-rule="evenodd" d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5"></path>
+                                                <path fill-rule="evenodd" d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z"></path>
+                                            </svg></a><a href="AssignmentTemplateEdit.html"><i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i></a><button class="btn-close" type="button" aria-label="Close"></button></td>
+                                </tr>
+                            }
+                        
+                        }
+                        else
+                        {
                         <tr>
-                            <td>SSH Key erstellen</td>
-                            <td><a href="#" data-bs-target="#modal-3" data-bs-toggle="modal">Mehr anzeigen</a></td>
-                            <td>IT</td>
-                            <td>Werkstudent</td>
-                            <td>Developer</td>
-                            <td>1Wochen vor Start</td>
-                            <td class="d-flex flex-row justify-content-evenly"><a data-bs-target="#modal-1" data-bs-toggle="modal"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
-                                        <path fill-rule="evenodd" d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5"></path>
-                                        <path fill-rule="evenodd" d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z"></path>
-                                    </svg></a><a href="AssignmentTemplateEdit.html"><i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i></a><button class="btn-close" type="button" aria-label="Close"></button></td>
+                            <td>Keine Aufgabevorlagen vorhanden</td>
                         </tr>
-                        <tr>
-                            <td>Laptop einrichten</td>
-                            <td><a href="#">Mehr anzeigen</a></td>
-                            <td>Bezugsperson</td>
-                            <td>Werkstudent</td>
-                            <td>Developer</td>
-                            <td>2 Wochen vor Start</td>
-                            <td class="d-flex flex-row justify-content-evenly"><a data-bs-target="#modal-1" data-bs-toggle="modal"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
-                                        <path fill-rule="evenodd" d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5"></path>
-                                        <path fill-rule="evenodd" d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z"></path>
-                                    </svg></a><a href="AssignmentTemplateEdit.html"><i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i></a><button class="btn-close" type="button" aria-label="Close"></button></td>
-                        </tr>
-                        <tr>
-                            <td>Vertrag abschließen</td>
-                            <td><a href="#">Mehr anzeigen</a></td>
-                            <td>Geschäftsleitung</td>
-                            <td>Vollzeit</td>
-                            <td>Personal</td>
-                            <td>1 Wochen vor Start</td>
-                            <td class="d-flex flex-row justify-content-evenly"><a data-bs-target="#modal-1" data-bs-toggle="modal"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
-                                        <path fill-rule="evenodd" d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5"></path>
-                                        <path fill-rule="evenodd" d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z"></path>
-                                    </svg></a><a href="AssignmentTemplateEdit.html"><i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i></a><button class="btn-close" type="button" aria-label="Close"></button></td>
-                        </tr>
+                        }
+
                     </tbody>
                 </table>
             </div>
-        </fieldset><button class="btn btn-primary" type="submit" style="margin-top: 12px;">Starten</button>
-    </form><!-- Start: AufgabenModal -->
-    <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-1">
+        </fieldset>
+
+        <button class="btn btn-primary" type="button" style="margin-top: 12px;" onclick="startProcess()">Starten</button>
+
+    </form>
+
+    <!-- Start: VertragModal -->
+    <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-contract">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Füge weitere Aufgaben hinzu</h4><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                    <h4 class="modal-title">Füge weitere Vertragstyp hinzu</h4><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Aufgabentitel</th>
+                                    <th>Vertragsart</th>
                                     <th>Aktion</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Aufgabe 1</td>
-                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-check-lg fs-3 text-success">
-                                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022"></path>
-                                        </svg></td>
-                                </tr>
-                                <tr>
-                                    <td>Aufgabe 2</td>
-                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-ban fs-3 text-danger">
-                                            <path d="M15 8a6.973 6.973 0 0 0-1.71-4.584l-9.874 9.875A7 7 0 0 0 15 8M2.71 12.584l9.874-9.875a7 7 0 0 0-9.874 9.874ZM16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"></path>
-                                        </svg></td>
-                                </tr>
+                                @foreach(var contract in @Model.AvailableContracts)
+                                {
+                                    var label = contract.Label;
+                                    <tr>
+                                        <td>@label</td>
+                                        <td class="text-center">
+                                        <form action="@Url.Action("AddContract", "Process", new { id = contract.Id, viewModel = Model })" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <button class="btn btn-primary" type="button" data-bs-dismiss="modal" style="margin-left: 16px;" onclick="selectContract(@contract.Id)">Auswählen</button>
+                                        </form>
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
                         </table>
                     </div>
@@ -111,7 +125,48 @@
                 <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button><button class="btn btn-primary" type="button">Speichern</button></div>
             </div>
         </div>
-    </div><!-- End: AufgabenModal -->
+    </div><!-- End: VertragModal -->
+
+
+    <!-- Start: AbteilungModal -->
+    <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-department">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Füge weitere Abteilung hinzu</h4><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Abteilung</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(var department in @Model.AvailableDepartments)
+                                {
+                                    var name = department.Name;
+                                    <tr>
+                                        <td>@name</td>
+                                        <td class="text-center">
+                                        <form action="@Url.Action("AddDepartment", "Process", new { id = department.Id, viewModel = Model })" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <button class="btn btn-primary" type="button" data-bs-dismiss="modal" style="margin-left: 16px;" onclick="selectDepartment(@department.Id)" >Auswählen</button>
+                                        </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button><button class="btn btn-primary" type="button">Speichern</button></div>
+            </div>
+        </div>
+    </div><!-- End: AbteilungModal -->
+
     <!-- Start: ProzessModal -->
     <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-2">
         <div class="modal-dialog" role="document">
@@ -129,24 +184,232 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Onboarding</td>
-                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-check-lg fs-3 text-success">
-                                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022"></path>
-                                        </svg></td>
-                                </tr>
-                                <tr>
-                                    <td>Offboarding</td>
-                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-ban fs-3 text-danger">
-                                            <path d="M15 8a6.973 6.973 0 0 0-1.71-4.584l-9.874 9.875A7 7 0 0 0 15 8M2.71 12.584l9.874-9.875a7 7 0 0 0-9.874 9.874ZM16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"></path>
-                                        </svg></td>
-                                </tr>
+                            @if (Model.AvailableProcessTemplates != null && Model.AvailableProcessTemplates.Count > 0)
+                            {
+                                @foreach (var processTemplate in @Model.AvailableProcessTemplates)
+                                {
+                                    var id = processTemplate.Id;
+                                    var title = processTemplate.Title;
+                                    <tr>
+                                        <td>@title</td>
+                                        <td class="text-center">
+                                        <button class="btn btn-primary" type="button" data-bs-dismiss="modal" style="margin-left: 16px;" onclick="applyProcessTemplate(@id)" >Auswählen</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                    <tr>
+                                        <td>Keine Prozessvorlagen vorhanden</td>
+                                    </tr>
+                            }
+
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button><button class="btn btn-primary" type="button">Speichern</button></div>
+                <div class="modal-footer">
+                    <button class="btn btn-light" type="button" data-bs-dismiss="modal" >Zurück</button>
+                </div>
             </div>
         </div>
-    </div><!-- End: ProzessModal -->
+    </div>
+    <!-- End: ProzessModal -->
+
+    <!-- Start: AufgabenModal -->
+    <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-assignment">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Wähle eine Aufgabe als Template aus</h4><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Aufgabentitel</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @if (Model.AvailableAssignmentTemplates != null && Model.AvailableAssignmentTemplates.Count > 0)
+                            {
+                                @foreach (var assignmentTemplate in @Model.AvailableAssignmentTemplates)
+                                {
+                                    var id = assignmentTemplate.Id;
+                                    var title = assignmentTemplate.Title;
+                                    <tr>
+                                        <td>@title</td>
+                                        <td class="text-center">
+                                        <button class="btn btn-primary" type="button" data-bs-dismiss="modal" style="margin-left: 16px;" onclick="addAssignmentTemplate(@id)" >Auswählen</button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                    <tr>
+                                        <td>Keine Prozessvorlagen vorhanden</td>
+                                    </tr>
+                            }
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-light" type="button" data-bs-dismiss="modal" >Zurück</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End: AufgabenModal -->
+
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+
+    <script>
+
+        function startProcess() {
+
+            let templateId = $('#processTemplateId').val();
+            let title = $('#title').val();
+            let description = $('#processDescription').val();
+            let contractId = $('#contractId').val();
+            let departmentId = $('#departmentId').val();
+            let assignmentTemplates = [1, 2];
+
+            console.log(templateId);
+            console.log(title);
+            console.log(description);
+            console.log(contractId);
+            console.log(departmentId);
+
+            $.ajax({
+                url: '@Url.Action("StartProcess", "Process")',
+                type: 'POST',
+                data: { templateId: templateId, title: title, description: description, contractId: contractId, departmentId: departmentId, assignmentTemplateArray: assignmentTemplates},
+                success: function(response) {
+                    window.location.href = response.redirectToUrl;
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error starting process: " + error);
+                }
+            });
+        }
+
+        function applyProcessTemplate(templateId) {
+            $.ajax({
+                url: '@Url.Action("ApplyProcessTemplate", "Process")',
+                type: 'POST',
+                data: { id: templateId },
+                success: function(result) {
+                    let strResult = JSON.stringify(result);
+                    let title = JSON.parse(strResult).title;
+                    let contractId = JSON.parse(strResult).contractId;
+                    let departmentId = JSON.parse(strResult).departmentId;
+                    let assignments = JSON.parse(strResult).assignments;
+
+                    
+                    console.log(assignments);
+
+                    console.log("contractId: "+ contractId);
+                    console.log("departmentId: "+ departmentId);
+
+                    $('#processTemplateId').val(templateId);
+                    $('#templateTitle').val(title);
+                    $('#title').val(title);
+
+                    selectContract(contractId);
+                    selectDepartment(departmentId);
+
+                    assignments.forEach(addAssignmentTemplate);
+                    //alert('Vorlage "' + title + '" wurde angewendet');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error applying processTemplate: " + error);
+                }
+            });
+        }
+
+        function selectContract(contractId) {
+            $.ajax({
+                url: '@Url.Action("SelectContract", "Process")',
+                type: 'POST',
+                data: { id: contractId },
+                success: function(result) {
+                    let strResult = JSON.stringify(result);
+                    let label = JSON.parse(strResult).label;
+                    $('#contractType').html(label);
+                    $('#contractId').val(contractId);
+                    //alert('Vertrag "' + label + '" wurde ausgewählt');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error applying processTemplate: " + error);
+                }
+            });
+        }
+
+        function selectDepartment(departmentId) {
+            $.ajax({
+                url: '@Url.Action("SelectDepartment", "Process")',
+                type: 'POST',
+                data: { id: departmentId },
+                success: function(result) {
+                    let strResult = JSON.stringify(result);
+                    let label = JSON.parse(strResult).label;
+                    $('#department').html(label);
+                    $('#departmentId').val(departmentId);
+                    //alert('Abeilung "' + label + '" wurde ausgewählt');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error applying processTemplate: " + error);
+                }
+            });
+        }
+
+        function addAssignmentTemplate(assignmentId) {
+            $.ajax({
+                url: '@Url.Action("AddAssignmentTemplate", "Process")',
+                type: 'POST',
+                data: { id: assignmentId },
+                success: function(result) {
+                    let strResult = JSON.stringify(result);
+                    let title = JSON.parse(strResult).title;
+                    let assignee = JSON.parse(strResult).assignee;
+                    let dueIn = JSON.parse(strResult).dueIn;
+                    let html = JSON.parse(strResult).html;
+
+                    let obj = $('tr[name="templateItem'+ assignmentId +'"]')
+
+                    if (obj.length) {
+                        alert('Die Aufgabe "' + title + '" wurde bereits hinzugefügt');
+                    } else {
+                        if ($('#templateItem').length) {
+                            $('#assignments').append(html);
+                        } else {
+                            $('#assignments').html(html);
+                        }
+                    }
+                    //alert('Aufgabe "' + title + '" wurde hinzugefügt');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error applying processTemplate: " + error);
+                }
+            });
+        }
+
+        function removeAssignmentTemplate(obj, assignmentId) {
+            console.log(obj);
+            console.log(assignmentId);
+            console.log($('td[name="templateItem'+ assignmentId +'"]'));
+            console.log();
+            obj.closest('tr').remove();
+
+            if (!$('#templateItem').length) {
+                $('#assignments').html("<tr><td>Keine Aufgabevorlagen vorhanden</td></tr>");
+            }
+        }
+
+    </script>

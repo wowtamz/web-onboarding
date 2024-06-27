@@ -1,7 +1,7 @@
-using SoPro24Team06.Models;
+using Microsoft.AspNetCore.Identity;
 using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
-using Microsoft.AspNetCore.Identity;
+using SoPro24Team06.Models;
 
 namespace SoPro24Team06.Containers;
 
@@ -9,21 +9,51 @@ public class AssignmentTemplateContainer
 {
     private readonly ModelContext _context;
 
-    public AssignmentTemplateContainer(ModelContext context)
+    public AssignmentTemplateContainer()
     {
-        _context = context;
+        _context = new ModelContext();
     }
 
-    public void AddAssignmentTemplate(string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneType, List<IdentityRole>? assignedRoles)
+    public void AddAssignmentTemplate(
+        string title,
+        string? instructions,
+        DueTime dueIn,
+        List<Department>? forDepartmentsList,
+        List<Contract>? forContractsList,
+        AssigneeType assigneType,
+        List<IdentityRole>? assignedRoles
+    )
     {
-        _context.Add(new AssignmentTemplate(title, instructions, dueIn, forDepartmentsList, forContractsList, assigneType, assignedRoles) { Title = title, Instructions = instructions, DueIn = dueIn, ForDepartmentsList = forDepartmentsList, ForContractsList = forContractsList, AssigneeType = assigneType, AssignedRolesList = assignedRoles });
+        _context.Add(
+            new AssignmentTemplate(
+                title,
+                instructions,
+                dueIn,
+                forDepartmentsList,
+                forContractsList,
+                assigneType,
+                assignedRoles
+            )
+            {
+                Title = title,
+                Instructions = instructions,
+                DueIn = dueIn,
+                ForDepartmentsList = forDepartmentsList,
+                ForContractsList = forContractsList,
+                AssigneeType = assigneType,
+                AssignedRolesList = assignedRoles
+            }
+        );
         _context.SaveChanges();
     }
+
     public void DeleteAssignmentTemplate(int id)
     {
         if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
+            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(
+                assignmentTemplate => assignmentTemplate.Id == id
+            );
             if (assignmentTemplate != null)
             {
                 _context.Remove(assignmentTemplate!);
@@ -31,11 +61,23 @@ public class AssignmentTemplateContainer
             }
         }
     }
-    public void EditAssignmentTemplate(int id, string title, string? instructions, DueTime dueIn, List<Department>? forDepartmentsList, List<Contract>? forContractsList, AssigneeType assigneeType, List<IdentityRole>? assignedRoles)
+
+    public void EditAssignmentTemplate(
+        int id,
+        string title,
+        string? instructions,
+        DueTime dueIn,
+        List<Department>? forDepartmentsList,
+        List<Contract>? forContractsList,
+        AssigneeType assigneeType,
+        List<IdentityRole>? assignedRoles
+    )
     {
         if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
+            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(
+                assignmentTemplate => assignmentTemplate.Id == id
+            );
             if (assignmentTemplate != null)
             {
                 assignmentTemplate.Title = title;
@@ -50,11 +92,14 @@ public class AssignmentTemplateContainer
             }
         }
     }
+
     public AssignmentTemplate GetAssignmentTemplate(int id)
     {
         if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(assignmentTemplate => assignmentTemplate.Id == id);
+            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(
+                assignmentTemplate => assignmentTemplate.Id == id
+            );
             if (assignmentTemplate != null)
             {
                 return assignmentTemplate!;

@@ -1,0 +1,300 @@
+@model SoPro24Team06.ViewModels.AdministrationViewModel
+
+@if (TempData["UserDeleteMessage"] != null)
+{
+    <div id="userdelete-popup" class="alert alert-danger text-center"
+    style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1050;">
+    @TempData["UserDeleteMessage"]
+</div>
+}
+
+@if (TempData["Message"] != null)
+{
+    <div id="role-popup" class="alert alert-success text-center"
+    style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1050;">
+    @TempData["Message"]
+</div>
+}
+
+<!-- Start: Banner Heading -->
+<section class="py-4 py-xl-5" style="padding: 32px 0;">
+    <div class="container">
+        <div class="text-white bg-dark border rounded border-0 p-4 p-md-5"
+            style="background: linear-gradient(162deg, rgb(0,0,0) 0%, rgb(55,58,62) 62%, white 100%, rgb(230, 29, 71) 100%, rgb(245,165,182) 100%), rgb(13, 63, 148);color: rgb(255, 255, 255);">
+            <h2 class="fw-bold text-white mb-3">Verwaltung</h2>
+            <p class="text-white mb-4" style="font-size: 20px;">Kreieren Sie neue Rollen. Erstellen, bearbeiten oder
+                sperren Sie Nutzer.</p>
+            <div class="my-3">
+                <a class="btn btn-primary btn-lg me-2" role="button" href="@Url.Action("CreateUser", "Administration")"
+                    style="background: rgb(204, 212, 217);border-style: none;">Nutzer erstellen
+                </a>
+                <button class="btn btn-primary btn-lg me-2" role="button" data-bs-target="#modal-1"
+                    data-bs-toggle="modal" style="background: rgb(204, 212, 217);border-style: none;">Rolle erstellen
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End: Banner Heading -->
+
+<!-- List of Users -->
+<h3>Alle Nutzer</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email Adresse</th>
+            <th>Voller Name</th>
+            <th>Rollen</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.UserRoles)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>@user.FullName</td>
+                <td>
+                    <span>@string.Join(", ", user.Roles)</span>
+                </td>
+                <td>
+                    @if (user.Email != "admin@example.com")
+                    {
+                        <a class="btn btn-sm" style="background-color: var(--silver); color: black;"
+                            href="@Url.Action("EditUserDetails", "Administration", new { email = user.Email })">Bearbeiten</a>
+                        <a class="btn btn-sm" style="background-color: var(--lemming); color: white;"
+                            href="@Url.Action("ChangeUserPassword", "Administration", new { email = user.Email })">Passwort
+                            ändern</a>
+                        @if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
+                        {
+                            <form asp-action="UnlockUser" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@user.UserId" />
+                                <button type="submit" class="btn btn-sm" style="background-color: var(--amaranth); color: white;">Entsperren</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="LockUser" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@user.UserId" />
+                                <button type="submit" class="btn btn-sm" style="background-color: var(--amaranth); color: white;">Sperren</button>
+                            </form>
+                        }
+                        <form asp-action="DeleteUser" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.UserId" />
+                            <button type="submit" class="btn btn-sm" style="background-color: var(--amaranth); color: white;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<!-- Start: RollenModal -->
+<div class="modal fade visible" role="dialog" tabindex="-1" id="modal-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Rolle erstellen</h4>
+                <button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createRoleForm" asp-action="CreateRole" method="post">
+                    <div class="form-group">
+                        <label for="RoleName" class="control-label">Rollenname</label>
+                        <input id="RoleName" name="RoleName" class="form-control" />
+                    </div>
+                    <div class="form-group mt-3">
+                        <button type="submit" class="btn" style="background-color: var(--lemming); color: white;">Hinzufügen</button>
+                    </div>
+                </form>
+                <div class="mt-4">
+                    <h5>Vorhandene Rollen:</h5>
+                    <ul class="list-group" id="roles-list">
+                        @foreach (var role in Model.Roles)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span class="role-name" data-original-role="@role">@role</span>
+                                <div class="role-actions">
+                                    @if (role != "Administrator")
+                                    {
+                                        <button class="btn btn-sm edit-role" data-role="@role">Bearbeiten</button>
+                                        <button class="btn btn-sm delete-role" data-role="@role">Löschen</button>
+                                    }
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                    <div id="role-message" class="text-danger mt-2"></div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button>
+            </div>
+        </div>
+    </div>
+</div><!-- End: RollenModal -->
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            updateRoleList();
+            var popup = $("#userdelete-popup, #role-popup");
+            if (popup.length) {
+                setTimeout(function () {
+                    popup.fadeOut("slow", function () {
+                        popup.remove();
+                    });
+                }, 3000);
+            }
+
+            $('#createRoleForm').submit(function (e) {
+                e.preventDefault(); // Prevent form submission
+                var form = $(this);
+                $.ajax({
+                    type: "POST",
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $('#role-message').removeClass('text-danger').addClass('text-success').text('Role created successfully!');
+                            setTimeout(function () {
+                                $('#role-message').text('');
+                            }, 3000);
+                            updateRoleList();
+                        } else {
+                            var errorMessage = response.error || "An error occurred while creating the role.";
+                            $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                        }
+                    },
+                    error: function (response) {
+                        var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while creating the role.";
+                        $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                    }
+                });
+            });
+
+            $(document).on('submit', '.delete-role-form', function (e) {
+                e.preventDefault(); // Prevent default form submission
+                var form = $(this);
+                var actionUrl = "/Administration/DeleteRole";
+                $.ajax({
+                    type: "POST",
+                    url: actionUrl,
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $('#role-message').removeClass('text-danger').addClass('text-success').text('Role deleted successfully!');
+                            setTimeout(function () {
+                                $('#role-message').text('');
+                            }, 3000);
+                            updateRoleList();
+                        } else {
+                            var errorMessage = response.error || "An error occurred while deleting the role.";
+                            $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                        }
+                    },
+                    error: function (response) {
+                        console.error("Error response:", response); // Log the full response object
+                        var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while deleting the role.";
+                        $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                    }
+                });
+            });
+
+            $(document).on('click', '.edit-role', function () {
+                // Cancel the edit mode of any other role
+                cancelEditMode();
+
+                var roleNameElement = $(this).closest('li').find('.role-name');
+                var originalRoleName = roleNameElement.text().trim();
+                roleNameElement.html('<input type="text" class="form-control edit-role-input" value="' + originalRoleName + '" />');
+                $(this).replaceWith('<button class="btn btn-sm save-role mx-2" style="background-color: var(--lemming); color: white;" data-original-role="' + originalRoleName + '">Speichern</button>');
+            });
+
+            $(document).on('click', '.save-role', function () {
+                var roleNameElement = $(this).closest('li').find('.role-name');
+                var newRoleName = roleNameElement.find('.edit-role-input').val().trim();
+                var originalRoleName = $(this).data('original-role');
+
+                if (newRoleName && newRoleName !== originalRoleName) {
+                    $.ajax({
+                        type: "POST",
+                        url: '/Administration/EditRole', // Add the appropriate URL for editing roles
+                        data: {
+                            oldRoleName: originalRoleName,
+                            newRoleName: newRoleName,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() // Include anti-forgery token
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                $('#role-message').removeClass('text-danger').addClass('text-success').text('Role updated successfully!');
+                                setTimeout(function () {
+                                    $('#role-message').text('');
+                                }, 3000);
+                                updateRoleList();
+                            } else {
+                                var errorMessage = response.error || "An error occurred while updating the role.";
+                                $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                                roleNameElement.text(originalRoleName);
+                            }
+                        },
+                        error: function (response) {
+                            var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while updating the role.";
+                            $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                            roleNameElement.text(originalRoleName);
+                        }
+                    });
+                } else {
+                    roleNameElement.text(originalRoleName);
+                }
+            });
+
+            function cancelEditMode() {
+                $('.edit-role-input').each(function () {
+                    var inputElement = $(this);
+                    var originalRoleName = inputElement.closest('.role-name').data('original-role');
+                    inputElement.closest('.role-name').text(originalRoleName);
+                });
+                $('.save-role').each(function () {
+                    var saveButton = $(this);
+                    var originalRoleName = saveButton.data('original-role');
+                    saveButton.replaceWith('<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)" data-role="' + originalRoleName + '">Edit</button>');
+                });
+            }
+
+            function updateRoleList() {
+                $.get('/Administration/GetRoles', function (data) {
+                    var rolesList = $('#roles-list');
+                    rolesList.empty();
+                    data.forEach(function (role) {
+                        var deleteButton = role !== "Administrator" ?
+                            '<div class="role-actions">' +
+                            '<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)"  data-role="' + role + '">Edit</button>' +
+                            '<form asp-action="DeleteRole" method="post" class="delete-role-form" style="display:inline">' +
+                            '<input type="hidden" name="roleName" value="' + role + '" />' +
+                            '@Html.AntiForgeryToken()' +
+                            '<button type="submit" class="btn btn-sm" style="background-color: var(--amaranth); color: white;">Löschen</button>' +
+                            '</form>' +
+                            '</div>' :
+                            '<div class="role-actions">' +
+                            '</div>';
+
+                        rolesList.append('<li class="list-group-item d-flex justify-content-between align-items-center">' +
+                            '<span class="role-name" data-original-role="' + role + '">' + role + '</span>' +
+                            deleteButton +
+                            '</li>');
+                    });
+                });
+            }
+        });
+    </script>
+}

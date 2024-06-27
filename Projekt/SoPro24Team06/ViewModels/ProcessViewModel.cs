@@ -7,6 +7,7 @@ public class ProcessViewModel
     public int? Id { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
+    public ProcessTemplate Template { get; set; }
     public List<Assignment> Assignments { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime DueDate { get; set; }
@@ -14,6 +15,23 @@ public class ProcessViewModel
     public ApplicationUser WorkerOfReference { get; set; }
     public Contract ContractOfRefWorker { get; set; }
     public Department DepartmentOfRefWorker { get; set; }
+
+    public ProcessViewModel(int? id, string? title, string? description, List<Assignment>? assignments)
+    {
+        this.Id = id;
+        this.Title = title;
+        this.Description = description ?? "";
+        this.Assignments = assignments;
+    }
+
+    public ProcessViewModel(ProcessTemplate Template)
+    {
+        this.Title = Template.Title;
+        this.Description = Template.Description;
+        this.ContractOfRefWorker = Template.ContractOfRefWorker;
+        this.DepartmentOfRefWorker = Template.DepartmentOfRefWorker;
+        this.Template = Template;
+    }
 
     public ProcessViewModel(Process process)
     {
@@ -34,12 +52,30 @@ public class ProcessViewModel
         this.Id = null;
         this.Title = "";
         this.Description = "";
-        this.Assignments = new List<Assignment> {};
+        this.Assignments = new List<Assignment> { };
         this.StartDate = DateTime.Now;
         this.DueDate = DateTime.Now.AddDays(7);
-        this.Supervisor = new ApplicationUser{ FullName = "Der Verantwortlicher"};
-        this.WorkerOfReference = new ApplicationUser { FullName = "Der Bezugsperson"};
-        this.ContractOfRefWorker = new Contract("Vollzeit");
-        this.DepartmentOfRefWorker = new Department("Operations");
+        this.Supervisor = new ApplicationUser { FullName = "Vorgangsverantwortlicher" };
+        this.WorkerOfReference = new ApplicationUser { FullName = "Benzugsperson"};
+        this.ContractOfRefWorker = new Contract();
+        this.DepartmentOfRefWorker = new Department();
+    }
+
+    public Process ToProcess()
+    {
+        return new Process(
+            Title,
+            Description,
+            Assignments,
+            WorkerOfReference,
+            Supervisor,
+            ContractOfRefWorker,
+            DepartmentOfRefWorker
+        );
+    }
+
+    public ComposeProcessViewModel ToComposeProcessViewModel()
+    {
+        return new ComposeProcessViewModel(this.Template);
     }
 }

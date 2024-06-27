@@ -11,7 +11,6 @@ namespace SoPro24Team06.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonProperty("id")]
-
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Titel ist erforderlich")]
@@ -22,8 +21,8 @@ namespace SoPro24Team06.Models
         public string? Instructions { get; set; }
 
         [Required(ErrorMessage = "Fälligkeit ist erforderlich.")]
-        [JsonProperty("dueTime")]
-        public DueTime DueIn { get; set; }
+        [JsonProperty("dueIn")]
+        public DueTime? DueIn { get; set; } = new DueTime("ASAP", 0, 0, 0);
 
         [JsonProperty("forDepartments")]
         public List<Department>? ForDepartmentsList { get; set; }
@@ -37,8 +36,17 @@ namespace SoPro24Team06.Models
         [JsonProperty("assignedRoles")]
         public List<IdentityRole> AssignedRolesList { get; set; }
 
-        public AssignmentTemplate() {}
-        public AssignmentTemplate(string title, string instructions, DueTime dueIn, List<Department> forDepartmentsList, List<Contract> forContractsList, AssigneeType assigneeType, List<IdentityRole> assignedRolesList)
+        public AssignmentTemplate() { }
+
+        public AssignmentTemplate(
+            string title,
+            string instructions,
+            DueTime dueIn,
+            List<Department> forDepartmentsList,
+            List<Contract> forContractsList,
+            AssigneeType assigneeType,
+            List<IdentityRole> assignedRolesList
+        )
         {
             this.Title = title;
             this.Instructions = instructions;
@@ -54,7 +62,5 @@ namespace SoPro24Team06.Models
             DateTime dueDate = DateTime.Now; // sollte berechnet werden
             return new Assignment(template, dueDate);
         }
-
     }
-
 }

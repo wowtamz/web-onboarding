@@ -1,0 +1,40 @@
+<!-- Start: AufgabenModal -->
+<div class="modal fade" role="dialog" tabindex="-1" id="modal-task">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Füge weitere Aufgaben hinzu</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Aufgabentitel</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var task in Model.AssignmentTemplates)
+                            {
+                                <tr>
+                                    <td>@task.Title</td>
+                                    <td class="text-center">
+                                        <!-- Use data attributes to pass necessary data for AJAX operations -->
+                                        <button class="btn btn-primary" type="button" data-id="@task.Id"
+                                            data-title="@task.Title" onclick="addAssignment(this)">Hinzufügen</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End: AufgabenModal -->

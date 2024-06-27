@@ -11,5 +11,6 @@ namespace SoPro24Team06.ViewModels
         public string Email { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public IList<string> Roles { get; set; }
+        public DateTimeOffset? LockoutEnd { get; set; }
     }
 }

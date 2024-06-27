@@ -15,13 +15,10 @@ public class Contract
     [JsonProperty("label")]
     public string Label { get; set; }
 
-
     public Contract(string label)
     {
         this.Label = label;
     }
 
-    public Contract()
-    {
-    }
+    public Contract() { }
 }

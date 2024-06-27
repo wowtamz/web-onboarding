@@ -6,6 +6,7 @@ using SoPro24Team06.ViewModels;
 
 namespace SoPro24Team06.Controllers
 {
+    [Authorize]
     public class AssignmentTemplateController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
