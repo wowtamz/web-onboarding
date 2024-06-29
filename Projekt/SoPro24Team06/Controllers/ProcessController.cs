@@ -27,20 +27,17 @@ namespace SoPro24Team06.Controllers
         {
             List<ActiveProcess> processList = await _processContainer.GetProcessesAsync();
 
-            Console.WriteLine(processList.Count);
-
             ProcessListViewModel processListViewModel = new ProcessListViewModel(processList);
             return View(processListViewModel);
         }
 
-        public async Task<IActionResult> Start([FromQuery] ProcessViewModel? processViewModel)
+        public async Task<IActionResult> Start([FromServices] UserManager<ApplicationUser> userManager, [FromQuery] ProcessViewModel? processViewModel)
         {
-            Console.WriteLine("GET-REQ");
-            Console.WriteLine(processViewModel.Title);
 
             ModelContext modelContext = new ModelContext();
             // Replace with Containers
-            List<ApplicationUser> users = new List<ApplicationUser> { };
+            
+            List<ApplicationUser> users = userManager.Users.ToList();
             List<ProcessTemplate> processTemplates = modelContext.ProcessTemplates.ToList();
             List<AssignmentTemplate> assignmentTemplates =
                 modelContext.AssignmentTemplates.ToList();
@@ -50,6 +47,7 @@ namespace SoPro24Team06.Controllers
             ComposeProcessViewModel composeProcessViewModel =
                 processViewModel.ToComposeProcessViewModel();
 
+            composeProcessViewModel.AvailableUsers = users;
             composeProcessViewModel.AvailableProcessTemplates = processTemplates;
             composeProcessViewModel.AvailableAssignmentTemplates = assignmentTemplates;
             composeProcessViewModel.AvailableContracts = contracts;
@@ -111,18 +109,20 @@ namespace SoPro24Team06.Controllers
                     _assignmentTemplateContainer.GetAssignmentTemplate(id);
                 assignmentTemplateList.Add(assignmentTemplate);
             }
-            /*
+            
             Console.WriteLine(title);
             Console.WriteLine(description);
             Console.WriteLine(processTemplate.Title);
             Console.WriteLine(contract.Label);
             Console.WriteLine(department.Name);
-
+            
             Process newProcess = new Process(processTemplate);
             newProcess.Title = title;
             newProcess.Description = description;
-            newProcess.ContractOfRefWorker = contract;
-            newProcess.DepartmentOfRefWorker = department;
+            newProcess.ContractOfRefWorker = new Contract(contract.Label);
+            newProcess.DepartmentOfRefWorker = new Department(department.Name);
+            newProcess.WorkerOfReference = new ApplicationUser { FullName = "Benutzer"};
+            newProcess.Supervisor = new ApplicationUser { FullName = "Admin"};
             newProcess.Assignments = assignmentTemplateList.ConvertAll(template =>
                 template.ToAssignment(template)
             );
@@ -133,9 +133,16 @@ namespace SoPro24Team06.Controllers
             Console.WriteLine(newProcess.Assignments[0].Title);
 
             await _processContainer.AddProcessAsync(newProcess);
-            */
+            
             
             return Json(new { redirectToUrl = Url.Action("Index", "Process") });
+        }
+
+        // Evtl irrelevates Code-Teil
+        [HttpPost]
+        public async Task<IActionResult> SelectWorkerOfRef(int id, string name) {
+            
+            return Json(new { success = true, html = name });
         }
 
         [HttpPost]
@@ -156,9 +163,8 @@ namespace SoPro24Team06.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ApplyProcessTemplate(int id)
-        {
-            Console.WriteLine(String.Format("AJAX WORKS: {0}", id));
+        public async Task<IActionResult> ApplyProcessTemplate(int id) {
+
             ModelContext modelContext = new ModelContext();
             ProcessTemplate processTemplate = await modelContext.ProcessTemplates.FindAsync(id);
 
@@ -193,9 +199,8 @@ namespace SoPro24Team06.Controllers
             );
         }
 
-        public async Task<IActionResult> AddAssignmentTemplate(int id)
-        {
-            Console.WriteLine(String.Format("AJAX WORKS: {0}", id));
+        public async Task<IActionResult> AddAssignmentTemplate(int id) {
+            
             ModelContext modelContext = new ModelContext();
             AssignmentTemplate assignmentTemplate =
                 await modelContext.AssignmentTemplates.FindAsync(id);
