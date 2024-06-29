@@ -14,13 +14,6 @@
             <legend>Titel</legend>
             <input id="title" name="title" asp-for="Title" class="form-control" type="text">
         </fieldset>
-
-        <fieldset style="margin-top: 8px;">
-            <legend>Bezugsperson</legend>
-            <button id="workerOfRefButton" name="workerOfRefButton" class="btn btn-primary" type="button" data-bs-target="#modal-user" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;" >Bezugsperson wählen</button>
-            <input id="workerOfRefId" name="workerOfRefId" type="hidden" />
-        </fieldset>
-
         <fieldset style="margin-top: 8px;">
             <legend>Vertragstyp</legend>
             <button id="contractType" name="contractType" class="btn btn-primary" type="button" data-bs-target="#modal-contract" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;" >Vertragstyp wählen</button>
@@ -274,57 +267,6 @@
     </div>
     <!-- End: AufgabenModal -->
 
-    <!-- Start: BenutzerModal -->
-    <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-user">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Wähle eine Bezugsperson aus</h4><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Aktion</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            @if (Model.AvailableUsers != null && Model.AvailableUsers.Count > 0)
-                            {
-                                @foreach (var user in @Model.AvailableUsers)
-                                {
-                                    //var id = user.Id;
-                                    var userName = user.FullName;
-
-                                    <tr>
-                                        <td>@userName</td>
-                                        <td class="text-center">
-                                        <button class="btn btn-primary" type="button" data-bs-dismiss="modal" style="margin-left: 16px;" onclick="selectRefWorker('test')" >Auswählen</button>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                    <tr>
-                                        <td>Keine Personen vorhanden</td>
-                                    </tr>
-                            }
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-light" type="button" data-bs-dismiss="modal" >Zurück</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- End: BenutzerModal -->
-
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
 
     <script>
@@ -357,12 +299,6 @@
             });
         }
 
-        function selectRefWorker(userName) {
-            console.log(userName);
-            $('#workerOfRefButton').html("Benutzer");
-            $('#workerOfRefId').val(1);
-        }
-
         function applyProcessTemplate(templateId) {
             $.ajax({
                 url: '@Url.Action("ApplyProcessTemplate", "Process")',
@@ -384,7 +320,7 @@
                     $('#processTemplateId').val(templateId);
                     $('#templateTitle').val(title);
                     $('#title').val(title);
-                    
+
                     selectContract(contractId);
                     selectDepartment(departmentId);
 
@@ -398,43 +334,39 @@
         }
 
         function selectContract(contractId) {
-            if (contractId > 0){
-                $.ajax({
-                    url: '@Url.Action("SelectContract", "Process")',
-                    type: 'POST',
-                    data: { id: contractId },
-                    success: function(result) {
-                        let strResult = JSON.stringify(result);
-                        let label = JSON.parse(strResult).label;
-                        $('#contractType').html(label);
-                        $('#contractId').val(contractId);
-                        //alert('Vertrag "' + label + '" wurde ausgewählt');
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error applying processTemplate: " + error);
-                    }
-                });
-            }
+            $.ajax({
+                url: '@Url.Action("SelectContract", "Process")',
+                type: 'POST',
+                data: { id: contractId },
+                success: function(result) {
+                    let strResult = JSON.stringify(result);
+                    let label = JSON.parse(strResult).label;
+                    $('#contractType').html(label);
+                    $('#contractId').val(contractId);
+                    //alert('Vertrag "' + label + '" wurde ausgewählt');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error applying processTemplate: " + error);
+                }
+            });
         }
 
         function selectDepartment(departmentId) {
-            if (departmentId > 0) {
-                $.ajax({
-                    url: '@Url.Action("SelectDepartment", "Process")',
-                    type: 'POST',
-                    data: { id: departmentId },
-                    success: function(result) {
-                        let strResult = JSON.stringify(result);
-                        let label = JSON.parse(strResult).label;
-                        $('#department').html(label);
-                        $('#departmentId').val(departmentId);
-                        //alert('Abeilung "' + label + '" wurde ausgewählt');
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error applying processTemplate: " + error);
-                    }
-                });
-            }
+            $.ajax({
+                url: '@Url.Action("SelectDepartment", "Process")',
+                type: 'POST',
+                data: { id: departmentId },
+                success: function(result) {
+                    let strResult = JSON.stringify(result);
+                    let label = JSON.parse(strResult).label;
+                    $('#department').html(label);
+                    $('#departmentId').val(departmentId);
+                    //alert('Abeilung "' + label + '" wurde ausgewählt');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error applying processTemplate: " + error);
+                }
+            });
         }
 
         function addAssignmentTemplate(assignmentId) {
