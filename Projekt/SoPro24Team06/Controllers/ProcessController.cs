@@ -205,27 +205,6 @@ namespace SoPro24Team06.Controllers
             AssignmentTemplate assignmentTemplate =
                 await modelContext.AssignmentTemplates.FindAsync(id);
             //List<object> assignments = processTemplate.AssignmentTemplates.To
-
-            string _assignee = "Rollen";
-
-            switch (assignmentTemplate.AssigneeType) 
-            {
-                case AssigneeType.ROLES:
-                    _assignee = "Rollen";
-                    break;
-                
-                case AssigneeType.SUPERVISOR:
-                    _assignee = "Vorgangsverantwortlicher";
-                    break;
-                
-                case AssigneeType.WORKER_OF_RER:
-                    _assignee = "Bezugsperson";
-                    break;
-                
-                default:
-                    break;
-            }
-
             return Json(
                 new
                 {
@@ -233,14 +212,14 @@ namespace SoPro24Team06.Controllers
                     title = assignmentTemplate.Title,
                     assignee = assignmentTemplate.AssigneeType,
                     duein = assignmentTemplate.DueIn.Label,
-                    html = GenerateHtmlForAssignmentTemplate(assignmentTemplate, _assignee)
+                    html = GenerateHtmlForAssignmentTemplate(assignmentTemplate)
                 }
             );
         }
 
-        private string GenerateHtmlForAssignmentTemplate(AssignmentTemplate template, string assignee)
+        private string GenerateHtmlForAssignmentTemplate(AssignmentTemplate template)
         {
-            return $"<tr id='templateItem' name='templateItem{template.Id}'><td>{template.Title}</td> <td><a href='#'>Mehr anzeigen</a></td> <td>{assignee}</td><td>Vollzeit</td><td>Personal</td><td>{template.DueIn.Label}</td> <td><button class='btn btn-danger' type='button' style='margin-left: 16px;' onclick='removeAssignmentTemplate(this, {template.Id})'>Entfernen</button></td></tr>";
+            return $"<tr id='templateItem' name='templateItem{template.Id}'><td>{template.Title}</td> <td><a href='#'>Mehr anzeigen</a></td> <td>{template.AssigneeType}</td><td>Vollzeit</td><td>Personal</td><td>{template.DueIn.Label}</td> <td><button class='btn btn-primary' type='button' style='margin-left: 16px;' onclick='removeAssignmentTemplate(this, {template.Id})'>Remove</button></td></tr>";
         }
 
         public async Task<IActionResult> Edit(int id)
