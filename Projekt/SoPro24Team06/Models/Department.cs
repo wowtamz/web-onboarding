@@ -15,6 +15,10 @@ namespace SoPro24Team06.Models
         [JsonProperty("name")]
         public string Name { get; set; }
 
+        // Für DB relationen
+        public List<Assignment>? Assignments { get; set; }
+        public List<AssignmentTemplate>? AssignmentsTemplates { get; set; }
+
         public Department(string name)
         {
             Name = name;

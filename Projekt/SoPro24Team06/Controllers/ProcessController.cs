@@ -1,14 +1,21 @@
+//-------------------------
+// Author: Tamas Varadi
+//-------------------------
+
 using System.Collections.Immutable;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
 using SoPro24Team06.Containers;
 using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
+using SoPro24Team06.Helpers;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
 using ActiveProcess = SoPro24Team06.Models.Process;
@@ -18,249 +25,489 @@ namespace SoPro24Team06.Controllers
     [Authorize]
     public class ProcessController : Controller
     {
-        public ProcessContainer _processContainer = new ProcessContainer(new ModelContext());
-        public ProcessTemplateContainer _processTemplateContainer = new ProcessTemplateContainer();
-        public AssignmentTemplateContainer _assignmentTemplateContainer =
-            new AssignmentTemplateContainer();
+        public ProcessContainer _processContainer;
+        public ProcessTemplateContainer _processTemplateContainer;
+        public AssignmentTemplateContainer _assignmentTemplateContainer;
+
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
+
+        public ProcessController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager
+        )
+        {
+            _context = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _processContainer = new ProcessContainer(context, userManager, roleManager);
+            _processTemplateContainer = new ProcessTemplateContainer(context);
+            _assignmentTemplateContainer = new AssignmentTemplateContainer(context);
+        }
 
         public async Task<IActionResult> Index()
         {
-            List<ActiveProcess> processList = await _processContainer.GetProcessesAsync();
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            Console.WriteLine(processList.Count);
+            List<ActiveProcess> userProcessList = await _processContainer.GetProcessesOfUserAsync(
+                userId
+            );
+            
+            List<ActiveProcess> myProcessList = new List<ActiveProcess> {};
+            List<ActiveProcess> archivedProcessList = new List<ActiveProcess> {};
+            
+            foreach (var process in userProcessList)
+            {
+                if (process.IsArchived)
+                {
+                    archivedProcessList.Add(process);
+                }
+                else
+                {
+                    myProcessList.Add(process);
+                }
+            }
 
-            ProcessListViewModel processListViewModel = new ProcessListViewModel(processList);
+            ViewData["MyProcesses"] = myProcessList;
+
+            ViewData["ArchivedProcesses"] = archivedProcessList;
+
+            if (User.IsInRole("Administrator"))
+            {
+                List<ActiveProcess> ProcessList = await _processContainer.GetProcessesAsync();
+                ViewData["AllProcesses"] = ProcessList.Where(p => !p.IsArchived);
+                ViewData["AllArchivedProcesses"] = ProcessList.Where(p => p.IsArchived);
+            }
+
+            ProcessListViewModel processListViewModel = new ProcessListViewModel(myProcessList);
             return View(processListViewModel);
         }
 
-        public async Task<IActionResult> Start([FromQuery] ProcessViewModel? processViewModel)
+        // Vorgang starten Seite mit ohne Prozess vorausgewählt
+        [HttpGet("/Process/Start")]
+        public async Task<IActionResult> Start()
         {
-            Console.WriteLine("GET-REQ");
-            Console.WriteLine(processViewModel.Title);
+            await AddModelsToViewData();
 
-            ModelContext modelContext = new ModelContext();
-            // Replace with Containers
-            List<ApplicationUser> users = new List<ApplicationUser> { };
-            List<ProcessTemplate> processTemplates = modelContext.ProcessTemplates.ToList();
-            List<AssignmentTemplate> assignmentTemplates =
-                modelContext.AssignmentTemplates.ToList();
-            List<Contract> contracts = modelContext.Contracts.ToList();
-            List<Department> departments = modelContext.Departments.ToList();
+            StartProcessViewModel startProcessViewModel = new StartProcessViewModel(new Process());
 
-            ComposeProcessViewModel composeProcessViewModel =
-                processViewModel.ToComposeProcessViewModel();
-
-            composeProcessViewModel.AvailableProcessTemplates = processTemplates;
-            composeProcessViewModel.AvailableAssignmentTemplates = assignmentTemplates;
-            composeProcessViewModel.AvailableContracts = contracts;
-            composeProcessViewModel.AvailableDepartments = departments;
-
-            return View(composeProcessViewModel);
+            return View(startProcessViewModel);
         }
+
+        // Vorgang starten Seite mit Prozess vorausgewählt
+        [HttpGet("/Process/Start/{templateId}")]
+        public async Task<IActionResult> Start(int templateId)
+        {
+            Console.WriteLine($"Template ID: {templateId}");
+            await AddModelsToViewData();
+
+            StartProcessViewModel startProcessViewModel = new StartProcessViewModel(new Process());
+
+            if (templateId > 0)
+            {
+                ProcessTemplate template =
+                    await _processTemplateContainer.GetProcessTemplateByIdAsync(templateId);
+                startProcessViewModel.Template = template;
+            }
+
+            return View(startProcessViewModel);
+        }
+        
+        [HttpPost("/Process/Start/{templateId}")]
+        public async Task<IActionResult> StartWithTemplate(
+            [Bind(
+                "Title, Description, Template, AssignmentTemplates, Supervisor, WorkerOfReference, ContractOfRefWorker, DepartmentOfRefWorker"
+            )]
+            [FromForm]
+                StartProcessViewModel startProcessViewModel
+        )
+        {
+            if (startProcessViewModel == null)
+            {
+                throw new ArgumentNullException(nameof(startProcessViewModel));
+            }
+
+            if (startProcessViewModel.WorkerOfReference == null)
+            {
+                ModelState.AddModelError("WorkerOfReference", "WorkerOfReference is required");
+            }
+
+            if (startProcessViewModel.Supervisor == null)
+            {
+                ModelState.AddModelError("Supervisor", "Supervisor is required");
+            }
+
+            if (startProcessViewModel.Template == null)
+            {
+                ModelState.AddModelError("Template", "Template is required");
+            }
+
+            if (startProcessViewModel.AssignmentTemplates == null)
+            {
+                throw new ArgumentNullException("AssignmentTemplates");
+            }
+
+            await AddModelsToViewData();
+
+            ModelState.Remove("Template.ContractOfRefWorker.Label");
+            ModelState.Remove("Template.DepartmentOfRefWorker.Name");
+
+            if (!ModelState.IsValid)
+            {
+                // ModelState ist nicht valid
+                // Alle Fehler auflisten
+
+                foreach (var modelStateEntry in ModelState.Values)
+                {
+                    foreach (var error in modelStateEntry.Errors)
+                    {
+                        // Validationfehlern loggen
+                        var errorMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                    }
+                }
+                //return BadRequest(ModelState);
+                return View("Start", startProcessViewModel);
+            }
+
+            try
+            {
+                ActiveProcess newProcess = startProcessViewModel.ToProcess();
+
+                newProcess.WorkerOfReference = await _userManager.FindByIdAsync(
+                    startProcessViewModel.WorkerOfReference.Id
+                );
+                newProcess.Supervisor = await _userManager.FindByIdAsync(
+                    startProcessViewModel.Supervisor.Id
+                );
+
+                newProcess.ContractOfRefWorker = _context.Contracts.Find(
+                    startProcessViewModel.ContractOfRefWorker.Id
+                );
+                newProcess.DepartmentOfRefWorker = _context.Departments.Find(
+                    startProcessViewModel.DepartmentOfRefWorker.Id
+                );
+
+                await _processContainer.AddProcessAsync(newProcess);
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException e)
+            {
+                ModelState.AddModelError(e.InnerException.Message, e.Message);
+                Console.WriteLine(e.Message);
+                Console.WriteLine($"DbUpdateException: {e.InnerException.Message}");
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            return View("Start", startProcessViewModel);
+        }
+        
+        
 
         [HttpPost("/Process/Start")]
         public async Task<IActionResult> Start(
             [Bind(
-                "Title, Description, WorkerOfReference, Supervisor, Assignments, ContractOfRefWorker, DepartmentOfRefWorker"
+                "Title, Description, Template, AssignmentTemplates, Supervisor, WorkerOfReference, ContractOfRefWorker, DepartmentOfRefWorker"
             )]
             [FromForm]
-                ComposeProcessViewModel composeProcessViewModel
+                StartProcessViewModel startProcessViewModel
         )
         {
-            Console.WriteLine("POST-REQ");
-            if (ModelState.IsValid)
+            if (startProcessViewModel == null)
             {
-                try
-                {
-                    await _processContainer.AddProcessAsync(composeProcessViewModel.ToProcess());
-                    return RedirectToAction("Index");
-                }
-                catch (DbUpdateException e)
-                {
-                    ModelState.AddModelError("", e.InnerException.Message);
-                }
-                return View(composeProcessViewModel);
+                throw new ArgumentNullException(nameof(startProcessViewModel));
             }
 
-            return View(composeProcessViewModel);
+            if (startProcessViewModel.WorkerOfReference == null)
+            {
+                ModelState.AddModelError("WorkerOfReference", "WorkerOfReference is required");
+            }
+
+            if (startProcessViewModel.Supervisor == null)
+            {
+                ModelState.AddModelError("Supervisor", "Supervisor is required");
+            }
+
+            if (startProcessViewModel.Template == null)
+            {
+                ModelState.AddModelError("Template", "Template is required");
+            }
+
+            if (startProcessViewModel.AssignmentTemplates == null)
+            {
+                throw new ArgumentNullException("AssignmentTemplates");
+            }
+
+            await AddModelsToViewData();
+
+            ModelState.Remove("Template.ContractOfRefWorker.Label");
+            ModelState.Remove("Template.DepartmentOfRefWorker.Name");
+
+            if (!ModelState.IsValid)
+            {
+                // ModelState ist nicht valid
+                // Alle Fehler auflisten
+
+                foreach (var modelStateEntry in ModelState.Values)
+                {
+                    foreach (var error in modelStateEntry.Errors)
+                    {
+                        // Validationfehlern loggen
+                        var errorMessage = error.ErrorMessage;
+                        var exception = error.Exception;
+                    }
+                }
+                //return BadRequest(ModelState);
+                return View("Start", startProcessViewModel);
+            }
+
+            try
+            {
+                ActiveProcess newProcess = startProcessViewModel.ToProcess();
+
+                newProcess.WorkerOfReference = await _userManager.FindByIdAsync(
+                    startProcessViewModel.WorkerOfReference.Id
+                );
+                newProcess.Supervisor = await _userManager.FindByIdAsync(
+                    startProcessViewModel.Supervisor.Id
+                );
+
+                newProcess.ContractOfRefWorker = _context.Contracts.Find(
+                    startProcessViewModel.ContractOfRefWorker.Id
+                );
+                newProcess.DepartmentOfRefWorker = _context.Departments.Find(
+                    startProcessViewModel.DepartmentOfRefWorker.Id
+                );
+
+                await _processContainer.AddProcessAsync(newProcess);
+                return RedirectToAction("Index");
+            }
+            catch (DbUpdateException e)
+            {
+                ModelState.AddModelError(e.InnerException.Message, e.Message);
+                Console.WriteLine(e.Message);
+                Console.WriteLine($"DbUpdateException: {e.InnerException.Message}");
+            }
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            return View("Start", startProcessViewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> StartProcess(
-            int templateId,
-            string title,
-            string description,
-            int contractId,
-            int departmentId,
-            int[] assignmentTemplateArray
+        public async Task<IActionResult> AddAssignmentTemplate(
+            [FromBody] AssignmentTemplate template,
+            int index
         )
         {
-            Console.WriteLine("starting Process");
-
-            ModelContext modelContext = new ModelContext();
-            ProcessTemplate processTemplate =
-                await _processTemplateContainer.GetProcessTemplateByIdAsync(templateId);
-            Contract contract = await modelContext.Contracts.FindAsync(contractId);
-            Department department = await modelContext.Departments.FindAsync(departmentId);
-
-            List<AssignmentTemplate> assignmentTemplateList = new List<AssignmentTemplate> { };
-
-            foreach (int id in assignmentTemplateArray)
-            {
-                AssignmentTemplate assignmentTemplate =
-                    _assignmentTemplateContainer.GetAssignmentTemplate(id);
-                assignmentTemplateList.Add(assignmentTemplate);
-            }
-            /*
-            Console.WriteLine(title);
-            Console.WriteLine(description);
-            Console.WriteLine(processTemplate.Title);
-            Console.WriteLine(contract.Label);
-            Console.WriteLine(department.Name);
-
-            Process newProcess = new Process(processTemplate);
-            newProcess.Title = title;
-            newProcess.Description = description;
-            newProcess.ContractOfRefWorker = contract;
-            newProcess.DepartmentOfRefWorker = department;
-            newProcess.Assignments = assignmentTemplateList.ConvertAll(template =>
-                template.ToAssignment(template)
-            );
-
-            Console.WriteLine(newProcess.Title);
-            Console.WriteLine(newProcess.ContractOfRefWorker.Label);
-            Console.WriteLine(newProcess.DepartmentOfRefWorker.Name);
-            Console.WriteLine(newProcess.Assignments[0].Title);
-
-            await _processContainer.AddProcessAsync(newProcess);
-            */
-            
-            return Json(new { redirectToUrl = Url.Action("Index", "Process") });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> SelectContract(int id)
-        {
-            ModelContext modelContext = new ModelContext();
-            Contract contract = await modelContext.Contracts.FindAsync(id);
-            return Json(new { success = true, label = contract.Label });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> SelectDepartment(int id)
-        {
-            ModelContext modelContext = new ModelContext();
-            Department department = await modelContext.Departments.FindAsync(id);
-
-            return Json(new { success = true, label = department.Name });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ApplyProcessTemplate(int id)
-        {
-            Console.WriteLine(String.Format("AJAX WORKS: {0}", id));
-            ModelContext modelContext = new ModelContext();
-            ProcessTemplate processTemplate = await modelContext.ProcessTemplates.FindAsync(id);
-
-            int[] assignmentIds = new int[] { };
-
-            foreach (AssignmentTemplate template in processTemplate.AssignmentTemplates)
-            {
-                assignmentIds.Append(template.Id);
-            }
-
-            // assignmentIds = {1, 2} for testing, should normally be empty
-            /*
-            int[] assignmentIds = new int[] {1, 2};
-            
-            */
-
-            //test Vertrag & Abteilung
-            /*
-            processTemplate.ContractOfRefWorker.Id = 1;
-            processTemplate.DepartmentOfRefWorker.Id = 1;
-            */
-
             return Json(
                 new
                 {
                     success = true,
-                    title = processTemplate.Title,
-                    contractId = processTemplate.ContractOfRefWorker.Id,
-                    departmentId = processTemplate.DepartmentOfRefWorker.Id,
-                    assignments = assignmentIds
+                    title = template.Title,
+                    assignee = template.AssigneeType,
+                    duein = template.DueIn.Label,
+                    html = GenerateHtmlForAssignmentTemplate(template, index)
                 }
             );
         }
 
-        public async Task<IActionResult> AddAssignmentTemplate(int id)
+        private string GenerateHtmlForAssignmentTemplate(AssignmentTemplate template, int index)
         {
-            Console.WriteLine(String.Format("AJAX WORKS: {0}", id));
-            ModelContext modelContext = new ModelContext();
-            AssignmentTemplate assignmentTemplate =
-                await modelContext.AssignmentTemplates.FindAsync(id);
-            //List<object> assignments = processTemplate.AssignmentTemplates.To
-            return Json(
-                new
+            string inputs =
+                $"<input type='hidden' name='AssignmentTemplates[{index}].Id' value='{template.Id}' />";
+            inputs +=
+                $"<input type='hidden' name='AssignmentTemplates[{index}].Title' value='{template.Title}' />";
+            inputs +=
+                $"<input type='hidden' name='AssignmentTemplates[{index}].Instructions' value='{template.Instructions}' />";
+
+            inputs +=
+                $"<input type='hidden' name='AssignmentTemplates[{index}].DueIn.Id' value='{template.DueIn.Id}' />";
+            inputs +=
+                $"<input type='hidden' name='AssignmentTemplates[{index}].DueIn.Label' value='{template.DueIn.Label}' />";
+            inputs +=
+                $"<input type='hidden' name='AssignmentTemplates[{index}].DueIn.Days' value='{template.DueIn.Days}' />";
+            inputs +=
+                $"<input type='hidden' name='AssignmentTemplates[{index}].DueIn.Weeks' value='{template.DueIn.Weeks}' />";
+            inputs +=
+                $"<input type='hidden' name='AssignmentTemplates[{index}].DueIn.Months' value='{template.DueIn.Months}' />";
+            inputs +=
+                $"<input type='hidden' name='AssignmentTemplates[{index}].AssigneeType' value='{template.AssigneeType}' />";
+
+            if (template.AssignedRole != null)
+            {
+                inputs +=
+                    $"<input type='hidden' name='AssignmentTemplates[{index}].AssignedRole.Id' value='{template.AssignedRole.Id}' />";
+                inputs +=
+                    $"<input type='hidden' name='AssignmentTemplates[{index}].AssignedRole.Name' value='{template.AssignedRole.Name}' />";
+            }
+
+            if (template.ForDepartmentsList != null)
+            {
+                for (int i = 0; i < template.ForDepartmentsList.Count; i++)
                 {
-                    success = true,
-                    title = assignmentTemplate.Title,
-                    assignee = assignmentTemplate.AssigneeType,
-                    duein = assignmentTemplate.DueIn.Label,
-                    html = GenerateHtmlForAssignmentTemplate(assignmentTemplate)
+                    var depId = template.ForDepartmentsList[i].Id;
+                    var depName = template.ForDepartmentsList[i].Name;
+                    inputs +=
+                        $"<input type='hidden' name='AssignmentTemplates[{index}].ForDepartmentsList[{i}].Id' value='{depId}' />";
+                    inputs +=
+                        $"<input type='hidden' name='AssignmentTemplates[{index}].ForDepartmentsList[{i}].Name' value='{depName}' />";
                 }
-            );
-        }
+            }
 
-        private string GenerateHtmlForAssignmentTemplate(AssignmentTemplate template)
-        {
-            return $"<tr id='templateItem' name='templateItem{template.Id}'><td>{template.Title}</td> <td><a href='#'>Mehr anzeigen</a></td> <td>{template.AssigneeType}</td><td>Vollzeit</td><td>Personal</td><td>{template.DueIn.Label}</td> <td><button class='btn btn-primary' type='button' style='margin-left: 16px;' onclick='removeAssignmentTemplate(this, {template.Id})'>Remove</button></td></tr>";
+            if (template.ForContractsList != null)
+            {
+                for (int i = 0; i < template.ForContractsList.Count; i++)
+                {
+                    var conId = template.ForContractsList[i].Id;
+                    var conLabel = template.ForContractsList[i].Label;
+                    inputs +=
+                        $"<input type='hidden' name='AssignmentTemplates[{index}].ForContractsList[{i}].Id' value='{conId}' />";
+                    inputs +=
+                        $"<input type='hidden' name='AssignmentTemplates[{index}].ForContractsList[{i}].Label' value='{conLabel}' />";
+                }
+            }
+
+            string _assignee = EnumHelper.GetDisplayName(template.AssigneeType);
+
+            return $"<tr id='templateItem' name='templateItem{template.Id}'><td>{template.Title}</td> <td><a href='#'>Mehr anzeigen</a></td> <td>{_assignee}</td><td>Vollzeit</td><td>Personal</td><td>{template.DueIn.Label}</td> <td><button class='btn btn-danger' type='button' style='margin-left: 16px;' onclick='removeAssignmentTemplate(this, {template.Id})'>Entfernen</button></td> {inputs} </tr>";
         }
 
         public async Task<IActionResult> Edit(int id)
         {
             ActiveProcess process = await _processContainer.GetProcessByIdAsync(id);
-            ProcessViewModel processViewModel = new ProcessViewModel(process);
-            return View("Edit", processViewModel);
+            EditProcessViewModel editProcessViewModel = new EditProcessViewModel(process);
+
+            Console.WriteLine("GET EditProcessViewModel:");
+
+            await AddModelsToViewData();
+
+            return View("Edit", editProcessViewModel);
         }
 
         [HttpPost("/Process/Edit/{id}")]
         public async Task<IActionResult> Edit(
             int id,
             [Bind(
-                "Id, Title, Description, StartDate, DueDate, WorkerOfReference, Supervisor, Assignments, ContractOfRefWorker, DepartmentOfRefWorker"
+                "Id, Title, Description, DueDate, WorkerOfReference, Supervisor, Assignments, AssignmentTemplates, ContractOfRefWorker, DepartmentOfRefWorker"
             )]
             [FromForm]
-                ActiveProcess process
+                EditProcessViewModel editProcessViewModel
         )
         {
-            ProcessViewModel processViewModel = new ProcessViewModel(process);
+            List<Assignment> newAssignments = new List<Assignment> { };
+            //beginn codeownership Jan Pfluger
+            List<AssignmentTemplate> assignmentTemplates = new List<AssignmentTemplate>();
+            assignmentTemplates = editProcessViewModel
+                .AssignmentTemplates.Where(temp =>
+                    (
+                        temp.ForContractsList == null
+                        || temp.ForContractsList.Contains(editProcessViewModel.ContractOfRefWorker)
+                            && (
+                                temp.ForDepartmentsList == null
+                                || temp.ForDepartmentsList.Contains(
+                                    editProcessViewModel.DepartmentOfRefWorker
+                                )
+                            )
+                    )
+                )
+                .ToList();
+
+            foreach (AssignmentTemplate temp in assignmentTemplates)
+            {
+                switch (temp.AssigneeType)
+                {
+                    case AssigneeType.SUPERVISOR:
+                        newAssignments.Add(temp.ToAssignment(editProcessViewModel.Supervisor));
+                        break;
+                    case AssigneeType.WORKER_OF_REF:
+                        newAssignments.Add(
+                            temp.ToAssignment(editProcessViewModel.WorkerOfReference)
+                        );
+                        break;
+                    default:
+                        newAssignments.Add(temp.ToAssignment(null));
+                        break;
+                }
+            }
+            //end codeownership Jan Pfluger
+
+            List<Assignment> currentAssignments = new List<Assignment> { };
+            foreach (Assignment assignment in editProcessViewModel.Assignments)
+            {
+                Assignment a = _context.Assignments.Find(assignment.Id);
+                currentAssignments.Add(a);
+            }
+
+            foreach (Assignment assignment in newAssignments)
+            {
+                if (currentAssignments.Find(a => a.Title == assignment.Title) == null)
+                {
+                    currentAssignments.Add(assignment);
+                }
+            }
+
+            newAssignments.AddRange(editProcessViewModel.Assignments);
+
+            await AddModelsToViewData();
 
             if (!ModelState.IsValid)
             {
-                return View("Edit", processViewModel);
+                Console.WriteLine("Modelstate Invalid");
+                return View("Edit", editProcessViewModel);
             }
 
             try
             {
+                ApplicationUser sup = await _userManager.FindByIdAsync(
+                    editProcessViewModel.Supervisor.Id
+                );
+                ApplicationUser worker = await _userManager.FindByIdAsync(
+                    editProcessViewModel.WorkerOfReference.Id
+                );
+
+                Contract contract = _context.Contracts.Find(
+                    editProcessViewModel.ContractOfRefWorker.Id
+                );
+                Department department = _context.Departments.Find(
+                    editProcessViewModel.DepartmentOfRefWorker.Id
+                );
+
                 await _processContainer.UpdateProcessAsync(
                     id,
-                    process.Title,
-                    process.Description,
-                    process.Assignments,
-                    process.Supervisor,
-                    process.WorkerOfReference,
-                    process.ContractOfRefWorker,
-                    process.DepartmentOfRefWorker
+                    editProcessViewModel.Title,
+                    editProcessViewModel.Description,
+                    currentAssignments,
+                    sup,
+                    worker,
+                    contract,
+                    department
                 );
+
                 return RedirectToAction("Index");
             }
             catch (DbUpdateException e)
             {
                 ModelState.AddModelError("", e.InnerException?.Message ?? e.Message);
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.InnerException?.Message);
             }
+            return View("Edit", editProcessViewModel);
+        }
 
-            return View("Edit", processViewModel);
+        public async Task<IActionResult> Detail(int id)
+        {
+            ActiveProcess process = await _processContainer.GetProcessByIdAsync(id);
+            DetailProcessViewModel detailProcessViewModel = new DetailProcessViewModel(process);
+
+            return View("Detail", detailProcessViewModel);
         }
 
         [HttpPost("/Process/Stop/{id}")]
@@ -268,14 +515,42 @@ namespace SoPro24Team06.Controllers
         {
             try
             {
-                await _processContainer.DeleteProcessAsync(id);
+                //await _processContainer.DeleteProcessAsync(id);
+                await _processContainer.StopProcess(id);
             }
             catch (DbUpdateException e)
             {
+                Console.WriteLine(e.InnerException.Message);
                 ModelState.AddModelError("", e.InnerException.Message);
             }
 
             return RedirectToAction("Index");
+        }
+
+        public async Task AddModelsToViewData()
+        {
+            List<ApplicationUser> users = _userManager.Users.ToList();
+            List<ProcessTemplate> processTemplates =
+                await _processTemplateContainer.GetProcessTemplatesAsync();
+
+            processTemplates.ForEach(p => p.RolesWithAccess = new List<ApplicationRole> { });
+
+            List<AssignmentTemplate> assignmentTemplates =
+                _assignmentTemplateContainer.GetAllAssignmentTemplates();
+
+            assignmentTemplates.ForEach(a => a.ProcessTemplates = new List<ProcessTemplate> { });
+
+            // Replace with Containers
+            List<Assignment> assignments = _context.Assignments.ToList();
+            List<Contract> contracts = _context.Contracts.ToList();
+            List<Department> departments = _context.Departments.ToList();
+
+            ViewData["Users"] = users;
+            ViewData["ProcessTemplates"] = processTemplates;
+            ViewData["Assignments"] = assignments;
+            ViewData["AssignmentTemplates"] = assignmentTemplates;
+            ViewData["Contracts"] = contracts;
+            ViewData["Departments"] = departments;
         }
     }
 }

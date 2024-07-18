@@ -1,10 +1,17 @@
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
 namespace SoPro24Team06.Enums
 {
     public enum AssignmentStatus
     {
-        UNASSIGNED,
-        IN_PROGRESS,
-        DONE
+        [Display(Name = "noch zu Erliedigen")]
+        NOT_STARTED,
 
+        [Display(Name = "In Bearbeitung")]
+        IN_PROGRESS,
+
+        [Display(Name = "Fertig")]
+        DONE
     }
 }

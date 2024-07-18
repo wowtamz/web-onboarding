@@ -14,13 +14,13 @@ namespace SoPro24Team06.Controllers
     public class AdministrationController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
         private readonly ILogger<AdministrationController> _logger;
 
         public AdministrationController(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager,
+            RoleManager<ApplicationRole> roleManager,
             ILogger<AdministrationController> logger
         )
         {
@@ -295,7 +295,7 @@ namespace SoPro24Team06.Controllers
 
                 TempData["UserEditMessage"] =
                     $"Passwort für User: {user.FullName} wurde erfolgreich geändert.";
-                return RedirectToAction("Administration");
+                return RedirectToAction("Index");
             }
 
             return View("~/Views/Administration/ChangeUserPassword.cshtml", model);
@@ -311,10 +311,10 @@ namespace SoPro24Team06.Controllers
 
                 if (await _roleManager.RoleExistsAsync(roleName))
                 {
-                    return Json(new { success = false, error = "Role already exists." });
+                    return Json(new { success = false, error = "Role existiert bereits." });
                 }
 
-                IdentityRole role = new IdentityRole { Name = roleName };
+                ApplicationRole role = new ApplicationRole { Name = roleName };
 
                 IdentityResult result = await _roleManager.CreateAsync(role);
 

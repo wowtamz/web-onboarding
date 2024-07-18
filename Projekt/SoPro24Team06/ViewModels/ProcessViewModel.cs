@@ -1,3 +1,7 @@
+//-------------------------
+// Author: Tamas Varadi
+//-------------------------
+
 using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels;
@@ -16,7 +20,12 @@ public class ProcessViewModel
     public Contract ContractOfRefWorker { get; set; }
     public Department DepartmentOfRefWorker { get; set; }
 
-    public ProcessViewModel(int? id, string? title, string? description, List<Assignment>? assignments)
+    public ProcessViewModel(
+        int? id,
+        string? title,
+        string? description,
+        List<Assignment>? assignments
+    )
     {
         this.Id = id;
         this.Title = title;
@@ -40,11 +49,16 @@ public class ProcessViewModel
         this.Description = process.Description ?? "";
         this.Assignments = process.Assignments;
         this.StartDate = process.StartDate;
-        this.DueDate = process.Assignments.Max(a => a.DueDate);
+        this.DueDate = DateTime.Now.AddDays(14);
         this.Supervisor = process.Supervisor;
         this.WorkerOfReference = process.WorkerOfReference;
         this.ContractOfRefWorker = process.ContractOfRefWorker;
         this.DepartmentOfRefWorker = process.DepartmentOfRefWorker;
+
+        if (process.Assignments.Count > 0)
+        {
+            this.DueDate = process.Assignments.Max(a => a.DueDate);
+        }
     }
 
     public ProcessViewModel()
@@ -56,7 +70,7 @@ public class ProcessViewModel
         this.StartDate = DateTime.Now;
         this.DueDate = DateTime.Now.AddDays(7);
         this.Supervisor = new ApplicationUser { FullName = "Vorgangsverantwortlicher" };
-        this.WorkerOfReference = new ApplicationUser { FullName = "Benzugsperson"};
+        this.WorkerOfReference = new ApplicationUser { FullName = "Benzugsperson" };
         this.ContractOfRefWorker = new Contract();
         this.DepartmentOfRefWorker = new Department();
     }

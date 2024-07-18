@@ -1,18 +1,19 @@
 using SoPro24Team06.Models;
 
-namespace SoPro24Team06.ViewModels;
-
-public class AssignmentListViewModel
+namespace SoPro24Team06.ViewModels
 {
-    public List<Assignment> AssignmentList { get; set; }
-
-    public AssignmentListViewModel(List<Assignment> assignmentList)
+    public class AssignmentListViewModel
     {
-        this.AssignmentList = assignmentList;
-    }
+        public List<Assignment> AssignmentList { get; set; }
 
-    public AssignmentListViewModel()
-    {
-        this.AssignmentList = new List<Assignment>();
+        public AssignmentListViewModel(List<Assignment> assignmentList)
+        {
+            this.AssignmentList = assignmentList;
+        }
+
+        public AssignmentListViewModel()
+        {
+            this.AssignmentList = new List<Assignment>();
+        }
     }
 }

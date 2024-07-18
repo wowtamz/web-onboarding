@@ -1,6 +1,12 @@
+//-------------------------
+// Author: Tamas Varadi
+//-------------------------
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
+using SoPro24Team06.Container;
+using SoPro24Team06.Enums;
 
 namespace SoPro24Team06.Models
 {
@@ -37,26 +43,63 @@ namespace SoPro24Team06.Models
         [JsonProperty("assignments")]
         public List<Assignment> Assignments { get; set; }
 
-        [Required(ErrorMessage = "Contract is required")]
+        [Required(ErrorMessage = "Vertragstyp ist erforderlich")]
         [JsonProperty("contractOfRefWorker")]
         public Contract ContractOfRefWorker { get; set; }
 
-        [Required(ErrorMessage = "Department is required")]
+        [Required(ErrorMessage = "Abteilung ist erforderlich")]
         [JsonProperty("departmentOfRefWorker")]
         public Department DepartmentOfRefWorker { get; set; }
+        
+        [JsonProperty("isArchived")]
+        public bool IsArchived { get; set; }
 
         public Process(ProcessTemplate Template)
         {
             this.Title = Template.Title;
             this.Description = Template.Description;
-            this.Assignments = Template.AssignmentTemplates.ConvertAll(template =>
-                template.ToAssignment(template)
-            );
+            List<Assignment> assignments = new List<Assignment>();
+            //for uncomment for procuction use
+            // List<AssignmentTemplate> assignmentTemplates = Template.AssignmentTemplates.Where
+            // (
+            // 	temp =>
+            // 	(
+            // 		temp.ForContractsList == null || temp.ForContractsList.Contains
+            // 		(
+            // 			this.ContractOfRefWorker
+            // 		) && (
+            // 			temp.ForDepartmentsList == null || temp.ForDepartmentsList.Contains
+            // 			(
+            // 				this.DepartmentOfRefWorker
+            // 			)
+            // 		)
+            // 	)
+            // ).ToList();
+            // foreach (AssignmentTemplate temp in assignmentTemplates)
+            Assignments = new List<Assignment>(); //delete for production use
+            foreach (AssignmentTemplate temp in Template.AssignmentTemplates) //delete for production use
+            {
+                switch (temp.AssigneeType)
+                {
+                    case AssigneeType.SUPERVISOR:
+                        assignments.Add(temp.ToAssignment(this.Supervisor));
+                        break;
+                    case AssigneeType.WORKER_OF_REF:
+                        assignments.Add(temp.ToAssignment(this.WorkerOfReference));
+                        break;
+                    default:
+                        assignments.Add(temp.ToAssignment(null));
+                        break;
+                }
+            }
             this.ContractOfRefWorker = Template.ContractOfRefWorker;
             this.DepartmentOfRefWorker = Template.DepartmentOfRefWorker;
-            if (Assignments.Count() > 0) {
+            if (Assignments.Count() > 0)
+            {
                 this.DueDate = this.Assignments.Max(assignment => assignment.DueDate);
-            } else {
+            }
+            else
+            {
                 this.DueDate = DateTime.Now;
             }
         }
@@ -79,9 +122,12 @@ namespace SoPro24Team06.Models
             this.ContractOfRefWorker = contractOfRefWorker;
             this.DepartmentOfRefWorker = departmentOfRefWorker;
             this.StartDate = DateTime.Now;
-            if (Assignments.Count() > 0) {
+            if (Assignments.Count() > 0)
+            {
                 this.DueDate = this.Assignments.Max(assignment => assignment.DueDate);
-            } else {
+            }
+            else
+            {
                 this.DueDate = DateTime.Now;
             }
         }

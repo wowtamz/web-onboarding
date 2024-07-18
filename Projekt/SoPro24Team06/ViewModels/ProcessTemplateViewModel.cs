@@ -1,3 +1,7 @@
+//-------------------------
+// Author: Kevin Tornquist
+//-------------------------
+
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using SoPro24Team06.Data;
@@ -7,45 +11,33 @@ namespace SoPro24Team06.ViewModels;
 
 public class ProcessTemplateViewModel
 {
-    private readonly ModelContext _modelContext = new();
-
-    // Values to be selected by the user
-    public int? Id { get; }
+    public int? Id { get; set; }
 
     [Required(ErrorMessage = "Titel ist erforderlich")]
     public string Title { get; set; }
 
     public string? Description { get; set; }
 
-    public Department DepartmentOfRefWorker { get; set; } = new();
+    public int DepartmentOfRefWorkerId { get; set; } = new();
 
-    [Required(ErrorMessage = "Mindestens eine Aufgabe ist erforderlich")]
-    public List<AssignmentTemplate> SelectedAssignmentTemplates { get; set; } = new();
+    public List<int>? SelectedAssignmentTemplateIds { get; set; } = new();
 
-    public List<IdentityRole> RolesWithAccess { get; set; } = new();
+    [Required(ErrorMessage = "Mindestens eine Rolle ist erforderlich")]
+    public List<string> RolesWithAccess { get; set; } = new();
 
-    public Contract ContractOfRefWorker { get; set; } = new();
-
-    // Values to choose from
-    public List<AssignmentTemplate> AssignmentTemplates { get; set; } = new();
-    public List<Contract> Contracts { get; set; } = new();
-    public List<Department> Departments { get; set; } = new();
-    public List<IdentityRole> Roles { get; set; } = new();
+    public int ContractOfRefWorkerId { get; set; } = new();
 
     public ProcessTemplateViewModel(ProcessTemplate processTemplate)
     {
         Id = processTemplate.Id;
         Title = processTemplate.Title;
         Description = processTemplate.Description;
-        AssignmentTemplates = processTemplate.AssignmentTemplates;
-        ContractOfRefWorker = processTemplate.ContractOfRefWorker;
-        DepartmentOfRefWorker = processTemplate.DepartmentOfRefWorker;
-        RolesWithAccess = processTemplate.RolesWithAccess;
-        AssignmentTemplates = _modelContext.AssignmentTemplates.ToList();
-        Contracts = _modelContext.Contracts.ToList();
-        Departments = _modelContext.Departments.ToList();
-        Roles = new List<IdentityRole>();
-
+        ContractOfRefWorkerId = processTemplate.ContractOfRefWorker.Id;
+        DepartmentOfRefWorkerId = processTemplate.DepartmentOfRefWorker.Id;
+        RolesWithAccess = processTemplate.RolesWithAccess.Select(r => r.Name).ToList();
+        SelectedAssignmentTemplateIds = processTemplate
+            .AssignmentTemplates.Select(a => a.Id)
+            .ToList();
     }
 
     public ProcessTemplateViewModel()
@@ -53,13 +45,9 @@ public class ProcessTemplateViewModel
         Id = null;
         Title = "";
         Description = "";
-        AssignmentTemplates = new List<AssignmentTemplate>();
-        ContractOfRefWorker = new Contract();
-        DepartmentOfRefWorker = new Department();
-        RolesWithAccess = new List<IdentityRole>();
-        AssignmentTemplates = _modelContext.AssignmentTemplates.ToList();
-        Contracts = _modelContext.Contracts.ToList();
-        Departments = _modelContext.Departments.ToList();
-        Roles = new List<IdentityRole>();
+        ContractOfRefWorkerId = 0;
+        DepartmentOfRefWorkerId = 0;
+        RolesWithAccess = new();
+        SelectedAssignmentTemplateIds = new();
     }
 }

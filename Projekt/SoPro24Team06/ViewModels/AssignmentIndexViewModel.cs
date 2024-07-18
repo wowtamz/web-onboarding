@@ -1,0 +1,87 @@
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Reflection;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using SoPro24Team06.Enums;
+using SoPro24Team06.Models;
+
+namespace SoPro24Team06.ViewModels;
+
+public class AssignmentIndexViewModel
+{
+    public List<Assignment> AssignmentList { get; set; }
+    public List<Process> ProcessList { get; set; }
+    public Boolean IsAdminOrSupervisor { get; set; }
+
+    public AssignmentIndexViewModel(
+        List<Assignment> assignmentList,
+        List<Process> processList
+    )
+    {
+        this.AssignmentList = assignmentList;
+        this.ProcessList = processList;
+    }
+
+    public void FilterAssignments(int selectedProcessId)
+    {
+        if (selectedProcessId != 0)
+        {
+            Process? process = ProcessList.FirstOrDefault(p => p.Id == selectedProcessId);
+            if (process != null)
+            {
+                this.AssignmentList = process
+                    .Assignments.Where(p => this.AssignmentList.Contains(p))
+                    .ToList();
+            }
+        }
+    }
+
+    public void SortAssingments(string sortingProperty)
+    {
+        switch (sortingProperty)
+        {
+            case "DueDate":
+                AssignmentList.Sort((x, y) => DateTime.Compare(x.DueDate, y.DueDate));
+                break;
+            case "Namen":
+                this.AssignmentList.Sort((x, y) => String.Compare(x.Title, y.Title));
+                break;
+        }
+    }
+
+    public string GetRowClass(Assignment assignment)
+    {
+        if (assignment.Status == AssignmentStatus.DONE)
+            return "done";
+        if (assignment.GetDaysTillDueDate() < 0)
+            return "overdue";
+        return "";
+    }
+
+    public string GetAssignmentStatus(Assignment assignment)
+    {
+        switch (assignment.Status)
+        {
+            case AssignmentStatus.NOT_STARTED:
+                return "Noch nicht Begonnen";
+            case AssignmentStatus.IN_PROGRESS:
+                return "In Bearbeitung";
+            case AssignmentStatus.DONE:
+                return "Fertig";
+            default:
+                return "Unbekannt";
+        }
+    }
+
+    public string GetProcessByAssingment(Assignment assignment)
+    {
+        Process? process = ProcessList.FirstOrDefault(p => p.Assignments.Contains(assignment));
+        if (process != null)
+        {
+            return process.Title;
+        }
+        return "";
+    }
+}

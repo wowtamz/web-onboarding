@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
 using SoPro24Team06.Models;
@@ -7,62 +7,51 @@ namespace SoPro24Team06.Containers;
 
 public class AssignmentTemplateContainer
 {
-    private readonly ModelContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public AssignmentTemplateContainer()
+    public AssignmentTemplateContainer(ApplicationDbContext context)
     {
-        _context = new ModelContext();
+        _context = context;
     }
 
-    public void AddAssignmentTemplate(
+    public AssignmentTemplate AddAssignmentTemplate(
         string title,
         string? instructions,
         DueTime dueIn,
         List<Department>? forDepartmentsList,
         List<Contract>? forContractsList,
         AssigneeType assigneType,
-        List<IdentityRole>? assignedRoles
+        ApplicationRole? assignedRole
     )
     {
-        _context.Add(
-            new AssignmentTemplate(
-                title,
-                instructions,
-                dueIn,
-                forDepartmentsList,
-                forContractsList,
-                assigneType,
-                assignedRoles
-            )
-            {
-                Title = title,
-                Instructions = instructions,
-                DueIn = dueIn,
-                ForDepartmentsList = forDepartmentsList,
-                ForContractsList = forContractsList,
-                AssigneeType = assigneType,
-                AssignedRolesList = assignedRoles
-            }
+        AssignmentTemplate template = new AssignmentTemplate(
+            title,
+            instructions,
+            dueIn,
+            forDepartmentsList,
+            forContractsList,
+            assigneType,
+            assignedRole
         );
+        var assignmentTemplateID = _context.AssignmentTemplates.Add(template);
         _context.SaveChanges();
+        return assignmentTemplateID.Entity;
     }
 
     public void DeleteAssignmentTemplate(int id)
     {
         if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(
-                assignmentTemplate => assignmentTemplate.Id == id
-            );
+            AssignmentTemplate? assignmentTemplate = GetAssignmentTemplateWithDepartmentsAsync(id);
             if (assignmentTemplate != null)
             {
-                _context.Remove(assignmentTemplate!);
+                _context.AssignmentTemplates.Remove(assignmentTemplate!);
                 _context.SaveChanges();
             }
         }
     }
 
-    public void EditAssignmentTemplate(
+    public void EditAssignmentTemplates(
         int id,
         string title,
         string? instructions,
@@ -70,14 +59,12 @@ public class AssignmentTemplateContainer
         List<Department>? forDepartmentsList,
         List<Contract>? forContractsList,
         AssigneeType assigneeType,
-        List<IdentityRole>? assignedRoles
+        ApplicationRole? assignedRole
     )
     {
         if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(
-                assignmentTemplate => assignmentTemplate.Id == id
-            );
+            AssignmentTemplate? assignmentTemplate = GetAssignmentTemplateWithDepartmentsAsync(id);
             if (assignmentTemplate != null)
             {
                 assignmentTemplate.Title = title;
@@ -86,8 +73,9 @@ public class AssignmentTemplateContainer
                 assignmentTemplate.ForDepartmentsList = forDepartmentsList;
                 assignmentTemplate.ForContractsList = forContractsList;
                 assignmentTemplate.AssigneeType = assigneeType;
-                assignmentTemplate.AssignedRolesList = assignedRoles;
-                _context.Update(assignmentTemplate);
+                assignmentTemplate.AssignedRole = assignedRole;
+
+                _context.AssignmentTemplates.Update(assignmentTemplate);
                 _context.SaveChanges();
             }
         }
@@ -97,15 +85,26 @@ public class AssignmentTemplateContainer
     {
         if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault(
-                assignmentTemplate => assignmentTemplate.Id == id
-            );
+            AssignmentTemplate? assignmentTemplate = GetAssignmentTemplateWithDepartmentsAsync(id);
+
             if (assignmentTemplate != null)
             {
-                return assignmentTemplate!;
+                return assignmentTemplate;
             }
         }
+
         return null;
+    }
+
+    public AssignmentTemplate? GetAssignmentTemplateWithDepartmentsAsync(int id)
+    {
+        AssignmentTemplate? at = _context
+            .AssignmentTemplates.Include(at => at.ForDepartmentsList) // Include für das Laden der ForDepartmentsList
+            .Include(at => at.ForContractsList) // Include für das Laden der ForContractList
+            .Include(at => at.AssignedRole) // Include für das Laden der AssignedRole
+            .Include(at => at.DueIn) // Include für das Laden der DueIn
+            .FirstOrDefault(at => at.Id == id);
+        return at;
     }
 
     public List<AssignmentTemplate> GetAllAssignmentTemplates()
@@ -113,7 +112,7 @@ public class AssignmentTemplateContainer
         List<AssignmentTemplate> assignmentTemplateList = new List<AssignmentTemplate>();
         if (_context.AssignmentTemplates != null)
         {
-            assignmentTemplateList = _context.AssignmentTemplates.ToList();
+            assignmentTemplateList = _context.AssignmentTemplates.Include(a => a.DueIn).ToList();
         }
         return assignmentTemplateList;
     }

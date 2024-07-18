@@ -15,6 +15,10 @@ public class Contract
     [JsonProperty("label")]
     public string Label { get; set; }
 
+    // Für DB relationen
+    public List<Assignment>? Assignments { get; set; }
+    public List<AssignmentTemplate>? AssignmentsTemplates { get; set; }
+
     public Contract(string label)
     {
         this.Label = label;

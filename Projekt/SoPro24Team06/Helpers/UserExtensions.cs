@@ -5,7 +5,10 @@ using SoPro24Team06.Models;
 
 public static class UserExtensions
 {
-    public static async Task<bool> IsLockedOutAsync(this ClaimsPrincipal user, IServiceProvider services)
+    public static async Task<bool> IsLockedOutAsync(
+        this ClaimsPrincipal user,
+        IServiceProvider services
+    )
     {
         if (user.Identity == null || !user.Identity.IsAuthenticated)
         {
