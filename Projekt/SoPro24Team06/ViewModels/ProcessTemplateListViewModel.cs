@@ -1,3 +1,7 @@
+//-------------------------
+// Author: Kevin Tornquist
+//-------------------------
+
 using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels;

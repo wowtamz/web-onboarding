@@ -11,11 +11,30 @@ if (!Directory.Exists(dataDirectory))
     Directory.CreateDirectory(dataDirectory);
 }
 
+/* Alte DbContext
 var connectionString = builder.Configuration.GetConnectionString("UserConnection");
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseSqlite(connectionString + ";Pooling=False")
 ); // Disable pooling
+*/
 
+// Beginn: Neue DbContext
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
+builder
+    .Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+        options.SignIn.RequireConfirmedAccount = false
+    )
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+// Ende: Neu DbContext
+
+
+/*
 builder
     .Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
@@ -23,9 +42,19 @@ builder
     })
     .AddEntityFrameworkStores<UserDbContext>()
     .AddDefaultTokenProviders();
+*/
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60); // Session-Timeout
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -40,8 +69,9 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    await SeedData.Initialize(userManager, roleManager, new ModelContext());
+    var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    await SeedData.Initialize(userManager, roleManager, context);
 }
 
 if (!app.Environment.IsDevelopment())
@@ -50,6 +80,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+/*
+else
+{
+    app.UseDeveloperExceptionPage();
+}
+*/
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -57,6 +94,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSession();
 
 app.UseEndpoints(endpoints =>
 {

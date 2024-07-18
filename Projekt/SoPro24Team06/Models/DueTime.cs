@@ -35,5 +35,8 @@ public class DueTime
         this.Months = months;
     }
 
-    public DueTime() { }
+    public DueTime()
+    {
+        Label = string.Empty;
+    }
 }

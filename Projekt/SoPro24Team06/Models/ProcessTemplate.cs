@@ -1,3 +1,7 @@
+//-------------------------
+// Author: Kevin Tornquist
+//-------------------------
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +36,8 @@ public class ProcessTemplate
     public Department DepartmentOfRefWorker { get; set; }
 
     [JsonProperty("rolesWithAccess")]
-    public List<IdentityRole> RolesWithAccess { get; set; }
+    [Required(ErrorMessage = "Mindestens eine Rolle ist erforderlich")]
+    public List<ApplicationRole> RolesWithAccess { get; set; }
 
     public ProcessTemplate(
         string title,
@@ -40,7 +45,7 @@ public class ProcessTemplate
         List<AssignmentTemplate> assignmentTemplates,
         Contract contractOfRefWorker,
         Department departmentOfRefWorker,
-        List<IdentityRole> rolesWithAccess
+        List<ApplicationRole> rolesWithAccess
     )
     {
         this.Title = title;
@@ -58,7 +63,7 @@ public class ProcessTemplate
         this.AssignmentTemplates = new List<AssignmentTemplate> { };
         this.ContractOfRefWorker = new Contract();
         this.DepartmentOfRefWorker = new Department();
-        this.RolesWithAccess = new List<IdentityRole> { };
+        this.RolesWithAccess = new List<ApplicationRole> { };
     }
 
     public Process ToProcess()

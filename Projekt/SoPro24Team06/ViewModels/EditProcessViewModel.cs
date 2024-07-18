@@ -1,43 +1,54 @@
+//-------------------------
+// Author: Tamas Varadi
+//-------------------------
+
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SoPro24Team06.Data;
+using SoPro24Team06.Enums;
 using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels;
 
-public class ComposeProcessViewModel
+public class EditProcessViewModel
 {
     public int? Id { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
-    public ProcessTemplate Template { get; set; }
-    public List<Assignment> Assignments { get; set; }
 
-    public List<int> AssignmentTemplates { get; set; }
+    public List<AssignmentTemplate>? AssignmentTemplates { get; set; }
 
-    public List<AssignmentTemplate> AssignmentTemplateList { get; set; }
-
-    public DateTime StartDate { get; set; }
+    public List<Assignment>? Assignments { get; set; }
+    public DateTime? StartDate { get; set; }
     public DateTime? DueDate { get; set; }
+
+    [Required(ErrorMessage = "Vorgangsverantwortlicher ist erforderlich")]
     public ApplicationUser Supervisor { get; set; }
+
+    [Required(ErrorMessage = "Bezugsperson ist erforderlich")]
     public ApplicationUser WorkerOfReference { get; set; }
+
+    [Required(ErrorMessage = "Vertragsart ist erforderlich")]
     public Contract ContractOfRefWorker { get; set; }
+
+    [Required(ErrorMessage = "Abteilung ist erforderlich")]
     public Department DepartmentOfRefWorker { get; set; }
 
-    public ComposeProcessViewModel(Process process)
+    public EditProcessViewModel(Process process)
     {
         this.Title = process.Title;
         this.Description = process.Description;
-        this.Assignments = process.Assignments;
         this.StartDate = process.StartDate;
         this.DueDate = process.DueDate;
+        this.Assignments = process.Assignments;
         this.Supervisor = process.Supervisor;
         this.WorkerOfReference = process.WorkerOfReference;
         this.ContractOfRefWorker = process.ContractOfRefWorker;
         this.DepartmentOfRefWorker = process.DepartmentOfRefWorker;
     }
 
-    public ComposeProcessViewModel(ProcessTemplate? processTemplate)
+    public EditProcessViewModel(ProcessTemplate? processTemplate)
     {
         if (processTemplate != null)
         {
@@ -45,29 +56,18 @@ public class ComposeProcessViewModel
 
             this.Title = process.Title;
             this.Description = process.Description;
-            this.Template = processTemplate;
-            this.Assignments = process.Assignments;
-            this.AssignmentTemplates = new List<int> { };
+            this.AssignmentTemplates = new List<AssignmentTemplate> { };
             this.ContractOfRefWorker = process.ContractOfRefWorker;
             this.DepartmentOfRefWorker = process.DepartmentOfRefWorker;
-            if (Assignments.Count() > 0)
-            {
-                this.DueDate = this.Assignments.Max(assignment => assignment.DueDate);
-            }
-            else
-            {
-                this.DueDate = DateTime.Now;
-            }
         }
     }
 
-    public ComposeProcessViewModel()
+    public EditProcessViewModel()
     {
         this.Id = null;
         this.Title = "";
         this.Description = "";
-        this.Assignments = new List<Assignment> { };
-        this.AssignmentTemplates = new List<int> { };
+        this.AssignmentTemplates = new List<AssignmentTemplate> { };
         this.StartDate = DateTime.Now;
         this.DueDate = DateTime.Now.AddDays(7);
         this.Supervisor = new ApplicationUser { FullName = "Der Verantwortlicher" };
@@ -81,7 +81,7 @@ public class ComposeProcessViewModel
         return new Process(
             Title,
             Description,
-            Assignments,
+            new List<Assignment> { },
             WorkerOfReference,
             Supervisor,
             ContractOfRefWorker,
@@ -89,9 +89,21 @@ public class ComposeProcessViewModel
         );
     }
 
-    public ProcessViewModel ToProcessViewModel()
+    public string AssigneeTypeAsString(AssigneeType type)
     {
-        ProcessViewModel processViewModel = new ProcessViewModel(this.Template);
-        return processViewModel;
+        if (type == AssigneeType.ROLES)
+        {
+            return "Rolle";
+        }
+        if (type == AssigneeType.SUPERVISOR)
+        {
+            return "Vorgangsverantwortlicher";
+        }
+        if (type == AssigneeType.WORKER_OF_REF)
+        {
+            return "Bezugsperson";
+        }
+
+        return "Rolle";
     }
 }

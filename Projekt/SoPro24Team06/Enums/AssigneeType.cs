@@ -1,9 +1,19 @@
-namespace SoPro24Team06.Enums;
+using System.ComponentModel.DataAnnotations;
 
-public enum AssigneeType
+namespace SoPro24Team06.Enums
 {
-    SUPERVISOR,
-    ROLES,
-    WORKER_OF_RER
+    public enum AssigneeType
+    {
+        [Display(Name = "Rolle")]
+        ROLES,
 
+        [Display(Name = "Vorgangsverantwortlicher")]
+        SUPERVISOR,
+
+        [Display(Name = "Bezugsperson")]
+        WORKER_OF_REF,
+
+        [Display(Name = "Benutzer")]
+        USER,
+    }
 }

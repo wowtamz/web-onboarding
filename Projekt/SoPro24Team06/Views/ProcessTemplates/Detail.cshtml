@@ -1,0 +1,103 @@
+@model SoPro24Team06.ViewModels.DetailProcessTemplateViewModel
+@{
+    //-------------------------
+    // Author: Kevin Tornquist
+    //-------------------------
+
+    ViewData["Title"] = @Model.Title;
+}
+
+<form asp-action="Detail" method="post">
+
+    <input type="hidden" asp-for="Id" value="@Model.Id" />
+
+    <fieldset style="margin-top: 18px;">
+        <legend>Titel</legend>
+        <input class="form-control" readonly value="@Model.Title" />
+    </fieldset>
+    <fieldset style="margin-top: 12px;">
+        <legend>Beschreibung</legend>
+        <textarea readonly asp-for="Description" class="form-control"></textarea>
+    </fieldset>
+    <fieldset style="margin-top: 12px;">
+        <legend>Vertragstyp</legend>
+        <input class="form-control" readonly value="@Model.ContractOfRefWorker.Label" />
+    </fieldset>
+    <fieldset style="margin-top: 12px;">
+        <legend>Rolle</legend>
+        <p class="form-control">
+            @if (@Model.RolesWithAccess != null && @Model.RolesWithAccess.Count > 0)
+            {
+                foreach (ApplicationRole r in @Model.RolesWithAccess)
+                {
+                    <span>@r.Name</span>
+                    <br />
+                }
+            }
+            else
+            {
+                <span>Keine Rolle zugewiesen</span>
+            }
+        </p>
+    </fieldset>
+    <fieldset style="margin-top: 8px;">
+        <legend>Abteilung</legend>
+        <input class="form-control" readonly value="@Model.DepartmentOfRefWorker.Name" />
+    </fieldset>
+    <fieldset style="margin-top: 12px;">
+        <legend>Aufgaben</legend>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Titel</th>
+                        <th>Anleitung</th>
+                        <th>Aufgabenverantwortlicher</th>
+                        <th>Zugewiesene Rolle</th>
+                        <th>Zu Erledigen bis:</th>
+                    </tr>
+                </thead>
+                <tbody id="assignments" name="assignments">
+                    @if (@Model.AssignmentTemplates != null && @Model.AssignmentTemplates.Count > 0)
+                    {
+                        @foreach (AssignmentTemplate at in @Model.AssignmentTemplates)
+                        {
+                            <tr class="hoverTableRow"
+                                onclick="window.location='/AssignmentTemplate/Edit/@at.Id?processId=@Model.Id'">
+                                <td>@at.Title</td>
+                                <td>@at.Instructions</td>
+                                <td>@at.AssigneeType</td>
+                                <td>@at.AssignedRole</td>
+                                @if (at.DueIn != null)
+                                {
+                                    <td>@at.DueIn.Label</td>
+                                }
+                                else
+                                {
+                                    <td></td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td>Keine Aufgaben zugewiesen</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </fieldset>
+    <input type="hidden" asp-for="AssignmentTemplates" />
+    <div style="margin-top: 36px;">
+        <a class="btn" style="background-color: var(--lemming); color: white;"
+            href="/ProcessTemplate/Edit/@Model.Id">Bearbeiten</a>
+        <a class="btn" style="background-color: var(--amaranth); color: white;"
+            href="/ProcessTemplate/Delete/@Model.Id">Löschen</a>
+    </div>
+
+</form>
+
+<script src="assets/bootstrap/js/bootstrap.min.js"></script>

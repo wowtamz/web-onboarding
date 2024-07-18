@@ -22,7 +22,7 @@ namespace SoPro24Team06.Models
 
         [Required(ErrorMessage = "Fälligkeit ist erforderlich.")]
         [JsonProperty("dueIn")]
-        public DueTime? DueIn { get; set; } = new DueTime("ASAP", 0, 0, 0);
+        public DueTime? DueIn { get; set; }
 
         [JsonProperty("forDepartments")]
         public List<Department>? ForDepartmentsList { get; set; }
@@ -34,7 +34,9 @@ namespace SoPro24Team06.Models
         public AssigneeType AssigneeType { get; set; }
 
         [JsonProperty("assignedRoles")]
-        public List<IdentityRole> AssignedRolesList { get; set; }
+        public ApplicationRole? AssignedRole { get; set; }
+
+        public List<ProcessTemplate>? ProcessTemplates { get; set; }
 
         public AssignmentTemplate() { }
 
@@ -45,7 +47,7 @@ namespace SoPro24Team06.Models
             List<Department> forDepartmentsList,
             List<Contract> forContractsList,
             AssigneeType assigneeType,
-            List<IdentityRole> assignedRolesList
+            ApplicationRole assignedRole
         )
         {
             this.Title = title;
@@ -54,13 +56,13 @@ namespace SoPro24Team06.Models
             this.ForDepartmentsList = forDepartmentsList;
             this.ForContractsList = forContractsList;
             this.AssigneeType = assigneeType;
-            this.AssignedRolesList = assignedRolesList;
+            this.AssignedRole = assignedRole;
         }
 
-        public Assignment ToAssignment(AssignmentTemplate template)
+        public Assignment ToAssignment(ApplicationUser? user)
         {
             DateTime dueDate = DateTime.Now; // sollte berechnet werden
-            return new Assignment(template, dueDate);
+            return new Assignment(this, dueDate, user);
         }
     }
 }

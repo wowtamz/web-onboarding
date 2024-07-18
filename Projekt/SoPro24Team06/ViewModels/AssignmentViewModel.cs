@@ -33,7 +33,7 @@ public class AssignmentViewModel
     public AssigneeType AssigneeType { get; set; }
 
     [JsonProperty("assignedRoles")]
-    public List<IdentityRole> AssignedRolesList { get; set; }
+    public List<ApplicationRole> AssignedRolesList { get; set; }
 
     [JsonProperty("assignee")]
     public ApplicationUser Assignee { get; set; }
@@ -42,20 +42,30 @@ public class AssignmentViewModel
     public AssignmentStatus Status { get; set; }
 
     // #TODO: Additional Attributes
-    public AssignmentViewModel(AssignmentTemplate template)
-    {
-        Assignment assignment = template.ToAssignment(template);
+    // public AssignmentViewModel(AssignmentTemplate template)
+    // {
+    //     Assignment assignment = template.ToAssignment(template);
 
-        this.Title = assignment.Title;
-        this.Instructions = assignment.Instructions;
-        this.DueDate = assignment.DueDate;
-        this.ForDepartmentsList = assignment.ForDepartmentsList;
-        this.ForContractsList = assignment.ForContractsList;
-        this.AssigneeType = assignment.AssigneeType;
-        this.AssignedRolesList = assignment.AssignedRolesList;
-    }
+    //     this.Title = assignment.Title;
+    //     this.Instructions = assignment.Instructions;
+    //     this.DueDate = assignment.DueDate;
+    //     this.ForDepartmentsList = assignment.ForDepartmentsList;
+    //     this.ForContractsList = assignment.ForContractsList;
+    //     this.AssigneeType = assignment.AssigneeType;
+    //     this.AssignedRolesList = new List<ApplicationRole> { template.AssignedRole };
+    // }
 
-    public AssignmentViewModel(string title, string instructions, DateTime dueDate, List<Department> forDepartmentsList, List<Contract> forContractsList, AssigneeType assigneeType, List<IdentityRole> assignedRolesList, ApplicationUser assignee, AssignmentStatus status)
+    public AssignmentViewModel(
+        string title,
+        string instructions,
+        DateTime dueDate,
+        List<Department> forDepartmentsList,
+        List<Contract> forContractsList,
+        AssigneeType assigneeType,
+        List<ApplicationRole> assignedRolesList,
+        ApplicationUser assignee,
+        AssignmentStatus status
+    )
     {
         this.Title = title;
         this.Instructions = instructions;
@@ -68,4 +78,3 @@ public class AssignmentViewModel
         this.Status = status;
     }
 }
-

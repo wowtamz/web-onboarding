@@ -1,68 +1,148 @@
-@model SoPro24Team06.ViewModels.AssigmentTemplateViewModel
+@model SoPro24Team06.ViewModels.CreateEditAssignmentTemplateViewModel
+@using SoPro24Team06.Enums
+@using SoPro24Team06.Models
+@using Microsoft.AspNetCore.Identity
+@{
+    List<ApplicationRole> roleList = ViewData["roles"] as List<ApplicationRole> ?? new List<ApplicationRole>();
+    List<Department> departmentList = ViewData["departments"] as List<Department> ?? new List<Department>();
+    List<DueTime> dueInList = ViewData["dueIns"] as List<DueTime> ?? new List<DueTime>();
+    List<Contract> contractList = ViewData["contracts"] as List<Contract> ?? new List<Contract>();
+}
 
-<form>
-    <fieldset>
-        <legend>Titel</legend><input class="form-control" type="text">
-    </fieldset>
-    <fieldset style="margin-top: 8px;">
-        <legend>Anweisungen</legend>
-        <textarea class="form-control" placeholder="Schritt 1... "></textarea>
-    </fieldset>
-    <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
-    <div class="dropdown show">
-        <button class="btn btn-primary dropdown-toggle" aria-expanded="true" data-bs-toggle="dropdown" type="button"
-            style="margin-top: 0px;margin-bottom: 0px;margin-right: 0;">
-            Aufgabenzuständiger&nbsp;
-        </button>
-        <div class="dropdown-menu" data-bs-popper="none">
-            <a class="dropdown-item">Vorgangsverantwortlicher</a>
-            <a class="dropdown-item">Bezugsperson</a>
-            <a class="dropdown-item">Rollen</a>
+<body>
+    <form asp-controller="AssignmentTemplate" asp-action="Create" method="post">
+        <input hidden asp-for="processId" value="@Model.processId" />
+        <fieldset>
+            <legend>Titel</legend>
+            <input class="form-control" type="text" asp-for="Title">
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend>Anweisungen</legend>
+            <textarea class="form-control" placeholder="Schritt 1... " asp-for="Instructions"></textarea>
+        </fieldset>
+        <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
+        <div>
+            <select asp-for="AssigneeType" class="form-select" id="assigneeType"
+                asp-items="Html.GetEnumSelectList<AssigneeType>()"></select>
         </div>
-    </div>
-    <fieldset style="margin-top: 8px;">
-        <legend style="margin-top: 4px;">Fälligkeit</legend>
-        <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown"
-                type="button" style="margin-top: 0px;margin-bottom: 4px;margin-right: 12px;">
-                ASAP
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item">ASAP</a>
-                <a class="dropdown-item">2 Wochen vor Start</a>
-                <a class="dropdown-item">Am ersten Arbeitstag</a>
-                <a class="dropdown-item">3 Wochen nach Arbeitsbeginn</a>
-                <a class="dropdown-item">3 Monate nach Arbeitsbeginn</a>
-                <a class="dropdown-item">6 Monate nach Arbeitsbeginn</a>
+        <div id="roleSelect" style="margin-top: 8px;">
+            <select asp-for="AssignedRole" class="form-select">
+                @foreach (var r in roleList)
+                {
+                    <option value="@r.Name">@r.Name</option>
+                }
+            </select>
+        </div>
+        <fieldset style="margin-top: 8px;">
+            <legend style="margin-top: 4px;">Fälligkeit</legend>
+            <div>
+                <select asp-for="DueIn" id="dueIn" class="form-select">
+                    @foreach (var di in dueInList)
+                    {
+                        <option value="@di.Label" id="@di.Label">@di.Label</option>
+                    }
+                    <option value="Benutzerdefiniert">Benutzerdefiniert</option>
+                </select>
+                <div id="dueInCustom" class="dropdown" asp-for="" style="margin-top: 8px; display: none;">
+                    <legend style="margin-top: 4px;">Tage: | Wochen: | Monate: | Vor/Nach:</legend>
+                    <select id="days" asp-for="Days">
+                        @for (int i = 0; i <= 7; ++i)
+                        {
+                            <option value="@i"> @i </option>
+                        }
+                    </select>
+                    <select id="weeks" style="margin-left: 37px;" asp-for="Weeks">
+                        @for (int i = 0; i <= 4; ++i)
+                        {
+                            <option value="@i"> @i </option>
+                        }
+                    </select>
+                    <select id="months" style="margin-left: 70px;" asp-for="Months">
+                        @for (int i = 0; i <= 12; ++i)
+                        {
+                            <option value="@i"> @i </option>
+                        }
+                    </select>
+                    <select id="VorNach" style="margin-left: 70px;" asp-for="VorNach">
+                        <option value="Vor:">vor Start</option>
+                        <option value="Nach:">nach Arbeitsbeginn</option>
+                    </select>
+                </div>
             </div>
-        </div>
-    </fieldset>
-    <fieldset style="margin-top: 8px;">
-        <legend style="margin-top: 4px;">Vertragsart</legend>
-        <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown"
-                type="button" style="margin-bottom: 4px;">
-                Vertragsart&nbsp;
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item">First Item</a>
-                <a class="dropdown-item">Second Item</a>
-                <a class="dropdown-item">Third Item</a>
+        </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend style="margin-top: 4px;">Vertragstyp</legend>
+            <div class="form-group mt-2">
+                <select asp-for="ForContractsList" class="form-control" multiple="multiple" id="ForContractsLists">
+                    @foreach (var c in contractList)
+                    {
+                        <option value="@c.Label">@c.Label</option>
+                    }
+                </select>
+                <span asp-validation-for="ForContractsList" class="text-danger"></span>
             </div>
-        </div>
-    </fieldset>
-    <fieldset>
-        <legend style="margin-top: 4px;">Abteilung</legend>
-        <div class="dropdown"><button class="btn btn-primary dropdown-toggle" aria-expanded="false"
-                data-bs-toggle="dropdown" type="button" style="margin-top: 0px;margin-bottom: 12px;">
-                Abteilung&nbsp;
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item">First Item</a>
-                <a class="dropdown-item">Second Item</a>
-                <a class="dropdown-item">Third Item</a>
+        </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend style="margin-top: 4px;">Abteilung</legend>
+            <div class="form-group mt-2">
+                <select asp-for="ForDepartmentsList" class="form-control" multiple="multiple" id="ForDepartmentsLists">
+                    @foreach (var d in departmentList)
+                    {
+                        <option value="@d.Name">@d.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="ForDepartmentsList" class="text-danger"></span>
             </div>
-        </div>
-    </fieldset>
-    <button class="btn btn-dark" type="submit" style="margin-top: 12px;">Erstellen</button>
-</form>
+        </fieldset>
+        <button class="btn btn-dark" type="submit" style="margin-top: 12px;">Erstellen</button>
+    </form>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+        <script>
+            $(document).ready(function () {
+                $('#ForDepartmentsLists').select2({
+                    placeholder: "Wählen Sie Rollen aus",
+                    allowClear: true
+                });
+
+                $('#ForContractsLists').select2({
+                    placeholder: "Wählen Sie Rollen aus",
+                    allowClear: true
+                });
+
+                var popup = $("#usercreate-popup");
+                if (popup.length) {
+                    setTimeout(function () {
+                        popup.fadeOut("slow", function () {
+                            popup.remove();
+                        });
+                    }, 3000);
+                }
+            });
+        </script>
+        <script>
+            document.getElementById('assigneeType').addEventListener('change', function () {
+                var roleSelect = document.getElementById('roleSelect');
+                if (this.value === '0') {
+                    roleSelect.style.display = 'block';
+                } else {
+                    roleSelect.style.display = 'none';
+                }
+            });
+        </script>
+        <script>
+            document.getElementById('dueIn').addEventListener('change', function () {
+                var customDiv = document.getElementById('dueInCustom');
+                if (this.value === 'Benutzerdefiniert') {
+                    customDiv.style.display = 'block';
+                } else {
+                    customDiv.style.display = 'none';
+                }
+            });
+        </script>
+    }
+</body>

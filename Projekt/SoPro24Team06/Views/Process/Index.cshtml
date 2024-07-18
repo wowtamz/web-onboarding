@@ -1,30 +1,74 @@
-﻿@model SoPro24Team06.ViewModels.ProcessListViewModel
+﻿<!------------------------- 
+< Author: Tamas Varadi
+<------------------------->
+
+@model SoPro24Team06.ViewModels.ProcessListViewModel
 @{
     ViewData["Title"] = "Vorgänge";
+
+    List<Process> MyProcesses = ViewData["MyProcesses"] as List<Process>;
+    List<Process> AllProcesses = new List<Process> { };
+    List<Process> AllArchivedProcesses = new List<Process> { };
+    List<Process> ArchivedProcesses = new List<Process> { };
+
+    if (ViewData["AllProcesses"] != null)
+    {
+        AllProcesses = ViewData["AllProcesses"] as List<Process>;
+    }
+    
+    if (ViewData["AllArchivedProcesses"] != null)
+    {
+        AllProcesses = ViewData["AllArchivedProcesses"] as List<Process>;
+    }
+
+    if (ViewData["ArchivedProcesses"] != null)
+    {
+        ArchivedProcesses = ViewData["ArchivedProcesses"] as List<Process>;
+    }
 }
 
 <body>
     <!-- Start: Banner Heading -->
     <section class="py-4 py-xl-5" style="padding: 32px 0;">
         <div class="container">
-            <div class="text-white bg-dark border rounded border-0 p-4 p-md-5" style="background: linear-gradient(150deg, var(--bs-danger) 0%, rgb(245,165,182) 60%, white 100%, rgb(230, 29, 71) 100%), rgb(230, 29, 71);">
+            <div class="text-white bg-dark border rounded border-0 p-4 p-md-5"
+                style="background: linear-gradient(150deg, var(--bs-danger) 0%, rgb(245,165,182) 60%, white 100%, rgb(230, 29, 71) 100%), rgb(230, 29, 71);">
                 <h2 class="fw-bold text-black mb-3">Vorgänge</h2>
-                <p class="text-black mb-4" style="font-size: 20px;">Wähle einen beliebigen Prozess aus als Blaupause für um einen Vorgang zu kreieren.</p>
-                <div class="my-3"><a class="btn btn-primary btn-lg me-2" role="button" 
-                asp-controller="Process" asp-action="Start" style="background: rgb(204, 212, 217);border-style: none;">Vorgang starten</a></div>
+                <p class="text-black mb-4" style="font-size: 20px;">Wähle einen beliebigen Prozess aus als Blaupause für
+                    um einen Vorgang zu kreieren.</p>
+                <div class="my-3"><a class="btn btn-primary btn-lg me-2" role="button" asp-controller="Process"
+                        asp-action="Start" style="background: rgb(204, 212, 217);border-style: none;">Vorgang
+                        starten</a></div>
             </div>
         </div>
     </section><!-- End: Banner Heading -->
     <div class="d-flex justify-content-between align-items-xxl-center">
         <div class="btn-toolbar">
-            <div class="btn-group" role="group"><button class="btn btn-primary" type="button">Meine Vorgänge</button><button class="btn btn-primary" type="button">Alle Vorgänge</button><button class="btn btn-primary" type="button">Archivierte Vorgänge</button></div>
+            <div class="btn-group" role="group">
+                <button class="btn btn-primary" type="button" id="myProcessesButton"
+                    onclick="changeTable('myProcessesTable', this)">Meine Vorgänge</button>
+                <button class="btn btn-primary" type="button" id="archivedProcessesButton"
+                        onclick="changeTable('archivedProcessesTable', this)">Archivierte Vorgänge</button>
+                @if (User.IsInRole("Administrator"))
+                {
+                    <button class="btn btn-primary" type="button" id="allProcessesButton"
+                            onclick="changeTable('allProcessesTable', this)">Alle Vorgänge</button>
+                    
+                    <button class="btn btn-primary" type="button" id="allArchivedProcessesButton"
+                            onclick="changeTable('allArchivedProcessesTable', this)">Alle archivierte Vorgänge</button>
+                }
+            </div>
         </div>
-        <div class="dropdown"><button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;">Sortierung&nbsp;</button>
-            <div class="dropdown-menu"><a class="dropdown-item" href="#">Alle</a><a class="dropdown-item" href="#">Name</a><a class="dropdown-item" href="#">Fälligkeiten</a></div>
+        <div class="dropdown"><button class="btn btn-primary dropdown-toggle" aria-expanded="false"
+                data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;">Sortierung&nbsp;</button>
+            <div class="dropdown-menu"><a class="dropdown-item" href="#">Alle</a><a class="dropdown-item"
+                    href="#">Name</a><a class="dropdown-item" href="#">Fälligkeiten</a></div>
         </div>
     </div>
+
+    <!-- Beginn: MyProcess Liste -->
     <div class="table-responsive">
-        <table class="table">
+        <table class="table" id="myProcessesTable">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -37,39 +81,45 @@
                 </tr>
             </thead>
             <tbody>
-                @if (@Model != null)
+                @if (MyProcesses != null)
                 {
-                    @foreach (var process in @Model.ProcessList)
+                    @foreach (var process in MyProcesses)
                     {
-                        var title = process.Title;
-                        var description = process.Description;
-                        var contract = process.ContractOfRefWorker.Label;
-                        var department = process.DepartmentOfRefWorker.Name;
-                        var worker = process.WorkerOfReference.FullName;
-                        var due = process.DueDate.ToString();
+                        var id = process.Id;
 
                         <tr>
-                            <td>@title</td>
-                            <td>@description</td>
-                            <td>@contract</td>
-                            <td>@department</td>
-                            <td>@worker</td>
-                            <td>@due</td>
-                            <td class="d-flex flex-row justify-content-evenly"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
-                                    <path fill-rule="evenodd" d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5"></path>
-                                    <path fill-rule="evenodd" d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z"></path></svg>
-                                <a asp-controller="Process" asp-action="Edit"><i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i></a>
-                                
+                            <td>@process.Title</td>
+                            <td>@process.Description</td>
+                            <td>@process.ContractOfRefWorker.Label</td>
+                            <td>@process.DepartmentOfRefWorker.Name</td>
+                            <td>@process.WorkerOfReference.FullName</td>
+                            <td>@process.DueDate.ToString()</td>
+                            <td class="d-flex flex-row justify-content-evenly">
+                                <a href="/Process/Detail/@id">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
+                                        viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
+                                        <path fill-rule="evenodd"
+                                            d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5">
+                                        </path>
+                                        <path fill-rule="evenodd"
+                                            d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z">
+                                        </path>
+                                    </svg>
+                                </a>
+
+                                <a href="/Process/Edit/@id">
+                                    <i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i>
+                                </a>
+
 
                                 <form action="@Url.Action("Stop", "Process", new { id = process.Id})" method="post">
                                     @Html.AntiForgeryToken()
-                                    <input type="hidden" name="_method" value="stop" />
                                     <button class="btn-close" type="submit" aria-label="Close"></button>
                                 </form>
                             </td>
                         </tr>
                     }
-                    if (@Model.ProcessList.Count == 0)
+                    if (MyProcesses.Count == 0)
                     {
                         <tr>
                             <td colspan="7">Keine Vorgänge vorhanden</td>
@@ -79,5 +129,267 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Ende: MyProcesses Liste -->
+
+
+    <!-- Beginn: AllProcesses Liste -->
+    <div class="table-responsive">
+        <table class="table" id="allProcessesTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Beschreibung</th>
+                    <th>Vertragstyp</th>
+                    <th>Abteilung</th>
+                    <th>Bezugsperson</th>
+                    <th>Zieldatum</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (AllProcesses != null)
+                {
+                    @foreach (var process in AllProcesses)
+                    {
+                        var id = process.Id;
+
+                        <tr>
+                            <td>@process.Title</td>
+                            <td>@process.Description</td>
+                            <td>@process.ContractOfRefWorker.Label</td>
+                            <td>@process.DepartmentOfRefWorker.Name</td>
+                            <td>@process.WorkerOfReference.FullName</td>
+                            <td>@process.DueDate.ToString()</td>
+                            <td class="d-flex flex-row justify-content-evenly">
+                                <a href="/Process/Detail/@id">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
+                                        viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
+                                        <path fill-rule="evenodd"
+                                            d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5">
+                                        </path>
+                                        <path fill-rule="evenodd"
+                                            d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z">
+                                        </path>
+                                    </svg>
+                                </a>
+
+                                <a href="/Process/Edit/@id">
+                                    <i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i>
+                                </a>
+
+
+                                <form action="@Url.Action("Stop", "Process", new { id = process.Id})" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn-close" type="submit" aria-label="Close"></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    if (@AllProcesses.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7">Keine Vorgänge vorhanden</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Ende: AllProcesses Liste -->
+
+    <!-- Beginn: AllArchivedProcesses Liste -->
+    <div class="table-responsive">
+        <table class="table" id="allArchivedProcessesTable">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Beschreibung</th>
+                <th>Vertragstyp</th>
+                <th>Abteilung</th>
+                <th>Bezugsperson</th>
+                <th>Zieldatum</th>
+                <th>Aktionen</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (AllProcesses != null)
+            {
+            @foreach (var process in AllArchivedProcesses)
+            {
+            var id = process.Id;
+
+            <tr>
+                <td>@process.Title</td>
+                <td>@process.Description</td>
+                <td>@process.ContractOfRefWorker.Label</td>
+                <td>@process.DepartmentOfRefWorker.Name</td>
+                <td>@process.WorkerOfReference.FullName</td>
+                <td>@process.DueDate.ToString()</td>
+                <td class="d-flex flex-row justify-content-evenly">
+                    <a href="/Process/Detail/@id">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
+                             viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
+                            <path fill-rule="evenodd"
+                                  d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5">
+                            </path>
+                            <path fill-rule="evenodd"
+                                  d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z">
+                            </path>
+                        </svg>
+                    </a>
+
+                    <a href="/Process/Edit/@id">
+                        <i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i>
+                    </a>
+
+
+                    <form action="@Url.Action("Stop", "Process", new { id = process.Id})" method="post">
+                        @Html.AntiForgeryToken()
+                        <button class="btn-close" type="submit" aria-label="Close"></button>
+                    </form>
+                </td>
+            </tr>
+            }
+            if (@AllArchivedProcesses.Count == 0)
+            {
+            <tr>
+                <td colspan="7">Keine Vorgänge vorhanden</td>
+            </tr>
+            }
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Ende: AllArchivedProcesses Liste -->
+
+    <!-- Beginn: ArchivedProcesses Liste -->
+    <div class="table-responsive">
+        <table class="table" id="archivedProcessesTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Beschreibung</th>
+                    <th>Vertragstyp</th>
+                    <th>Abteilung</th>
+                    <th>Bezugsperson</th>
+                    <th>Zieldatum</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (@ArchivedProcesses != null)
+                {
+                    @foreach (var process in @ArchivedProcesses)
+                    {
+                        var id = process.Id;
+
+                        <tr>
+                            <td>@process.Title</td>
+                            <td>@process.Description</td>
+                            <td>@process.ContractOfRefWorker.Label</td>
+                            <td>@process.DepartmentOfRefWorker.Name</td>
+                            <td>@process.WorkerOfReference.FullName</td>
+                            <td>@process.DueDate.ToString()</td>
+                            <td class="d-flex flex-row justify-content-evenly">
+                                <a href="/Process/Detail/@id">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
+                                        viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
+                                        <path fill-rule="evenodd"
+                                            d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5">
+                                        </path>
+                                        <path fill-rule="evenodd"
+                                            d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z">
+                                        </path>
+                                    </svg>
+                                </a>
+
+                                <a href="/Process/Edit/@id">
+                                    <i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i>
+                                </a>
+
+
+                                <form action="@Url.Action("Stop", "Process", new { id = process.Id})" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn-close" type="submit" aria-label="Close"></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    if (@ArchivedProcesses.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7">Keine archivierte Vorgänge vorhanden</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Ende: ArchivedProcesses Liste -->
+
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
 </body>
+
+
+<script>
+
+    window.onload = function () {
+        var allProcesses = document.getElementById("allProcessesTable");
+        var allArchivedProcesses = document.getElementById("allArchivedProcessesTable");
+        var archivedProcesses = document.getElementById("archivedProcessesTable");
+        
+        allProcesses.setAttribute("hidden", "hidden");
+        allArchivedProcesses.setAttribute("hidden", "hidden");
+        archivedProcesses.setAttribute("hidden", "hidden");
+
+        document.getElementById("allProcessesButton").setAttribute("class", "btn btn-secondary");
+        document.getElementById("allArchivedProcessesButton").setAttribute("class", "btn btn-secondary");
+        document.getElementById("archivedProcessesButton").setAttribute("class", "btn btn-secondary");
+    }
+
+    function changeTable(tableId, button) {
+
+        var myProcesses = document.getElementById("myProcessesTable");
+        var allProcesses = document.getElementById("allProcessesTable");
+        var allArchivedProcesses = document.getElementById("allArchivedProcessesTable");
+        var archivedProcesses = document.getElementById("archivedProcessesTable");
+
+        myProcesses.setAttribute("hidden", "hidden");
+        allProcesses.setAttribute("hidden", "hidden");
+        allArchivedProcesses.setAttribute("hidden", "hidden");
+        archivedProcesses.setAttribute("hidden", "hidden");
+
+
+        document.getElementById("myProcessesButton").setAttribute("class", "btn btn-secondary");
+        document.getElementById("allProcessesButton").setAttribute("class", "btn btn-secondary");
+        document.getElementById("allArchivedProcessesButton").setAttribute("class", "btn btn-secondary");
+        document.getElementById("archivedProcessesButton").setAttribute("class", "btn btn-secondary");
+
+        button.setAttribute("class", "btn btn-primary");
+        button.blur();
+
+        var tableElement = document.getElementById(tableId);
+
+        tableElement.removeAttribute("hidden");
+    }
+
+    function stop(processId) {
+
+        $.ajax({
+            url: '@Url.Action("Stop", "Process")',
+            type: 'POST',
+            data: { id: processId },
+            success: function (response) {
+                window.location.href = response.redirectToUrl;
+            },
+            error: function (xhr, status, error) {
+                console.error("Error starting process: " + error);
+            }
+        });
+    }
+
+</script>
