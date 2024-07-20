@@ -230,7 +230,7 @@ namespace SoPro24Team06.Controllers
             {
                 return NotFound();
             }
-            List<Process> processList = await _processContainer.GetProcessesAsync();
+            List<Process> processList = await _processContainer.GetActiveProcessesAsync();
             Process? process = processList.FirstOrDefault(p =>
                 p.Assignments != null && p.Assignments.Contains(assignment)
             );
@@ -260,7 +260,7 @@ namespace SoPro24Team06.Controllers
             Assignment? assignment = _assignmentContainer.GetAssignmentById(assignmentId);
             if (assignment == null)
                 return NotFound();
-            List<Process> processList = await _processContainer.GetProcessesAsync();
+            List<Process> processList = await _processContainer.GetActiveProcessesAsync();
             Process? process = processList.FirstOrDefault(p => p.Assignments.Contains(assignment));
             AssignmentDetailsViewModel model = new AssignmentDetailsViewModel(
                 assignment,
@@ -301,7 +301,7 @@ namespace SoPro24Team06.Controllers
             ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
             List<string> roles = new List<string>(await _userManager.GetRolesAsync(user));
 
-            List<Process> processList = await _processContainer.GetProcessesAsync();
+            List<Process> processList = await _processContainer.GetActiveProcessesAsync();
             // überprüfung einfügen ob Process noch nicht Archiviert ist.
             List<Assignment> assignmentList = new List<Assignment>();
 

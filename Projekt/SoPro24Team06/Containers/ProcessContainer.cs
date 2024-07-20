@@ -44,6 +44,13 @@ public class ProcessContainer
         return processList;
     }
 
+	// Alle Vorgänge die nicht Archiviert sind
+	public async Task<List<Process>> GetActiveProcessesAsync()
+	{
+		List<Process> processList = await this.GetProcessesAsync();
+		return processList.Where(p => p.IsArchived).ToList<Process>();
+	}
+
     // Vorgang per Id lesen
     public async Task<Process> GetProcessByIdAsync(int id)
     {
