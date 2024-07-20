@@ -382,8 +382,7 @@ namespace SoPro24Team06.Controllers
             {
                 return NotFound("Eror: Selected Assignment Not Found");
             }
-
-            List<Process> processList = await _processContainer.GetProcessesAsync();
+            List<Process> processList = await _processContainer.GetActiveProcessesAsync();
             Process? process = processList.FirstOrDefault(p =>
                 p.Assignments != null && p.Assignments.Contains(assignment)
             );
@@ -431,8 +430,7 @@ namespace SoPro24Team06.Controllers
             if (assignment == null)
             {
                 return NotFound();
-            }
-            List<Process> processList = await _processContainer.GetProcessesAsync();
+            List<Process> processList = await _processContainer.GetActiveProcessesAsync();
             Process? process = processList.FirstOrDefault(p => p.Assignments.Contains(assignment));
 
             AssignmentDetailsViewModel model = new AssignmentDetailsViewModel(assignment, process);
@@ -481,10 +479,9 @@ namespace SoPro24Team06.Controllers
             // get current User and Roles current user
             ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
             List<string> roles = new List<string>(await _userManager.GetRolesAsync(user));
-            //get List of all currently active Processes
-            List<Process> processList = await _processContainer.GetProcessesAsync();
-            processList = processList.Where(p => !p.IsArchived).ToList();
 
+            List<Process> processList = await _processContainer.GetActiveProcessesAsync();
+            // überprüfung einfügen ob Process noch nicht Archiviert ist.
             List<Assignment> assignmentList = new List<Assignment>();
             //changes contents of Lists depending on which list was selected in Index ViewModel
             switch (HttpContext.Session.GetString("currentList"))
