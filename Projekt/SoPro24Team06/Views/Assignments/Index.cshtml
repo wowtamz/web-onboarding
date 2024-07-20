@@ -117,7 +117,7 @@
 							@if (assignment.DueDate != null)
 							{
 								<td>@assignment.GetDaysTillDueDate()</td>
-								<td>@assignment.DueDate</td>
+								<td>@assignment.DueDate.Date</td>
 							}
 							else
 							{
@@ -189,7 +189,7 @@
 							@if (@assignment.DueDate != null)
 							{
 								<td>@assignment.GetDaysTillDueDate()</td>
-								<td>@assignment.DueDate</td>
+								<td>@assignment.DueDate.Date</td>
 							}
 							else
 							{
@@ -279,7 +279,7 @@
 							@if (assignment.DueDate != null)
 							{
 								<td>@assignment.GetDaysTillDueDate()</td>
-								<td>@assignment.DueDate</td>
+								<td>@assignment.DueDate.Date</td>
 							}
 							else
 							{
