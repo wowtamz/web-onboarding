@@ -1,8 +1,9 @@
 //beginn codeownership Jan Pfluger
-
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SoPro24Team06.Container;
 using SoPro24Team06.Containers;
@@ -10,6 +11,7 @@ using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
+using SoPro24Team06.Helpers;
 
 namespace SoPro24Team06.Controllers
 {
@@ -159,7 +161,7 @@ namespace SoPro24Team06.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
             }
 
             if (
@@ -185,7 +187,7 @@ namespace SoPro24Team06.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
             }
 
             Assignment? assignment = await _context.Assignments.FirstOrDefaultAsync(a =>
@@ -262,13 +264,19 @@ namespace SoPro24Team06.Controllers
                 return NotFound();
             List<Process> processList = await _processContainer.GetProcessesAsync();
             Process? process = processList.FirstOrDefault(p => p.Assignments.Contains(assignment));
+			List<ApplicationUser> userList = _userManager.Users.ToList();
+			foreach (ApplicationUser u in userList)
+			{
+				if (await _userManager.IsLockedOutAsync(u)) userList.Remove(u);
+			}
+			List<ApplicationRole> roleList =  _roleManager.Roles.ToList();
             AssignmentDetailsViewModel model = new AssignmentDetailsViewModel(
                 assignment,
-                _userManager.Users.ToList(),
-                _roleManager.Roles.ToList(),
+                userList,
+                roleList,
                 process
             );
-            return View("~/Views/Assignments/Details", model);
+            return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
         }
 
         public async Task<IActionResult> Delete()
@@ -316,12 +324,13 @@ namespace SoPro24Team06.Controllers
                         )
                         .ToList();
 					foreach(Process p in processList)
+					{
+						foreach(Assignment a in p.Assignments)
 						{
-							foreach(Assignment a in p.Assignments)
-							{
-								if(a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())) assignmentList.Add(a);
-							}
+							if(a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())) assignmentList.Add(a);
 						}
+					}
+					assignmentList = _context.Assignments.ToList().Where(a => a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())).ToList();
                     break;
 				
                 case "AllAssignments":
@@ -334,6 +343,7 @@ namespace SoPro24Team06.Controllers
 								assignmentList.Add(a);
                     		} 
 						}
+						assignmentList = _context.Assignments.ToList();
 					}
 					else if (processList.Any(p => p.Supervisor == user))
 					{
@@ -348,13 +358,15 @@ namespace SoPro24Team06.Controllers
 								{
 									assignmentList.Add(a);
 								}
+								assignmentList = _context.Assignments.ToList();
 							}
 							foreach(Assignment a in p.Assignments)
 							{
-								if((a. Assignee != null && a.Assignee == user) || (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())))assignmentList.Add(a);
-							}
-					
+								if((a.Assignee != null && a.Assignee == user) || (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())))assignmentList.Add(a);
+							}					
 						}
+						assignmentList = _context.Assignments.ToList().Where(a => (a.Assignee != null && a.Assignee == user) || (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString()))).ToList();
+
 					}
                     else
                     {
@@ -372,6 +384,7 @@ namespace SoPro24Team06.Controllers
 								if(a.Assignee != null && a.Assignee == user) assignmentList.Add(a);
 							}
 						}
+						assignmentList = _context.Assignments.ToList().Where(a => a.Assignee != null && a.Assignee == user).ToList();
 						HttpContext.Session.SetString("currentList", "MyAssignments");
                     }
                     break;
@@ -389,7 +402,7 @@ namespace SoPro24Team06.Controllers
 								if(a.Assignee != null && a.Assignee == user) assignmentList.Add(a);
 							}
 						}
-
+					assignmentList = _context.Assignments.ToList().Where(a => a.Assignee != null && a.Assignee == user).ToList();
                     HttpContext.Session.SetString("currentList", "MyAssignments");
                     break;
             }
