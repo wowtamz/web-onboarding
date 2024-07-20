@@ -8,10 +8,10 @@ namespace SoPro24Team06.ViewModels
 {
     public class AssignmentDetailsViewModel
     {
-        public Assignment Assignment { get; set; }
-        public SelectList UserList { get; set; }
-        public SelectList RoleList { get; set; }
-        public Process? Process { get; set; }
+        public Assignment ? Assignment { get; set; }
+        public SelectList ? UserList { get; set; }
+        public SelectList ? RoleList { get; set; }
+        public Process ? Process { get; set; }
         public SelectList AssignmentStatusList { get; set; }
 
         public AssignmentDetailsViewModel(
@@ -24,11 +24,11 @@ namespace SoPro24Team06.ViewModels
             this.Assignment = assignment;
             if (this.Assignment.Assignee != null)
             {
-                this.UserList = new SelectList(userList, "Id", "Name", this.Assignment.Assignee.Id);
+                this.UserList = new SelectList(userList, "Id", "FullName", this.Assignment.Assignee.Id);
             }
             else
             {
-                this.UserList = new SelectList(userList, "Id", "Name");
+                this.UserList = new SelectList(userList, "Id", "FullName");
             }
 
             if (this.Assignment.AssignedRole != null)
@@ -48,9 +48,20 @@ namespace SoPro24Team06.ViewModels
             this.AssignmentStatusList = new SelectList(
                 EnumHelper.GetEnumList<AssignmentStatus>(),
                 "Value",
-                "Text"
+                "Text",
+				Assignment.Status
             );
         }
+
+		public AssignmentDetailsViewModel() 
+		{
+			this.AssignmentStatusList = new SelectList(
+                EnumHelper.GetEnumList<AssignmentStatus>(),
+                "Value",
+                "Text",
+				Assignment.Status
+            );
+		}
     }
 }
 //end codeownership Jan Pfluger

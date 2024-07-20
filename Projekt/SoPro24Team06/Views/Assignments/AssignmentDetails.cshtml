@@ -9,7 +9,7 @@
 	<fieldset>
 		@if (Model.Process != null)
 		{
-			<legent>Vorgang</legent>
+			<legend>Vorgang</legend>
 			<p>@Model.Process.Title</p>
 		}
 	</fieldset>
@@ -28,15 +28,14 @@
 		<legend>Aufgabenverantwortlichkeit</legend>
 		<select id="assignmentTypeDropdown" asp-for="Assignment.AssigneeType" class="btn btn-primary dropdown-toggle"
 			aria-expanded="false" data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;">
-			<option value=null>Bitte Auswählen</option>
-			@if (Model.Assignment.AssigneeType == @SoPro24Team06.Enums.AssigneeType.ROLES)
+			@if (Model.Assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.ROLES)
 			{
-				<otpion value="@SoPro24Team06.Enums.AssigneeType.ROLES" selected>Rolle</otpion>
+				<option value="@SoPro24Team06.Enums.AssigneeType.ROLES" selected>Rolle</option>
 				<option value="@SoPro24Team06.Enums.AssigneeType.USER">Nutzer</option>
 			}
 			else
 			{
-				<otpion value="@SoPro24Team06.Enums.AssigneeType.ROLES">Rolle</otpion>
+				<option value="@SoPro24Team06.Enums.AssigneeType.ROLES">Rolle</option>
 				<option value="@SoPro24Team06.Enums.AssigneeType.USER" selected>Nutzer</option>
 			}
 		</select>
@@ -58,44 +57,8 @@
 	<fieldset style="margin-top: 4px">
 		<legend>Status</legend>
 		<select id="assignmentStatusDrowpdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
-			data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.Status" aps-items=>
-
-			@if (Model.Assignment.Status == SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED)
-			{
-				<option selected value="@SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED">
-					@SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED.ToString()
-				</option>
-			}
-			else
-			{
-				<option value="@SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED">
-					@SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED.ToString()</option>
-			}
-
-			@if (Model.Assignment.Status == SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS)
-			{
-				<option selected value="@SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS">
-					@SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS.ToString()
-				</option>
-			}
-			else
-			{
-				<option value="@SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS">
-					@SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS.ToString()</option>
-			}
-
-			@if (Model.Assignment.Status == SoPro24Team06.Enums.AssignmentStatus.DONE)
-			{
-				<option selected value="@SoPro24Team06.Enums.AssignmentStatus.DONE">
-					@SoPro24Team06.Enums.AssignmentStatus.DONE.ToString()
-				</option>
-			}
-			else
-			{
-				<option value="@SoPro24Team06.Enums.AssignmentStatus.DONE">
-					@SoPro24Team06.Enums.AssignmentStatus.DONE.ToString()
-				</option>
-			}
+			data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.Status"
+			aps-items="@Model.AssignmentStatusList">
 		</select>
 	</fieldset>
 	<div style="margin-top: 12px">
@@ -108,9 +71,8 @@
 <script>
 	// anzeigen der zugehörigen Dropdownmenues
 	document.getElementById('assignmentTypeDropdown').addEventListener('change', function () {
-		var assignedRoleGroup = document.getelementById('assignedRoleGroup');
-		var assingeeGroup = document.getElementById('assigneeGroup');
-
+		var assignedRoleGroup = document.getElementById('assignedRoleGroup');
+		var assigneeGroup = document.getElementById('assigneeGroup');
 		if (this.value == '@SoPro24Team06.Enums.AssigneeType.ROLES') {
 			assignedroleGroup.style.display = 'block';
 			assingeeGroup.style.display = 'none';
@@ -123,10 +85,11 @@
 		}
 	});
 	// Trigger change event on page load
-	document.getElementById('assingmentTypeDropdown').dispatchEvent(new Event('change'));
+	document.getElementById('assignmentTypeDropdown').dispatchEvent(new Event('change'));
 
 	function validateForm() {
-		const assignmentTpe = document.getElementById('assignmentTypeDropdown').value;
+		let isValid = true;
+		const assignmentType = document.getElementById('assignmentTypeDropdown').value;
 		if (!assignmentType) {
 			alert('Bitte wählen Sie eine Aufgabenverantwortlichkeit aus.');
 			isValid = false;
