@@ -82,7 +82,7 @@
 
 	// überprüfung ob alles gesetzt ist
 	function validateForm() {
-		const assignmentTpe = document.getElementById('assignmentTypeDropdown').value;
+		const assignmentType = document.getElementById('assignmentTypeDropdown').value;
 		let isValid = true;
 
 		if (!assignmentType) {
@@ -90,7 +90,7 @@
 			isValid = false;
 		}
 
-		if (assignmentTpe === '@SoPro24Team06.Enums.AssigneeType.ROLES') {
+		if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.ROLES') {
 			const assingedRole = document.getElementById('assignedRoleDropdown').value;
 			if (!assingedRole) {
 				alert('Bitte wählen Sie eine Rolle aus');
