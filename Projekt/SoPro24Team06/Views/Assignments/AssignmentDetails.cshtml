@@ -47,7 +47,7 @@
 			</select>
 		</div>
 		<div id="assigneeGroup" style="display:none;">
-			<select id="assigneedropdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
+			<select id="assignedUserDropdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
 				data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.Assignee"
 				asp-items="@Model.UserList">
 				<option value=null>Bitte Auswählen</option>
@@ -58,7 +58,7 @@
 		<legend>Status</legend>
 		<select id="assignmentStatusDrowpdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
 			data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.Status"
-			aps-items="@Model.AssignmentStatusList">
+			asp-items="@Model.AssignmentStatusList">
 		</select>
 	</fieldset>
 	<div style="margin-top: 12px">
@@ -67,25 +67,27 @@
 	</div>
 </form>
 
-
 <script>
-	// anzeigen der zugehörigen Dropdownmenues
-	document.getElementById('assignmentTypeDropdown').addEventListener('change', function () {
+	function updateDropdownVisibility() {
 		var assignedRoleGroup = document.getElementById('assignedRoleGroup');
 		var assigneeGroup = document.getElementById('assigneeGroup');
-		if (this.value == '@SoPro24Team06.Enums.AssigneeType.ROLES') {
-			assignedroleGroup.style.display = 'block';
-			assingeeGroup.style.display = 'none';
-		} else if (this.value == '@SoPro24Team06.Enums.AssigneeType.USER') {
-			assignedroleGroup.style.display = 'none';
-			assingeeGroup.style.display = 'block'
+		var assignmentType = document.getElementById('assignmentTypeDropdown').value;
+
+		console.log("Assignment Type Changed: " + assignmentType); // Debugging
+
+		if (assignmentType == '@SoPro24Team06.Enums.AssigneeType.ROLES') {
+			assignedRoleGroup.style.display = 'block';
+			assigneeGroup.style.display = 'none';
+		} else if (assignmentType == '@SoPro24Team06.Enums.AssigneeType.USER') {
+			assignedRoleGroup.style.display = 'none';
+			assigneeGroup.style.display = 'block';
 		} else {
-			assignedroleGroup.style.display = 'none';
-			assingeeGroup.style.display = 'none'
+			assignedRoleGroup.style.display = 'none';
+			assigneeGroup.style.display = 'none';
 		}
-	});
-	// Trigger change event on page load
-	document.getElementById('assignmentTypeDropdown').dispatchEvent(new Event('change'));
+	}
+	document.getElementById('assignmentTypeDropdown').addEventListener('change', updateDropdownVisibility);
+	document.addEventListener('DOMContentLoaded', updateDropdownVisibility);
 
 	function validateForm() {
 		let isValid = true;
@@ -94,9 +96,9 @@
 			alert('Bitte wählen Sie eine Aufgabenverantwortlichkeit aus.');
 			isValid = false;
 		}
-		if (assignmentTpe === '@SoPro24Team06.Enums.AssigneeType.ROLES') {
-			const assingedRole = document.getElementById('assignedRoleDropdown').value;
-			if (!assingedRole) {
+		if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.ROLES') {
+			const assignedRole = document.getElementById('assignedRoleDropdown').value;
+			if (!assignedRole) {
 				alert('Bitte wählen Sie eine Rolle aus');
 				isValid = false;
 			}
