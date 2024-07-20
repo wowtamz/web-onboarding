@@ -58,7 +58,7 @@ namespace SoPro24Team06.Models
                     this.Assignee = assignee;
                 this.AssigneeType = AssigneeType.USER;
             }
-            this.DueDate = dueDate;
+            this.DueDate = dueDate.Date;
             this.Status = AssignmentStatus.NOT_STARTED;
         }
 
@@ -66,7 +66,7 @@ namespace SoPro24Team06.Models
 
         public int GetDaysTillDueDate()
         {
-            return (this.DueDate - DateTime.Today).Days;
+            return (this.DueDate.Date - DateTime.Today).Days;
         }
     }
 }
