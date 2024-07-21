@@ -22,36 +22,20 @@
 	</fieldset>
 	<fieldset style="margin-top: 4px">
 		<legend>Aufgabenverantwortlichkeit</legend>
-		<select id="assignmentTypeDropdown" asp-for="Assignment.AssigneeType" class="btn btn-primary dropdown-toggle"
-			aria-expanded="false" data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;">
-			@if (Model.Assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.ROLES)
-			{
-				<option value="Null">Bitte Auswählen</option>
-				<option value="@SoPro24Team06.Enums.AssigneeType.ROLES" selected>Rolle</option>
-				<option value="@SoPro24Team06.Enums.AssigneeType.USER">Nutzer</option>
-			}
-			else if (Model.Assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.USER)
-			{
-				<option value="Null">Bitte Auswählen</option>
-				<option value="@SoPro24Team06.Enums.AssigneeType.ROLES">Rolle</option>
-				<option value="@SoPro24Team06.Enums.AssigneeType.USER" selected>Nutzer</option>
-			}
-			else
-			{
-				<option value="Null">Bitte Auswählen</option>
-				<option value="@SoPro24Team06.Enums.AssigneeType.ROLES">Rolle</option>
-				<option value="@SoPro24Team06.Enums.AssigneeType.USER">Nutzer</option>
-			}
-		</select>
-		<div id="assignedRoleGroup" style="display:none;">
+		@Html.DropDownList(
+					"Assignment.AssigneeType",
+					Model.AssigneeTypeList,
+					new { @id = "assignmentTypeDropdown", @class = "form-control", }
+					)
+		<div id="assignedRoleGroup" style="display:none; margin-top:8px !important;">
 			@Html.DropDownList(
-							
+
 							"Assignment.AssignedRole",
 							Model.RoleList,
 							new { @class = "form-control" }
 							)
 		</div>
-		<div id="assigneeGroup" style="display:none;">
+		<div id="assigneeGroup" style="display:none; margin-top:8px !important;">
 			@Html.DropDownList(
 							"Assignment.Assignee",
 							Model.UserList,
