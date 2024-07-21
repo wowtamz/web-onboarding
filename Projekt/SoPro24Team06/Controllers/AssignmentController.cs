@@ -232,6 +232,7 @@ namespace SoPro24Team06.Controllers
             {
                 return NotFound();
             }
+			
             List<Process> processList = await _processContainer.GetProcessesAsync();
             Process? process = processList.FirstOrDefault(p =>
                 p.Assignments != null && p.Assignments.Contains(assignment)
