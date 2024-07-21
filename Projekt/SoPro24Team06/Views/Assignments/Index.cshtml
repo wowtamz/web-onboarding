@@ -304,7 +304,7 @@
 								<a href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
 										class="far fa-edit" style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
 							</td>
-							<form id="Edit" asp-action="Edit-@assignment.Id" method="post" style="display:none;">
+							<form id="Edit-@assignment.Id" asp-action="Edit" method="post" style="display:none;">
 								@Html.AntiForgeryToken()
 								<input type="hidden" name="assignmentId" value="@assignment.Id" />
 							</form>
