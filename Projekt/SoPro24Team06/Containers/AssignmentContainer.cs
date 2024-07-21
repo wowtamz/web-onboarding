@@ -20,7 +20,7 @@ public class AssingmentContainer
         return _context.Assignments
 			.Include(a => a.AssignedRole)
 			.Include(a => a.Assignee)
-			.FirstOrDefault(a => a.Id == id);
+			.ToList().Find(a => a.Id == id);
 
     }
 

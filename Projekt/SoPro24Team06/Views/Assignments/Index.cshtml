@@ -3,11 +3,13 @@
 <head>
 	<style>
 		.done {
-			background-color: --silver
+			background-color: #4d5456 !important;
+			color: white !important
 		}
 
 		.overdue {
-			background-color: --amaranth
+			background-color: #e61d47 !important;
+			color: white !important
 		}
 	</style>
 </head>
@@ -111,13 +113,13 @@
 				{
 					@foreach (var assignment in Model.AssignmentList)
 					{
-						<tr>
+						<tr class="@Model.GetRowClass(assignment)">
 							<td>@assignment.Title</td>
 							<td>@Model.GetProcessByAssingment(assignment)</td>
 							@if (assignment.DueDate != null)
 							{
 								<td>@assignment.GetDaysTillDueDate()</td>
-								<td>@assignment.DueDate.Date</td>
+								<td>@assignment.DueDate.ToString("dd.MM.yyyy")</td>
 							}
 							else
 							{
@@ -126,7 +128,7 @@
 							}
 							<td>@Model.GetAssignmentStatus(assignment)</td>
 							<td>
-								<a href="#" onclick="document.getElementById('Details').submit(); return false;">
+								<a href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
@@ -138,8 +140,8 @@
 									</svg>
 								</a>
 							</td>
-							<form id="Details" asp-action="Details" method="post" style="display:none;">
-								<input type="hidden" name="assignmentID" value="@assignment.Id" />
+							<form id="Details" asp-action="Details-@assignment.Id" method="post" style="display:none;">
+								<input type="hidden" name="assignmentId" value="@assignment.Id" />
 							</form>
 						</tr>
 					}
@@ -175,7 +177,7 @@
 
 					@foreach (var assignment in Model.AssignmentList)
 					{
-						<tr class="d-flex flex-row justify-content-evenly" style="@Model.GetRowClass(assignment)" !important>
+						<tr class="@Model.GetRowClass(assignment)">
 							<td>@assignment.Title</td>
 							<td>@Model.GetProcessByAssingment(assignment)</td>
 							@if (assignment.AssignedRole != null)
@@ -189,7 +191,7 @@
 							@if (@assignment.DueDate != null)
 							{
 								<td>@assignment.GetDaysTillDueDate()</td>
-								<td>@assignment.DueDate.Date</td>
+								<td>@assignment.DueDate.ToString("dd.MM.yyyy")</td>
 							}
 							else
 							{
@@ -198,7 +200,7 @@
 							}
 							<td>@Model.GetAssignmentStatus(assignment)</td>
 							<td>
-								<a href="#" onclick="document.getElementById('Details').submit(); return false;">
+								<a href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
@@ -210,8 +212,8 @@
 									</svg>
 								</a>
 							</td>
-							<form id="Details" asp-action="Details" method="post" style="display:none;">
-								<input type="hidden" name="assignmentID" value="@assignment.Id" />
+							<form id="Details" asp-action="Details-@assignment.Id" method="post" style="display:none;">
+								<input type="hidden" name="assignmentId" value="@assignment.Id" />
 							</form>
 						</tr>
 					}
@@ -247,7 +249,7 @@
 				{
 					@foreach (var assignment in Model.AssignmentList)
 					{
-						<tr>
+						<tr class="@Model.GetRowClass(assignment)">
 							<td>@assignment.Title</td>
 							<td>@Model.GetProcessByAssingment(assignment)</td>
 							@if (@assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.ROLES)
@@ -279,7 +281,7 @@
 							@if (assignment.DueDate != null)
 							{
 								<td>@assignment.GetDaysTillDueDate()</td>
-								<td>@assignment.DueDate.Date</td>
+								<td>@assignment.DueDate.ToString("dd.MM.yyyy")</td>
 							}
 							else
 							{
@@ -288,7 +290,7 @@
 							}
 							<td>@Model.GetAssignmentStatus(assignment)</td>
 							<td class="d-flex flex-row justify-content-evenly gap-3">
-								<a href="#" onclick="document.getElementById('Details').submit(); return false;">
+								<a href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
@@ -299,16 +301,16 @@
 										</path>
 									</svg>
 								</a>
-								<a href="#" onclick="document.getElementById('Edit').submit(); return false;"><i class="far fa-edit"
-										style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
+								<a href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
+										class="far fa-edit" style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
 							</td>
-							<form id="Edit" asp-action="Edit" method="post" style="display:none;">
+							<form id="Edit" asp-action="Edit-@assignment.Id" method="post" style="display:none;">
 								@Html.AntiForgeryToken()
-								<input type="hidden" name="assignmentID" value="@assignment.Id" />
+								<input type="hidden" name="assignmentId" value="@assignment.Id" />
 							</form>
-							<form id="Details" asp-action="Details" method="post" style="display:none;">
+							<form id="Details-@assignment.Id" asp-action="Details" method="post" style="display:none;">
 								@Html.AntiForgeryToken()
-								<input type="hidden" name="assignmentID" value="@assignment.Id" />
+								<input type="hidden" name="assignmentId" value="@assignment.Id" />
 							</form>
 						</tr>
 					}

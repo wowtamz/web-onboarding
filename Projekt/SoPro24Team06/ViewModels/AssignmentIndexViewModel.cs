@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SoPro24Team06.Enums;
+using SoPro24Team06.Helpers;
 using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels;
@@ -55,24 +56,14 @@ public class AssignmentIndexViewModel
     {
         if (assignment.Status == AssignmentStatus.DONE)
             return "done";
-        if (assignment.GetDaysTillDueDate() < 0)
+        if (assignment.GetDaysTillDueDate() <= 0)
             return "overdue";
-        return "";
+        return string.Empty;
     }
 
     public string GetAssignmentStatus(Assignment assignment)
     {
-        switch (assignment.Status)
-        {
-            case AssignmentStatus.NOT_STARTED:
-                return "Noch nicht Begonnen";
-            case AssignmentStatus.IN_PROGRESS:
-                return "In Bearbeitung";
-            case AssignmentStatus.DONE:
-                return "Fertig";
-            default:
-                return "Unbekannt";
-        }
+        return EnumHelper.GetDisplayName(assignment.Status);
     }
 
     public string GetProcessByAssingment(Assignment assignment)
