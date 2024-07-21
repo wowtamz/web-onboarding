@@ -225,9 +225,9 @@ namespace SoPro24Team06.Controllers
         //hier muss noch was geändert werden
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(int id)
+        public async Task<ActionResult> Edit(int assignmentId)
         {
-            Assignment? assignment = _assignmentContainer.GetAssignmentById(id);
+            Assignment? assignment = _assignmentContainer.GetAssignmentById(assignmentId);
             if (assignment == null)
             {
                 return NotFound();
@@ -260,8 +260,7 @@ namespace SoPro24Team06.Controllers
         public async Task<IActionResult> Details(int assignmentId)
         {
             Assignment? assignment = _assignmentContainer.GetAssignmentById(assignmentId);
-            if (assignment == null)
-                return NotFound();
+            if (assignment == null) return NotFound();
             List<Process> processList = await _processContainer.GetProcessesAsync();
             Process? process = processList.FirstOrDefault(p => p.Assignments.Contains(assignment));
 			List<ApplicationUser> userList = _userManager.Users.ToList();

@@ -32,12 +32,7 @@ namespace SoPro24Team06.ViewModels
 			}
 			if (this.Assignment.AssigneeType == AssigneeType.ROLES && this.Assignment.AssignedRole != null)
 			{
-				this.RoleList = new SelectList(
-					roleList,
-					"Id",
-					"Name",
-					this.Assignment.AssignedRole
-				);
+				this.RoleList = new SelectList(roleList, "Id", "Name", this.Assignment.AssignedRole);
 			}
 			else
 			{
