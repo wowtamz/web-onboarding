@@ -9,12 +9,12 @@ namespace SoPro24Team06.ViewModels
     public class AssignmentDetailsViewModel
     {
         public Assignment Assignment { get; set; }
-        public SelectList UserList { get; set; }
-        public SelectList RoleList { get; set; }
+        public IEnumerable<SelectListItem> UserList { get; set; }
+        public IEnumerable<SelectListItem> RoleList { get; set; }
         public Process? Process { get; set; }
-        public SelectList AssignmentStatusList { get; set; }
+        public IEnumerable<SelectListItem> AssignmentStatusList { get; set; }
 
-		public SelectList AssigneeTypeList {get; set;}
+		public IEnumerable<SelectListItem> AssigneeTypeList {get; set;}
 
         public AssignmentDetailsViewModel(
             Assignment assignment,
@@ -24,7 +24,18 @@ namespace SoPro24Team06.ViewModels
         )
         {
             this.Assignment = assignment;
-            if (
+			this.Process = process;
+			InitialiseSelectList(userList, roleList);
+        }
+
+        public AssignmentDetailsViewModel() { }
+
+		public void InitialiseSelectList (
+			List<ApplicationUser> userList,
+            List<ApplicationRole> roleList
+		)
+		{
+			if (
                 this.Assignment.AssigneeType == AssigneeType.USER
                 && this.Assignment.Assignee != null
             )
@@ -40,6 +51,7 @@ namespace SoPro24Team06.ViewModels
             {
                 this.UserList = new SelectList(userList, "Id", "FullName");
             }
+
             if (
                 this.Assignment.AssigneeType == AssigneeType.ROLES
                 && this.Assignment.AssignedRole != null
@@ -56,7 +68,7 @@ namespace SoPro24Team06.ViewModels
             {
                 this.RoleList = new SelectList(roleList, "Id", "Name");
             }
-            this.Process = process;
+
             this.AssignmentStatusList = new SelectList(
                 EnumHelper.GetEnumList<AssignmentStatus>(),
                 "Value",
@@ -64,12 +76,15 @@ namespace SoPro24Team06.ViewModels
                 Assignment.Status
             );
 			
-			List<AssigneeType> assingeeTypeListTemp = new List<AssigneeType> {AssigneeType.ROLES, AssigneeType.USER};
-			AssigneeTypeList = new SelectList(assingeeTypeListTemp.Select(e => new {Value = e, Text = EnumHelper.GetDisplayName(e)}), "Value", "Text", Assignment.AssigneeType);
-				
-        }
-
-        public AssignmentDetailsViewModel() { }
+			AssigneeTypeList = Enum.GetValues(typeof(AssigneeType))
+            .Cast<AssigneeType>()
+            .Select(type => new SelectListItem
+            {
+                Value = type.ToString(),
+                Text = EnumHelper.GetDisplayName(type),
+                Selected = type == Assignment.AssigneeType
+            });
+		}
     }
 }
 //end codeownership Jan Pfluger
