@@ -22,22 +22,21 @@
 	</fieldset>
 	<fieldset style="margin-top: 4px">
 		<legend>Aufgabenverantwortlichkeit</legend>
-		@Html.DropDownList(
-					"Assignment.AssigneeType",
+		@Html.DropDownListFor(
+					model => model.Assignment.AssigneeType,
 					Model.AssigneeTypeList,
 					new { @id = "assignmentTypeDropdown", @class = "form-control", }
 					)
 		<div id="assignedRoleGroup" style="display:none; margin-top:8px !important;">
-			@Html.DropDownList(
-
-							"Assignment.AssignedRole",
+			@Html.DropDownListFor(
+							model => model.Assignment.AssignedRole,
 							Model.RoleList,
 							new { @class = "form-control" }
 							)
 		</div>
 		<div id="assigneeGroup" style="display:none; margin-top:8px !important;">
-			@Html.DropDownList(
-							"Assignment.Assignee",
+			@Html.DropDownListFor(
+							model => model.Assignment.Assignee,
 							Model.UserList,
 							new { @class = "form-control" }
 							)
