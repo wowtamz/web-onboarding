@@ -249,6 +249,7 @@ namespace SoPro24Team06.Controllers
                         AssignmentTemplates = assignments
                     };
                     await _processTemplateContainer.UpdateProcessTemplateAsync(processTemplate);
+
                     return RedirectToAction(
                         "CreateStart",
                         "AssignmentTemplate",
@@ -270,14 +271,13 @@ namespace SoPro24Team06.Controllers
                     var t = await _processTemplateContainer.AddProcessTemplateAsync(
                         processTemplate
                     );
+                    
                     return RedirectToAction(
                         "CreateStart",
                         "AssignmentTemplate",
                         new { processId = t.Id }
                     );
                 }
-
-                // redirect to        [HttpGet("AssignmentTemplate/Create/{processId}")]
             }
             catch (Exception ex)
             {

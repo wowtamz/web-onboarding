@@ -38,6 +38,8 @@ public class ProcessTemplate
     [JsonProperty("rolesWithAccess")]
     [Required(ErrorMessage = "Mindestens eine Rolle ist erforderlich")]
     public List<ApplicationRole> RolesWithAccess { get; set; }
+    
+
 
     public ProcessTemplate(
         string title,

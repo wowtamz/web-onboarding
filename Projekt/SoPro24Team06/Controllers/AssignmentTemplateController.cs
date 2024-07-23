@@ -10,7 +10,6 @@ using SoPro24Team06.ViewModels;
 
 namespace SoPro24Team06.Controllers
 {
-    [Authorize]
     public class AssignmentTemplateController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -20,7 +19,6 @@ namespace SoPro24Team06.Controllers
         private readonly ILogger<AssignmentTemplateController> _logger;
         private readonly AssignmentTemplateContainer _assignmentTemplateContainer;
         private readonly DueTimeContainer _dueTimeContainer;
-
         public AssignmentTemplateController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
@@ -46,6 +44,8 @@ namespace SoPro24Team06.Controllers
             ViewData["contracts"] = _context.Contracts.ToList();
             CreateEditAssignmentTemplateViewModel assignmentTemplateVM =
                 new CreateEditAssignmentTemplateViewModel(processId);
+            ProcessTemplate processTemplate = await _processTemplateContainer.GetProcessTemplateByIdAsync(processId);
+            ViewData["processRoles"] = processTemplate.RolesWithAccess; 
             return View("~/Views/Assignments/Create.cshtml", assignmentTemplateVM);
         }
 
@@ -131,7 +131,8 @@ namespace SoPro24Team06.Controllers
                     departmentsList,
                     contractsList,
                     assigneeType,
-                    assignedRole
+                    assignedRole,
+                    (int) model.processId
                 );
 
                 _logger.LogInformation(
@@ -156,18 +157,19 @@ namespace SoPro24Team06.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            string queryProcessId = HttpContext.Request.Query["processId"].ToString();
-            int processId = Int32.Parse(queryProcessId);
             ViewData["roles"] = _roleManager.Roles.ToList();
             ViewData["dueIns"] = _context.DueTimes.ToList();
             ViewData["departments"] = _context.Departments.ToList();
             ViewData["contracts"] = _context.Contracts.ToList();
+            
             AssignmentTemplate assignmentTemplate =
                 _assignmentTemplateContainer.GetAssignmentTemplate(id);
+            ProcessTemplate processTemplate= await _processTemplateContainer.GetProcessTemplateByIdAsync(assignmentTemplate.ProcessTemplateId);
+            ViewData["processRoles"] = processTemplate.RolesWithAccess; 
             if (assignmentTemplate != null)
             {
                 CreateEditAssignmentTemplateViewModel createEditAssignmentTemplateVM =
-                    new CreateEditAssignmentTemplateViewModel(assignmentTemplate, processId);
+                    new CreateEditAssignmentTemplateViewModel(assignmentTemplate, assignmentTemplate.ProcessTemplateId);
                 return View("~/Views/Assignments/Edit.cshtml", createEditAssignmentTemplateVM);
             }
             else
@@ -268,7 +270,7 @@ namespace SoPro24Team06.Controllers
                     "Successfully edited the assignment template with title: {Title}",
                     model.Title
                 );
-                return RedirectToAction("Detail", "ProcessTemplate", new { id = model.processId });
+                return RedirectToAction("Edit", "ProcessTemplate", new { id = model.processId });
             }
             catch (Exception ex)
             {
@@ -276,13 +278,19 @@ namespace SoPro24Team06.Controllers
                 return RedirectToAction("Edit", model);
             }
         }
-
+        [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
             AssignmentTemplate? assignmentTemplate =
                 _assignmentTemplateContainer.GetAssignmentTemplate(id);
-            _assignmentTemplateContainer.DeleteAssignmentTemplate(id);
-            return RedirectToAction(nameof(Index));
+            ProcessTemplate processTemplate = await _processTemplateContainer.GetProcessTemplateByIdAsync(assignmentTemplate.ProcessTemplateId);
+            foreach(var role in processTemplate.RolesWithAccess){
+                if(User.IsInRole(role.Name)|| User.IsInRole("Administrator")){
+                _assignmentTemplateContainer.DeleteAssignmentTemplate(id);
+                break;
+                }
+            }
+            return RedirectToAction("Detail", "ProcessTemplate", new { id = assignmentTemplate.ProcessTemplateId });
         }
     }
 }
