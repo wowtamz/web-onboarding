@@ -161,65 +161,74 @@ namespace SoPro24Team06.Controllers
         {
             if (!ModelState.IsValid)
             {
+				if (model.Assignment == null) return NotFound();
+            	List<Process> processList = await _processContainer.GetProcessesAsync();
+            	Process? process = processList.FirstOrDefault(p => p.Assignments.Contains(model.Assignment));
+				List<ApplicationUser> userList = _userManager.Users.ToList();
+				foreach (ApplicationUser u in userList)
+				{
+					if (await _userManager.IsLockedOutAsync(u)) userList.Remove(u);
+				}
+				List<ApplicationRole> roleList =  _roleManager.Roles.ToList();
+				model.InitialiseSelectList(userList, roleList);
                 return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
             }
 
-            if (
-                model.Assignment.AssigneeType == AssigneeType.ROLES
-                && model.Assignment.AssignedRole == null
-            )
-            {
-                ModelState.AddModelError(
-                    "Assignment.AssignedRole",
-                    "Bitte wählen Sie eine Rolle aus"
-                );
-            }
-            else if (
-                model.Assignment.AssigneeType == AssigneeType.USER
-                && model.Assignment.Assignee == null
-            )
-            {
-                ModelState.AddModelError(
-                    "Assignment.Assingee",
-                    "Bitte wählen Sie einen Nutzer aus."
-                );
-            }
+			// if(model.SelectedAssigneeType == null)
+			// {
+			// 	ModelState.AddModelError
+			// 	(
+			// 		"Assignment.AssigneeType",
+			// 		"Bitte wählen Sie eine Rolle aus"
+			// 	);
+			// } else {
+			// 	if (
+			// 		 model.Assignment.AssignedRole == null
+			// 	)
+			// 	{
+			// 		ModelState.AddModelError(
+			// 			"Assignment.AssignedRole",
+			// 			"Bitte wählen Sie eine Rolle aus"
+			// 		);
+			// 	}
+			// 	else if (
+			// 		model.SelectedAssigneeType.Value == AssigneeType.USER.ToString()
+			// 		&& model.Assignment.Assignee == null
+			// 	)
+			// 	{
+			// 		ModelState.AddModelError(
+			// 			"Assignment.Assingee",
+			// 			"Bitte wählen Sie einen Nutzer aus."
+			// 		);
+			// 	}
+			// }
+			return RedirectToAction("Index");
+            // Assignment? assignment = await _context.Assignments.FirstOrDefaultAsync(a =>
+            //     a.Id == model.Assignment.Id
+            // );
 
-            if (!ModelState.IsValid)
-            {
-                return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
-            }
+            // if (assignment == null)
+            // {
+            //     return NotFound();
+            // }
 
-            Assignment? assignment = await _context.Assignments.FirstOrDefaultAsync(a =>
-                a.Id == model.Assignment.Id
-            );
+			// if(model.SelectedAssigneeType.Value == AssigneeType.ROLES.ToString())
+			// {
+			// 	assignment.AssigneeType = AssigneeType.ROLES;
+			// 	assignment.AssignedRole = model.Assignment.AssignedRole;
+			// 	assignment.Status = model.Assignment.Status;
+			// }
+			// else if (model.SelectedAssigneeType.Value == AssigneeType.ROLES.ToString())
+            // {
+			// 	assignment.AssigneeType = AssigneeType.USER;
+			// 	assignment.Assignee = model.Assignment.Assignee;
+			// 	assignment.Status = model.Assignment.Status;
+			// }
 
-            if (assignment == null)
-            {
-                return NotFound();
-            }
+            // _context.Assignments.Update(assignment);
+            // await _context.SaveChangesAsync();
 
-            switch (model.Assignment.AssigneeType)
-            {
-                case AssigneeType.ROLES:
-                    assignment.AssigneeType = model.Assignment.AssigneeType;
-                    assignment.AssignedRole = model.Assignment.AssignedRole;
-                    assignment.Status = model.Assignment.Status;
-                    break;
-                case AssigneeType.USER:
-                    assignment.AssigneeType = model.Assignment.AssigneeType;
-                    assignment.Assignee = model.Assignment.Assignee;
-                    assignment.Status = model.Assignment.Status;
-                    break;
-                default:
-                    assignment.Status = model.Assignment.Status;
-                    break;
-            }
-
-            _context.Assignments.Update(assignment);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index");
+            // return RedirectToAction("Index");
         }
 
         //hier muss noch was geändert werden
@@ -244,6 +253,7 @@ namespace SoPro24Team06.Controllers
             }
             else
             {
+
                 return NotFound();
             }
             AssignmentEditViewModel model = new AssignmentEditViewModel(
