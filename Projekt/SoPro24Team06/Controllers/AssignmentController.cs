@@ -159,9 +159,10 @@ namespace SoPro24Team06.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateDetails([FromForm] AssignmentDetailsViewModel model)
         {
-            if (!ModelState.IsValid)
+			if (ModelState.IsValid == false)
             {
 				if (model.Assignment == null) return NotFound();
+				model.Assignment.Title = "Fehler ModelState was invalid"; 
             	List<Process> processList = await _processContainer.GetProcessesAsync();
             	Process? process = processList.FirstOrDefault(p => p.Assignments.Contains(model.Assignment));
 				List<ApplicationUser> userList = _userManager.Users.ToList();
@@ -171,6 +172,12 @@ namespace SoPro24Team06.Controllers
 				}
 				List<ApplicationRole> roleList =  _roleManager.Roles.ToList();
 				model.InitialiseSelectList(userList, roleList);
+				ModelState.AddModelError(
+					"Assignment.Title",
+					"Model State was invalid"
+				);
+				TempData["Error"] = ModelState["Assignment.Title"].Errors.Select(e => e.ErrorMessage);
+
                 return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
             }
 
