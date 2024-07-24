@@ -1,4 +1,5 @@
 //beginn codeownership Jan Pfluger
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SoPro24Team06.Enums;
 using SoPro24Team06.Helpers;
@@ -11,7 +12,7 @@ namespace SoPro24Team06.ViewModels
         public Assignment Assignment { get; set; }
         public IEnumerable<SelectListItem> UserList { get; set; }
         public IEnumerable<SelectListItem> RoleList { get; set; }
-        public Process? Process { get; set; }
+        public string ProcessTitle { get; set; }
         public IEnumerable<SelectListItem> AssignmentStatusList { get; set; }
 
 		public IEnumerable<SelectListItem> AssigneeTypeList {get; set;}
@@ -24,7 +25,14 @@ namespace SoPro24Team06.ViewModels
         )
         {
             this.Assignment = assignment;
-			this.Process = process;
+			if(process != null)
+			{
+				this.ProcessTitle = process.Title;
+			}
+			else 
+			{
+				this.ProcessTitle = "es konnte kein zugehöriger Vorgang gefunden werden";
+			}
 			InitialiseSelectList(userList, roleList);
         }
 
@@ -76,8 +84,11 @@ namespace SoPro24Team06.ViewModels
                 Assignment.Status
             );
 			
-			AssigneeTypeList = Enum.GetValues(typeof(AssigneeType))
-            .Cast<AssigneeType>()
+			List<AssigneeType> assigneeTypeList = new List<AssigneeType> () {
+				AssigneeType.ROLES,
+				AssigneeType.USER,
+			};
+			AssigneeTypeList = assigneeTypeList
             .Select(type => new SelectListItem
             {
                 Value = type.ToString(),
