@@ -1,5 +1,6 @@
 //beginn codeownership Jan Pfluger
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -135,7 +136,7 @@ namespace SoPro24Team06.Controllers
                     _logger.LogInformation("EditAssignment Status Error");
                 }
 
-                if (model.Assignment.DueDate == null)
+                if (model.Assignment.DueDate != null)
                 {
                     ModelState.AddModelError(
                         "Assignment.DueDate",
@@ -186,6 +187,7 @@ namespace SoPro24Team06.Controllers
             assignment.AssigneeType = model.Assignment.AssigneeType;
             assignment.Status = model.Assignment.Status;
             assignment.DueDate = model.Assignment.DueDate;
+            _logger.LogInformation("EditAssignment DueDate Error" + model.Assignment.DueDate);
 
             ApplicationUser? selectedUser = await _userManager.FindByIdAsync(model.SelectedUserId);
             ApplicationRole? selectedRole = await _roleManager.FindByIdAsync(model.SelectedRoleId);
@@ -209,7 +211,9 @@ namespace SoPro24Team06.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateDetails([FromForm] AssignmentDetailsViewModel model)
+        public async Task<IActionResult> UpdateDetails(
+            [FromForm] EditAssignmentLimitedViewModel model
+        )
         {
             if (ModelState.IsValid)
             {
@@ -291,7 +295,7 @@ namespace SoPro24Team06.Controllers
                 List<ApplicationRole> roleList = _roleManager.Roles.ToList();
 
                 model.InitialiseSelectList(userList, roleList);
-                return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
+                return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
             }
 
             Assignment? assignment = await _context.Assignments.FirstOrDefaultAsync(a =>
@@ -370,13 +374,13 @@ namespace SoPro24Team06.Controllers
                     userList.Remove(u);
             }
             List<ApplicationRole> roleList = _roleManager.Roles.ToList();
-            AssignmentDetailsViewModel model = new AssignmentDetailsViewModel(
+            EditAssignmentLimitedViewModel model = new EditAssignmentLimitedViewModel(
                 assignment,
                 userList,
                 roleList,
                 process
             );
-            return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
+            return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
         }
 
         public async Task<IActionResult> Delete()
