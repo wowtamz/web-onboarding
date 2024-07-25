@@ -155,6 +155,7 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index"); //hier muss noch der richtige Redirect rein, je nach dem wo man es aufgerufen hat;
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateDetails([FromForm] AssignmentDetailsViewModel model)
@@ -242,7 +243,6 @@ namespace SoPro24Team06.Controllers
             );
 			ApplicationUser ? selectedUser = await _userManager.FindByIdAsync(model.SelectedUserId);
 			ApplicationRole ? selectedRole = await _roleManager.FindByIdAsync(model.SelectedRoleId);
-
             if (assignment == null)
             {
                 return NotFound();
@@ -252,13 +252,14 @@ namespace SoPro24Team06.Controllers
 			assignment.AssigneeType = model.Assignment.AssigneeType;
 			if(assignment.AssigneeType == AssigneeType.ROLES)
 			{
+				_logger.LogInformation("AssingeeType == ROLES" + assignment.AssigneeType);
 				assignment.AssignedRole = selectedRole;
 				_context.Assignments.Update(assignment);
 				_context.Entry(assignment).Reference(a => a.Assignee).CurrentValue = null;
 			}
 			if(assignment.AssigneeType == AssigneeType.USER)
 			{
-				assignment.AssignedRole = null;
+				assignment.Assignee = selectedUser;
 				_context.Assignments.Update(assignment);
 				_context.Entry(assignment).Reference(a => a.AssignedRole).CurrentValue = null;
 			}
@@ -271,26 +272,24 @@ namespace SoPro24Team06.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(int assignmentId)
         {
-            Assignment? assignment = _assignmentContainer.GetAssignmentById(assignmentId);
-            if (assignment == null)
-            {
-                return NotFound();
-            }
+			Assignment ? assignment = _assignmentContainer.GetAssignmentById(assignmentId);
+			if (assignment == null)
+			{
+				return NotFound();
+			}
 			
             List<Process> processList = await _processContainer.GetProcessesAsync();
             Process? process = processList.FirstOrDefault(p =>
                 p.Assignments != null && p.Assignments.Contains(assignment)
             );
-            int processId;
-            if (process != null)
-            {
-                processId = process.Id;
-            }
-            else
-            {
-
-                return NotFound();
-            }
+			int processId;
+			if (process != null)
+			{
+				processId = process.Id;
+			}
+			else{
+				return NotFound();
+			}
             AssignmentEditViewModel model = new AssignmentEditViewModel(
                 assignment,
                 processId,
@@ -375,7 +374,7 @@ namespace SoPro24Team06.Controllers
 							if(a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())) assignmentList.Add(a);
 						}
 					}
-					assignmentList = _context.Assignments.ToList().Where(a => a.AssignedRole != null && roles.Contains(a.AssignedRole.Name)).ToList();
+					assignmentList = _assignmentContainer.GetAllAssignments().Where(a => a.AssignedRole != null && roles.Contains(a.AssignedRole.Name)).ToList();
                     break;
 				
                 case "AllAssignments":
@@ -391,7 +390,7 @@ namespace SoPro24Team06.Controllers
 								}
 							}
 						}
-						assignmentList = _context.Assignments.ToList();
+						assignmentList = _assignmentContainer.GetAllAssignments();
 					}
 					else if (processList.Any(p => p.Supervisor == user))
 					{
@@ -416,7 +415,7 @@ namespace SoPro24Team06.Controllers
 								}	
 							}
 						}
-						assignmentList = _context.Assignments.ToList().Where(a => (a.Assignee != null && a.Assignee == user) || (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString()))).ToList();
+						assignmentList = _assignmentContainer.GetAllAssignments().Where(a => (a.Assignee != null && a.Assignee == user) || (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString()))).ToList();
 
 					}
                     else
@@ -436,7 +435,7 @@ namespace SoPro24Team06.Controllers
 								else if (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())) assignmentList.Add(a);
 							}
 						}
-						assignmentList = _context.Assignments.ToList().Where(a => a.Assignee != null && a.Assignee == user).ToList();
+						assignmentList = _assignmentContainer.GetAllAssignments().Where(a => a.Assignee != null && a.Assignee == user).ToList();
 						HttpContext.Session.SetString("currentList", "MyAssignments");
                     }
                     break;
@@ -454,7 +453,7 @@ namespace SoPro24Team06.Controllers
 								if(a.Assignee != null && a.Assignee == user) assignmentList.Add(a);
 							}
 						}
-					assignmentList = _context.Assignments.ToList().Where(a => a.Assignee != null && a.Assignee == user).ToList();
+					assignmentList = _assignmentContainer.GetAllAssignments().ToList().Where(a => a.Assignee != null && a.Assignee == user).ToList();
                     HttpContext.Session.SetString("currentList", "MyAssignments");
                     break;
             }
