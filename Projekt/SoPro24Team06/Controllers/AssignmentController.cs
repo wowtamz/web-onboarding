@@ -253,16 +253,15 @@ namespace SoPro24Team06.Controllers
 			if(assignment.AssigneeType == AssigneeType.ROLES)
 			{
 				assignment.AssignedRole = selectedRole;
-				assignment.Assignee = null;
+				_context.Assignments.Update(assignment);
+				_context.Entry(assignment).Reference(a => a.Assignee).CurrentValue = null;
 			}
 			if(assignment.AssigneeType == AssigneeType.USER)
 			{
 				assignment.AssignedRole = null;
-				assignment.Assignee = selectedUser;
+				_context.Assignments.Update(assignment);
+				_context.Entry(assignment).Reference(a => a.AssignedRole).CurrentValue = null;
 			}
-			_context.Entry(assignment).Reference(a => a.AssignedRole).IsModified = true;
-			_context.Entry(assignment).Reference(a => a.Assignee).IsModified = true;
-            _context.Assignments.Update(assignment);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -376,7 +375,7 @@ namespace SoPro24Team06.Controllers
 							if(a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())) assignmentList.Add(a);
 						}
 					}
-					assignmentList = _context.Assignments.ToList().Where(a => a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())).ToList();
+					assignmentList = _context.Assignments.ToList().Where(a => a.AssignedRole != null && roles.Contains(a.AssignedRole.Name)).ToList();
                     break;
 				
                 case "AllAssignments":
