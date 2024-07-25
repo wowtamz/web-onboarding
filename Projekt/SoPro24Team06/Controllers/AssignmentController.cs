@@ -156,6 +156,7 @@ namespace SoPro24Team06.Controllers
         }
 
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateDetails([FromForm] AssignmentDetailsViewModel model)
