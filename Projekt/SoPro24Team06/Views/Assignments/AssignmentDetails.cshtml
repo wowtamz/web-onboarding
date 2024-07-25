@@ -33,22 +33,23 @@
 					Model.AssigneeTypeList,
 					new { @id = "assignmentTypeDropdown", @class = "form-control", }
 					)
-		<div class="text-danger" id="assigneeTypeError"></div>
-		<div id="assignedRoleGroup" style="display:none; margin-top:8px !important;">
+		@Html.ValidationMessageFor(model => model.Assignment.AssigneeType, "", new { @class = "text-danger" })
+		<div id="assignedRoleGroup" style="display:none; margin-top:8px;">
 			@Html.DropDownListFor(
 							model => model.SelectedRoleId,
 							Model.RoleList,
 							new { @class = "form-control", @id = "assignedRoleDropdown" }
 							)
+			@Html.ValidationMessageFor(model => model.Assignment.AssignedRole, "", new { @class = "text-danger" })
 			<div class="text-danger" id="roleError"></div>
 		</div>
-		<div id="assigneeGroup" style="display:none; margin-top:8px !important;">
+		<div id="assigneeGroup" style="display:none; margin-top:8px;">
 			@Html.DropDownListFor(
 							model => model.SelectedUserId,
 							Model.UserList,
 							new { @class = "form-control", @id = "assignedUserDropdown" }
 							)
-			<div class="text-danger" id="userError"></div>
+			@Html.ValidationMessageFor(model => model.Assignment.Assignee, "", new { @class = "text-danger" })
 		</div>
 	</fieldset>
 	<fieldset style="margin-top: 4px">

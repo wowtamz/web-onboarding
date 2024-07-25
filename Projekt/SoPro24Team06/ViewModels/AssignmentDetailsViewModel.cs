@@ -10,14 +10,14 @@ namespace SoPro24Team06.ViewModels
     public class AssignmentDetailsViewModel
     {
         public Assignment Assignment { get; set; }
-		public string? SelectedUserId {get; set;}
-		public string? SelectedRoleId {get; set;}
+        public string? SelectedUserId { get; set; }
+        public string? SelectedRoleId { get; set; }
         public SelectList UserList { get; set; }
         public SelectList RoleList { get; set; }
         public string ProcessTitle { get; set; }
         public IEnumerable<SelectListItem> AssignmentStatusList { get; set; }
 
-		public IEnumerable<SelectListItem> AssigneeTypeList {get; set;}
+        public IEnumerable<SelectListItem> AssigneeTypeList { get; set; }
 
         public AssignmentDetailsViewModel(
             Assignment assignment,
@@ -27,31 +27,31 @@ namespace SoPro24Team06.ViewModels
         )
         {
             this.Assignment = assignment;
-			if(process != null)
-			{
-				this.ProcessTitle = process.Title;
-			}
-			else 
-			{
-				this.ProcessTitle = "es konnte kein zugehöriger Vorgang gefunden werden";
-			}
-			InitialiseSelectList(userList, roleList);
+            if (process != null)
+            {
+                this.ProcessTitle = process.Title;
+            }
+            else
+            {
+                this.ProcessTitle = "es konnte kein zugehöriger Vorgang gefunden werden";
+            }
+            InitialiseSelectList(userList, roleList);
         }
 
         public AssignmentDetailsViewModel()
-		{ 
-			UserList = new SelectList(new List<SelectListItem>());
-			RoleList = new SelectList(new List<SelectListItem>());
-			AssignmentStatusList = new List<SelectListItem>();
-			AssigneeTypeList = new List<SelectListItem>();
-		}
+        {
+            UserList = new SelectList(new List<SelectListItem>());
+            RoleList = new SelectList(new List<SelectListItem>());
+            AssignmentStatusList = new List<SelectListItem>();
+            AssigneeTypeList = new List<SelectListItem>();
+        }
 
-		public void InitialiseSelectList (
-			List<ApplicationUser> userList,
+        public void InitialiseSelectList(
+            List<ApplicationUser> userList,
             List<ApplicationRole> roleList
-		)
-		{
-			if (
+        )
+        {
+            if (
                 this.Assignment.AssigneeType == AssigneeType.USER
                 && this.Assignment.Assignee != null
             )
@@ -84,27 +84,27 @@ namespace SoPro24Team06.ViewModels
             {
                 this.RoleList = new SelectList(roleList, "Id", "Name");
             }
-			List<AssignmentStatus> assignmentStatusList = EnumHelper.GetEnumList<AssignmentStatus>();
-            this.AssignmentStatusList = assignmentStatusList.Select(
-			status => new SelectListItem
-			{
-				Value = status.ToString(),
-				Text = EnumHelper.GetDisplayName(status),
-				Selected = status == Assignment.Status
-			});
-	
-			List<AssigneeType> assigneeTypeList = new List<AssigneeType> () {
-				AssigneeType.ROLES,
-				AssigneeType.USER,
-			};
-			AssigneeTypeList = assigneeTypeList
-            .Select(type => new SelectListItem
+            List<AssignmentStatus> assignmentStatusList =
+                EnumHelper.GetEnumList<AssignmentStatus>();
+            this.AssignmentStatusList = assignmentStatusList.Select(status => new SelectListItem
+            {
+                Value = status.ToString(),
+                Text = EnumHelper.GetDisplayName(status),
+                Selected = status == Assignment.Status
+            });
+
+            List<AssigneeType> assigneeTypeList = new List<AssigneeType>()
+            {
+                AssigneeType.ROLES,
+                AssigneeType.USER,
+            };
+            AssigneeTypeList = assigneeTypeList.Select(type => new SelectListItem
             {
                 Value = type.ToString(),
                 Text = EnumHelper.GetDisplayName(type),
                 Selected = type == Assignment.AssigneeType
             });
-		}
+        }
     }
 }
 //end codeownership Jan Pfluger
