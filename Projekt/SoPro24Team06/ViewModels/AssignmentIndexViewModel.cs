@@ -66,7 +66,7 @@ public class AssignmentIndexViewModel
     {
         if (assignment.Status == AssignmentStatus.DONE)
             return "done";
-        if (assignment.GetDaysTillDueDate() <= 0)
+        if (assignment.GetDaysTillDueDate() < 0)
             return "overdue";
         return string.Empty;
     }
