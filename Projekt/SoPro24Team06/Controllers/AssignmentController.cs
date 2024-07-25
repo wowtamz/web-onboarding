@@ -11,7 +11,6 @@ using SoPro24Team06.Containers;
 using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
 using SoPro24Team06.Helpers;
-using SoPro24Team06.Helpers;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
 
@@ -630,6 +629,7 @@ namespace SoPro24Team06.Controllers
             if (sortingMethod != null)
             {
                 model.SortAssingments(sortingMethod);
+                _logger.LogCritical(sortingMethod);
             }
 
             int? selectedProcess = HttpContext.Session.GetInt32("selectedProcessId");
