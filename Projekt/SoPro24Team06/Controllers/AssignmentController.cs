@@ -159,83 +159,112 @@ namespace SoPro24Team06.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateDetails([FromForm] AssignmentDetailsViewModel model)
         {
+			if (ModelState.IsValid)
+			{
+				if (model.Assignment.AssigneeType == AssigneeType.ROLES)
+				{
+					if(model.SelectedRoleId == null)
+					{
+						ModelState.AddModelError(
+							"Assignment.AssignedRole",
+							"Bitte wählen Sie eine Rolle aus 1"
+						);
+					}
+					else if(await _roleManager.FindByIdAsync(model.SelectedRoleId) == null){
+						ModelState.AddModelError(
+							"Assignment.AssignedRole",
+							"Bitte wählen Sie eine Rolle aus 2"
+						);
+					}
+				}
+				else if (model.Assignment.AssigneeType == AssigneeType.USER)
+				{
+					if(model.SelectedUserId == null)
+					{
+						ModelState.AddModelError(
+							"Assignment.Assingee",
+							"Bitte wählen Sie einen Nutzer aus. 1"
+						);
+					}
+					else if(await _userManager.FindByIdAsync(model.SelectedUserId) == null){
+						ModelState.AddModelError(
+							"Assignment.Assingee",
+							"Bitte wählen Sie einen Nutzer aus. 2"
+						);
+					}
+				}
+				else
+				{
+					ModelState.AddModelError(
+						"Assignment.AssigneeType",
+						"Bitte wählen Sie eine Zuständigkeitsart"
+					);
+				}
+				
+				if(model.Assignment.Status == null)
+				{
+					ModelState.AddModelError
+					(
+						"Assignment.Status",
+						"Bitte wählen sie einen Bearbeitungszustand aus"
+					);
+				}
+			}
+
 			if (ModelState.IsValid == false)
-            {
+			{
+				foreach (var modelStateEntry in ModelState.Values)
+				{
+					foreach (var error in modelStateEntry.Errors)
+					{
+						var errorMessage = error.ErrorMessage;
+						var exception = error.Exception;
+					}
+				}
+				return BadRequest(ModelState);
 				if (model.Assignment == null) return NotFound();
-				model.Assignment.Title = "Fehler ModelState was invalid"; 
             	List<Process> processList = await _processContainer.GetProcessesAsync();
             	Process? process = processList.FirstOrDefault(p => p.Assignments.Contains(model.Assignment));
 				List<ApplicationUser> userList = _userManager.Users.ToList();
+
 				foreach (ApplicationUser u in userList)
 				{
 					if (await _userManager.IsLockedOutAsync(u)) userList.Remove(u);
 				}
 				List<ApplicationRole> roleList =  _roleManager.Roles.ToList();
-				model.InitialiseSelectList(userList, roleList);
-				ModelState.AddModelError(
-					"Assignment.Title",
-					"Model State was invalid"
-				);
-				TempData["Error"] = ModelState["Assignment.Title"].Errors.Select(e => e.ErrorMessage);
 
+				model.InitialiseSelectList(userList, roleList);
                 return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
+			}
+
+            Assignment? assignment = await _context.Assignments.FirstOrDefaultAsync(a =>
+                a.Id == model.Assignment.Id
+            );
+			ApplicationUser ? selectedUser = await _userManager.FindByIdAsync(model.SelectedUserId);
+			ApplicationRole ? selectedRole = await _roleManager.FindByIdAsync(model.SelectedRoleId);
+
+            if (assignment == null)
+            {
+                return NotFound();
             }
 
-			// if(model.SelectedAssigneeType == null)
-			// {
-			// 	ModelState.AddModelError
-			// 	(
-			// 		"Assignment.AssigneeType",
-			// 		"Bitte wählen Sie eine Rolle aus"
-			// 	);
-			// } else {
-			// 	if (
-			// 		 model.Assignment.AssignedRole == null
-			// 	)
-			// 	{
-			// 		ModelState.AddModelError(
-			// 			"Assignment.AssignedRole",
-			// 			"Bitte wählen Sie eine Rolle aus"
-			// 		);
-			// 	}
-			// 	else if (
-			// 		model.SelectedAssigneeType.Value == AssigneeType.USER.ToString()
-			// 		&& model.Assignment.Assignee == null
-			// 	)
-			// 	{
-			// 		ModelState.AddModelError(
-			// 			"Assignment.Assingee",
-			// 			"Bitte wählen Sie einen Nutzer aus."
-			// 		);
-			// 	}
-			// }
-			return RedirectToAction("Index");
-            // Assignment? assignment = await _context.Assignments.FirstOrDefaultAsync(a =>
-            //     a.Id == model.Assignment.Id
-            // );
-
-            // if (assignment == null)
-            // {
-            //     return NotFound();
-            // }
-
-			// if(model.SelectedAssigneeType.Value == AssigneeType.ROLES.ToString())
-			// {
-			// 	assignment.AssigneeType = AssigneeType.ROLES;
-			// 	assignment.AssignedRole = model.Assignment.AssignedRole;
-			// 	assignment.Status = model.Assignment.Status;
-			// }
-			// else if (model.SelectedAssigneeType.Value == AssigneeType.ROLES.ToString())
-            // {
-			// 	assignment.AssigneeType = AssigneeType.USER;
-			// 	assignment.Assignee = model.Assignment.Assignee;
-			// 	assignment.Status = model.Assignment.Status;
-			// }
-
-            // _context.Assignments.Update(assignment);
-            // await _context.SaveChangesAsync();
-
-            // return RedirectToAction("Index");
+			assignment.Status = model.Assignment.Status;
+			assignment.AssigneeType = model.Assignment.AssigneeType;
+			if(assignment.AssigneeType == AssigneeType.ROLES)
+			{
+				assignment.AssignedRole = selectedRole;
+				assignment.Assignee = null;
+			}
+			if(assignment.AssigneeType == AssigneeType.USER)
+			{
+				assignment.AssignedRole = null;
+				assignment.Assignee = selectedUser;
+			}
+			_context.Entry(assignment).Reference(a => a.AssignedRole).IsModified = true;
+			_context.Entry(assignment).Reference(a => a.Assignee).IsModified = true;
+            _context.Assignments.Update(assignment);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
         }
 
         //hier muss noch was geändert werden
@@ -334,7 +363,7 @@ namespace SoPro24Team06.Controllers
             {
                 case "RoleAssignment":
                     processList = processList
-                        .Where(p =>
+                        .Where(p => !p.IsArchived &&
                             p.Assignments.Any(a =>
                                 a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())
                             )
@@ -355,18 +384,21 @@ namespace SoPro24Team06.Controllers
                     {
                         foreach(Process p in processList)
 						{
-							foreach(Assignment a in p.Assignments)
+							if(!p.IsArchived)
 							{
-								assignmentList.Add(a);
-                    		} 
+								foreach(Assignment a in p.Assignments)
+								{
+									assignmentList.Add(a);
+								}
+							}
 						}
 						assignmentList = _context.Assignments.ToList();
 					}
 					else if (processList.Any(p => p.Supervisor == user))
 					{
-						processList = processList.Where(p => p.Supervisor == user || p.Assignments.Any(
+						processList = processList.Where(p => !p.IsArchived && (p.Supervisor == user || p.Assignments.Any(
 							a => (a.Assignee != null && a.Assignee.Id == user.Id) || (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString()))
-							)).ToList();
+							))).ToList();
 						foreach(Process p in processList)
 						{
 							if(p.Supervisor == user)
@@ -376,11 +408,14 @@ namespace SoPro24Team06.Controllers
 									assignmentList.Add(a);
 								}
 								assignmentList = _context.Assignments.ToList();
-							}
-							foreach(Assignment a in p.Assignments)
+							} 
+							else
 							{
-								if((a.Assignee != null && a.Assignee == user) || (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())))assignmentList.Add(a);
-							}					
+									foreach(Assignment a in p.Assignments)
+								{
+									if((a.Assignee != null && a.Assignee == user) || (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())))assignmentList.Add(a);
+								}	
+							}
 						}
 						assignmentList = _context.Assignments.ToList().Where(a => (a.Assignee != null && a.Assignee == user) || (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString()))).ToList();
 
@@ -399,6 +434,7 @@ namespace SoPro24Team06.Controllers
 							foreach(Assignment a in p.Assignments)
 							{
 								if(a.Assignee != null && a.Assignee == user) assignmentList.Add(a);
+								else if (a.AssignedRole != null && roles.Contains(a.AssignedRole.ToString())) assignmentList.Add(a);
 							}
 						}
 						assignmentList = _context.Assignments.ToList().Where(a => a.Assignee != null && a.Assignee == user).ToList();

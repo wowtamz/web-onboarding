@@ -3,25 +3,14 @@
 <form id="Details" method="post" asp-action="UpdateDetails">
 	@Html.AntiForgeryToken()
 	@Html.HiddenFor(model => model.Assignment.Id)
+	@Html.HiddenFor(model => model.Assignment.Assignee)
+	@Html.HiddenFor(model => model.Assignment.Assignee)
 	@Html.HiddenFor(model => model.Assignment.Title)
 	@Html.HiddenFor(model => model.Assignment.Instructions)
 	@Html.HiddenFor(model => model.Assignment.DueDate)
 	@Html.HiddenFor(model => model.ProcessTitle)
 	@Html.HiddenFor(model => model.Assignment)
 	<fieldset>
-		@if (TempData["Error"] != null)
-		{
-			var errors = TempData["Error"] as List<string>;
-			if (errors != null)
-			{
-				<ul>
-					@foreach (var error in errors)
-					{
-						<li>@error</li>
-					}
-				</ul>
-			}
-		}
 		<legend>Title</legend>
 		<p>@Model.Assignment.Title</p>
 	</fieldset>
@@ -47,7 +36,7 @@
 		<div class="text-danger" id="assigneeTypeError"></div>
 		<div id="assignedRoleGroup" style="display:none; margin-top:8px !important;">
 			@Html.DropDownListFor(
-							model => model.Assignment.AssignedRole,
+							model => model.SelectedRoleId,
 							Model.RoleList,
 							new { @class = "form-control", @id = "assignedRoleDropdown" }
 							)
@@ -55,7 +44,7 @@
 		</div>
 		<div id="assigneeGroup" style="display:none; margin-top:8px !important;">
 			@Html.DropDownListFor(
-							model => model.Assignment.Assignee,
+							model => model.SelectedUserId,
 							Model.UserList,
 							new { @class = "form-control", @id = "assignedUserDropdown" }
 							)
@@ -73,7 +62,9 @@
 	</fieldset>
 	<div style="margin-top: 12px">
 		<button type="submit" class="btn btn-primary">Bestätigen</button>
-		<button type="button" class="btn btn-secondary" onclick="Index">Schließen ohne Speicher</button>
+		<a href="/Assignment" type="button" class="btn btn-secondary">Schließen
+			ohne
+			Speicher</a>
 	</div>
 </form>
 
@@ -82,11 +73,11 @@
 		updateDropdownVisibility();
 		document.getElementById('assignmentTypeDropdown').addEventListener('change', updateDropdownVisibility);
 
-	@* document.getElementById('Details').addEventListener('submit', function (event) {
+		document.getElementById('Details').addEventListener('submit', function (event) {
 			if (!validateForm()) {
-			event.preventDefault(); // Verhindert das Abschicken des Formulars
+				event.preventDefault(); // Verhindert das Abschicken des Formulars
 			}
-			}); *@
+		});
 	});
 
 	function updateDropdownVisibility() {
@@ -106,7 +97,7 @@
 		}
 	}
 
-	@* function validateForm() {
+	function validateForm() {
 		let isValid = true;
 		document.getElementById('assigneeTypeError').textContent = '';
 		document.getElementById('roleError').textContent = '';
@@ -115,27 +106,27 @@
 
 		const assignmentType = document.getElementById('assignmentTypeDropdown').value;
 		if (assignmentType === '') {
-		document.getElementById('assigneeTypeError').textContent = 'Bitte wählen Sie eine Aufgabenverantwortlichkeit aus.';
-		isValid = false;
+			document.getElementById('assigneeTypeError').textContent = 'Bitte wählen Sie eine Aufgabenverantwortlichkeit aus.';
+			isValid = false;
 		}
 		if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.ROLES') {
-		const assignedRole = document.getElementById('assignedRoleDropdown').value;
-		if (assignedRole === '') {
-		document.getElementById('roleError').textContent = 'Bitte wählen Sie eine Rolle aus.';
-		isValid = false;
-		}
+			const assignedRole = document.getElementById('assignedRoleDropdown').value;
+			if (assignedRole === '') {
+				document.getElementById('roleError').textContent = 'Bitte wählen Sie eine Rolle aus.';
+				isValid = false;
+			}
 		} else if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.USER') {
-		const assignedUser = document.getElementById('assignedUserDropdown').value;
-		if (assignedUser === '') {
-		document.getElementById('userError').textContent = 'Bitte wählen Sie einen Nutzer aus.';
-		isValid = false;
-		}
+			const assignedUser = document.getElementById('assignedUserDropdown').value;
+			if (assignedUser === '') {
+				document.getElementById('userError').textContent = 'Bitte wählen Sie einen Nutzer aus.';
+				isValid = false;
+			}
 		}
 		const assignmentStatus = document.getElementById('assignmentStatusDropdown').value;
 		if (assignmentStatus === '') {
-		document.getElementById('statusError').textContent = 'Bitte wählen Sie einen Bearbeitungsstatus aus.';
-		isValid = false;
+			document.getElementById('statusError').textContent = 'Bitte wählen Sie einen Bearbeitungsstatus aus.';
+			isValid = false;
 		}
 		return isValid;
-		} *@
+	}
 </script>

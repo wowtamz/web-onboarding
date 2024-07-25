@@ -10,8 +10,10 @@ namespace SoPro24Team06.ViewModels
     public class AssignmentDetailsViewModel
     {
         public Assignment Assignment { get; set; }
-        public IEnumerable<SelectListItem> UserList { get; set; }
-        public IEnumerable<SelectListItem> RoleList { get; set; }
+		public string? SelectedUserId {get; set;}
+		public string? SelectedRoleId {get; set;}
+        public SelectList UserList { get; set; }
+        public SelectList RoleList { get; set; }
         public string ProcessTitle { get; set; }
         public IEnumerable<SelectListItem> AssignmentStatusList { get; set; }
 
@@ -36,7 +38,13 @@ namespace SoPro24Team06.ViewModels
 			InitialiseSelectList(userList, roleList);
         }
 
-        public AssignmentDetailsViewModel() { }
+        public AssignmentDetailsViewModel()
+		{ 
+			UserList = new SelectList(new List<SelectListItem>());
+			RoleList = new SelectList(new List<SelectListItem>());
+			AssignmentStatusList = new List<SelectListItem>();
+			AssigneeTypeList = new List<SelectListItem>();
+		}
 
 		public void InitialiseSelectList (
 			List<ApplicationUser> userList,
@@ -76,14 +84,15 @@ namespace SoPro24Team06.ViewModels
             {
                 this.RoleList = new SelectList(roleList, "Id", "Name");
             }
-
-            this.AssignmentStatusList = new SelectList(
-                EnumHelper.GetEnumList<AssignmentStatus>(),
-                "Value",
-                "Text",
-                Assignment.Status
-            );
-			
+			List<AssignmentStatus> assignmentStatusList = EnumHelper.GetEnumList<AssignmentStatus>();
+            this.AssignmentStatusList = assignmentStatusList.Select(
+			status => new SelectListItem
+			{
+				Value = status.ToString(),
+				Text = EnumHelper.GetDisplayName(status),
+				Selected = status == Assignment.Status
+			});
+	
 			List<AssigneeType> assigneeTypeList = new List<AssigneeType> () {
 				AssigneeType.ROLES,
 				AssigneeType.USER,
