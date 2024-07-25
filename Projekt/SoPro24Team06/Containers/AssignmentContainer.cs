@@ -21,7 +21,6 @@ public class AssingmentContainer
 			.Include(a => a.AssignedRole)
 			.Include(a => a.Assignee)
 			.ToList().Find(a => a.Id == id);
-
     }
 
     public async Task AddAssingmentAsync(Assignment assignmentToAdd)

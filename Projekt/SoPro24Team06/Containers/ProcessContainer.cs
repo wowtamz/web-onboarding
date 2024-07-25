@@ -57,8 +57,6 @@ public class ProcessContainer
 					.ThenInclude(a => a.Assignee)
 				.Include(p => p.Assignments)
 					.ThenInclude(a => a.AssignedRole)
-				.Include(p => p.Assignments)
-					.ThenInclude(a => a.Assignee)
                 .Include(p => p.IsArchived)
                 .ToList()
                 .Find(p => p.Id == id)
