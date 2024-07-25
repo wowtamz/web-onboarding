@@ -10,7 +10,7 @@ namespace SoPro24Team06.ViewModels
         public Assignment Assignment { get; set; }
         public string? SelectedUserId { get; set; }
         public string? SelectedRoleId { get; set; }
-
+        public string? SelectedDate { get; set; }
         public SelectList UserList { get; set; }
         public SelectList RoleList { get; set; }
         public string ProcessTitle { get; set; }
