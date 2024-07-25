@@ -140,7 +140,7 @@
 									</svg>
 								</a>
 							</td>
-							<form id="Details" asp-action="Details-@assignment.Id" method="post" style="display:none;">
+							<form id="Details-@assignment.Id" asp-action="Details" method="post" style="display:none;">
 								<input type="hidden" name="assignmentId" value="@assignment.Id" />
 							</form>
 						</tr>
@@ -212,7 +212,7 @@
 									</svg>
 								</a>
 							</td>
-							<form id="Details" asp-action="Details-@assignment.Id" method="post" style="display:none;">
+							<form id="Details-@assignment.Id" asp-action="Details" method="post" style="display:none;">
 								<input type="hidden" name="assignmentId" value="@assignment.Id" />
 							</form>
 						</tr>
@@ -260,18 +260,18 @@
 								}
 								else
 								{
-									<td>Rolle: nicht angegeben</td>
+									<td>keine Rolle angegeben</td>
 								}
 							}
 							else if (@assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.USER)
 							{
 								@if (@assignment.Assignee != null)
 								{
-									<td>@assignment.Assignee.FullName</td>
+									<td>Benutzer: @assignment.Assignee.FullName</td>
 								}
 								else
 								{
-									<td>nicht angegeben</td>
+									<td>kein Benutzer angegeben</td>
 								}
 							}
 							else

@@ -30,16 +30,11 @@ public static class EnumHelper
         };
     }
 
-    public static List<SelectListItem> GetEnumList<T>()
+    public static List<T> GetEnumList<T>()
         where T : Enum
     {
         return Enum.GetValues(typeof(T))
             .Cast<T>()
-            .Select(e => new SelectListItem
-            {
-                Text = EnumHelper.GetDisplayName(e),
-                Value = e.ToString(),
-            })
             .ToList();
     }
 }
