@@ -486,19 +486,24 @@ namespace SoPro24Team06.Controllers
             // überprüfung einfügen ob Process noch nicht Archiviert ist.
             List<Assignment> assignmentList = new List<Assignment>();
             //changes contents of Lists depending on which list was selected in Index ViewModel
+
+            processList = processList
+                .Where(p =>
+                    p.Assignments.Any(a =>
+                        (
+                            a.AssignedRole != null
+                            && a.AssigneeType == AssigneeType.ROLES
+                            && roles.Contains(a.AssignedRole.ToString())
+                        )
+                        || (p.Supervisor == user)
+                        || (a.Assignee != null && a.Assignee.Id == user.Id)
+                    )
+                )
+                .ToList();
+
             switch (HttpContext.Session.GetString("currentList"))
             {
                 case "RoleAssignment":
-                    //make processList only contain processes with Assignment with AssignedRole from current User
-                    processList = processList
-                        .Where(p =>
-                            p.Assignments.Any(a =>
-                                a.AssignedRole != null
-                                && a.AssigneeType == AssigneeType.ROLES
-                                && roles.Contains(a.AssignedRole.ToString())
-                            )
-                        )
-                        .ToList();
                     //get Assignments form Processes in ProcessList with AssignedRole form current User
                     foreach (Process p in processList)
                     {
@@ -512,10 +517,10 @@ namespace SoPro24Team06.Controllers
                                 assignmentList.Add(a);
                         }
                     }
-                    assignmentList = _assignmentContainer
-                        .GetAllAssignments()
-                        .Where(a => a.AssignedRole != null && roles.Contains(a.AssignedRole.Name))
-                        .ToList();
+                    // assignmentList = _assignmentContainer
+                    //     .GetAllAssignments()
+                    //     .Where(a => a.AssignedRole != null && roles.Contains(a.AssignedRole.Name))
+                    //     .ToList();
                     break;
 
                 case "AllAssignments":
@@ -527,28 +532,13 @@ namespace SoPro24Team06.Controllers
                             foreach (Assignment a in p.Assignments)
                             {
                                 assignmentList.Add(a);
+                                _logger.LogInformation(a.Title);
                             }
                         }
-                        assignmentList = _assignmentContainer.GetAllAssignments();
                     }
                     //if process contains current user as Supervisor add all Assignments form that process to AssignmentList, and all which match normally included Assignments
                     else if (processList.Any(p => p.Supervisor == user))
                     {
-                        processList = processList
-                            .Where(
-                                (
-                                    p =>
-                                        p.Supervisor == user
-                                        || p.Assignments.Any(a =>
-                                            (a.Assignee != null && a.Assignee.Id == user.Id)
-                                            || (
-                                                a.AssignedRole != null
-                                                && roles.Contains(a.AssignedRole.ToString())
-                                            )
-                                        )
-                                )
-                            )
-                            .ToList();
                         foreach (Process p in processList)
                         {
                             if (p.Supervisor == user)
@@ -574,30 +564,19 @@ namespace SoPro24Team06.Controllers
                                 }
                             }
                         }
-                        assignmentList = _assignmentContainer
-                            .GetAllAssignments()
-                            .Where(a =>
-                                (a.Assignee != null && a.Assignee == user)
-                                || (
-                                    a.AssignedRole != null
-                                    && roles.Contains(a.AssignedRole.ToString())
-                                )
-                            )
-                            .ToList();
+                        // assignmentList = _assignmentContainer
+                        //     .GetAllAssignments()
+                        //     .Where(a =>
+                        //         (a.Assignee != null && a.Assignee == user)
+                        //         || (
+                        //             a.AssignedRole != null
+                        //             && roles.Contains(a.AssignedRole.ToString())
+                        //         )
+                        //     )
+                        //     .ToList();
                     }
                     else
                     {
-                        processList = processList
-                            .Where(p =>
-                                p.Assignments.Any(a =>
-                                    (a.Assignee != null && a.Assignee.Id == user.Id)
-                                    || (
-                                        a.AssignedRole != null
-                                        && roles.Contains(a.AssignedRole.ToString())
-                                    )
-                                )
-                            )
-                            .ToList();
                         foreach (Process p in processList)
                         {
                             foreach (Assignment a in p.Assignments)
@@ -611,33 +590,33 @@ namespace SoPro24Team06.Controllers
                                     assignmentList.Add(a);
                             }
                         }
-                        assignmentList = _assignmentContainer
-                            .GetAllAssignments()
-                            .Where(a => a.Assignee != null && a.Assignee == user)
-                            .ToList();
+                        // assignmentList = _assignmentContainer
+                        //     .GetAllAssignments()
+                        //     .Where(a => a.Assignee != null && a.Assignee == user)
+                        //     .ToList();
                         HttpContext.Session.SetString("currentList", "MyAssignments");
                     }
                     break;
                 default:
-                    processList = processList
-                        .Where(p =>
-                            p.Assignments.Any(a => a.Assignee != null && a.Assignee.Id == user.Id)
-                        )
-                        .ToList();
-
                     foreach (Process p in processList)
                     {
                         foreach (Assignment a in p.Assignments)
                         {
-                            if (a.Assignee != null && a.Assignee == user)
+                            if (
+                                a.AssigneeType == AssigneeType.USER
+                                && a.Assignee != null
+                                && a.Assignee == user
+                            )
                                 assignmentList.Add(a);
+                            else
+                                _logger.LogInformation(a.Title);
                         }
                     }
-                    assignmentList = _assignmentContainer
-                        .GetAllAssignments()
-                        .ToList()
-                        .Where(a => a.Assignee != null && a.Assignee == user)
-                        .ToList();
+                    // assignmentList = _assignmentContainer
+                    //     .GetAllAssignments()
+                    //     .ToList()
+                    //     .Where(a => a.Assignee != null && a.Assignee == user)
+                    //     .ToList();
                     HttpContext.Session.SetString("currentList", "MyAssignments");
                     break;
             }
@@ -650,7 +629,6 @@ namespace SoPro24Team06.Controllers
             if (sortingMethod != null)
             {
                 model.SortAssingments(sortingMethod);
-                _logger.LogCritical(sortingMethod);
             }
 
             int? selectedProcess = HttpContext.Session.GetInt32("selectedProcessId");

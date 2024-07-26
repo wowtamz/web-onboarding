@@ -40,6 +40,9 @@ public class ProcessContainer
             .Include(p => p.ContractOfRefWorker)
             .Include(p => p.DepartmentOfRefWorker)
             .Include(p => p.Assignments)
+            .ThenInclude(a => a.Assignee)
+            .Include(p => p.Assignments)
+            .ThenInclude(a => a.AssignedRole)
             .ToListAsync();
         return processList;
     }
@@ -60,6 +63,22 @@ public class ProcessContainer
         return activeProcesses;
     }
 
+    public async Task<List<Process>> GetArchivedProcessesAsync()
+    {
+        List<Process> processList = await GetProcessesAsync();
+        List<Process> archivedProcesses = new List<Process> { };
+
+        foreach (var process in processList)
+        {
+            if (process.IsArchived)
+            {
+                archivedProcesses.Add(process);
+            }
+        }
+
+        return archivedProcesses;
+    }
+
     // Vorgang per Id lesen
     public async Task<Process> GetProcessByIdAsync(int id)
     {
@@ -73,7 +92,6 @@ public class ProcessContainer
                 .ThenInclude(a => a.Assignee)
                 .Include(p => p.Assignments)
                 .ThenInclude(a => a.AssignedRole)
-                .Include(p => p.IsArchived)
                 .ToList()
                 .Find(p => p.Id == id)
             ?? throw new InvalidOperationException($"No Process found with Id {id}");
