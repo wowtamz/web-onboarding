@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
+using Microsoft.VisualBasic.CompilerServices;
+using Newtonsoft.Json;
 using SoPro24Team06.Containers;
 using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
@@ -44,8 +46,16 @@ namespace SoPro24Team06.Controllers
             ViewData["contracts"] = _context.Contracts.ToList();
             CreateEditAssignmentTemplateViewModel assignmentTemplateVM =
                 new CreateEditAssignmentTemplateViewModel(processId);
-            ProcessTemplate processTemplate = await _processTemplateContainer.GetProcessTemplateByIdAsync(processId);
-            ViewData["processRoles"] = processTemplate.RolesWithAccess; 
+            if (processId > 0)
+            {
+                ProcessTemplate processTemplate =
+                    await _processTemplateContainer.GetProcessTemplateByIdAsync(processId);
+                ViewData["processRoles"] = processTemplate.RolesWithAccess;
+            }
+            else
+            {
+                ViewData["processRoles"] = _roleManager.Roles.ToList();
+            }
             return View("~/Views/Assignments/Create.cshtml", assignmentTemplateVM);
         }
 
@@ -132,13 +142,66 @@ namespace SoPro24Team06.Controllers
                     contractsList,
                     assigneeType,
                     assignedRole,
-                    (int) model.processId
+                    TempData["startProcessViewModel"] == null || TempData["editProcessViewModel"] == null ? 0 : (int) model.processId
                 );
 
                 _logger.LogInformation(
                     "Successfully created a new assignment template with title: {Title}",
                     model.Title
                 );
+                
+                // Author: Tamas Varadi
+                // Begin
+
+                bool redirectFromProcessController = TempData["startProcessViewModel"] != null ||
+                                                     TempData["editProcessViewModel"] != null;
+                
+                if (redirectFromProcessController)
+                {
+                    at.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);
+                    at.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null);
+                    
+                    if (TempData["startProcessViewModel"] != null)
+                    {
+                        string jsonViewModel = TempData["startProcessViewModel"] as string;
+                        StartProcessViewModel startProcessViewModel =
+                            JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
+
+                        startProcessViewModel.AssignmentTemplates.Add(at);
+
+                        jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
+                        TempData["startProcessViewModel"] = jsonViewModel;
+
+                        return RedirectToAction("Start", "Process");
+                    }
+                    
+                    if (TempData["editProcessViewModel"] != null)
+                    {
+                        string jsonViewModel = TempData["editProcessViewModel"] as string;
+                        EditProcessViewModel editProcessViewModel =
+                            JsonConvert.DeserializeObject<EditProcessViewModel>(jsonViewModel);
+
+                        Process activeProcess = await _context.Processes.FindAsync(editProcessViewModel.Id);
+                        ApplicationUser? assignee = await _userManager.FindByIdAsync(editProcessViewModel.Supervisor.Id);
+
+                        if (at.AssigneeType == AssigneeType.WORKER_OF_REF)
+                        {
+                            assignee = await _userManager.FindByIdAsync(editProcessViewModel.WorkerOfReference.Id);
+                        }
+
+                        Assignment newAssignment = at.ToAssignment(assignee);
+                        _context.Assignments.Add(newAssignment);
+                        
+                        activeProcess.Assignments.Add(newAssignment);
+
+                        await _context.SaveChangesAsync();
+
+                        return RedirectToAction("Edit", "Process", new { id = editProcessViewModel.Id });
+
+                    }
+                }
+                
+                // End
 
                 var processTemplate = await _processTemplateContainer.GetProcessTemplateByIdAsync(
                     (int)model.processId
@@ -164,8 +227,23 @@ namespace SoPro24Team06.Controllers
             
             AssignmentTemplate assignmentTemplate =
                 _assignmentTemplateContainer.GetAssignmentTemplate(id);
-            ProcessTemplate processTemplate= await _processTemplateContainer.GetProcessTemplateByIdAsync(assignmentTemplate.ProcessTemplateId);
+            /*
+            ProcessTemplate processTemplate= await _processTemplateContainer.GetProcessTemplateByIdAsync((int)assignmentTemplate.ProcessTemplateId);
             ViewData["processRoles"] = processTemplate.RolesWithAccess; 
+            */
+            
+            // Überprüfen ob man das AssignmentTemplate einer ProcessTemplate oder Process bearbeitet
+            if (assignmentTemplate.ProcessTemplateId > 0)
+            {
+                ProcessTemplate processTemplate =
+                    await _processTemplateContainer.GetProcessTemplateByIdAsync((int)assignmentTemplate.ProcessTemplateId);
+                ViewData["processRoles"] = processTemplate.RolesWithAccess;
+            }
+            else
+            {
+                ViewData["processRoles"] = _roleManager.Roles.ToList();
+            }
+            
             if (assignmentTemplate != null)
             {
                 CreateEditAssignmentTemplateViewModel createEditAssignmentTemplateVM =
@@ -270,6 +348,31 @@ namespace SoPro24Team06.Controllers
                     "Successfully edited the assignment template with title: {Title}",
                     model.Title
                 );
+                
+                // Author: Tamas Varadi
+                // Begin
+                if (model.processId == 0 || model.processId == null)
+                {
+                    AssignmentTemplate at = _assignmentTemplateContainer.GetAssignmentTemplate(model.Id);
+                    
+                    if (TempData["startProcessViewModel"] != null)
+                    {
+                        string jsonViewModel = TempData["startProcessViewModel"] as string;
+                        StartProcessViewModel startProcessViewModel =
+                            JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
+                        
+                        startProcessViewModel.AssignmentTemplates.RemoveAll(a => a.Id == model.Id);
+                        startProcessViewModel.AssignmentTemplates.Add(at);
+
+                        jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
+                        TempData["startProcessViewModel"] = jsonViewModel;
+
+                        return RedirectToAction("Start", "Process");
+                    }
+                }
+
+                // End
+                
                 return RedirectToAction("Edit", "ProcessTemplate", new { id = model.processId });
             }
             catch (Exception ex)
@@ -283,7 +386,7 @@ namespace SoPro24Team06.Controllers
         {
             AssignmentTemplate? assignmentTemplate =
                 _assignmentTemplateContainer.GetAssignmentTemplate(id);
-            ProcessTemplate processTemplate = await _processTemplateContainer.GetProcessTemplateByIdAsync(assignmentTemplate.ProcessTemplateId);
+            ProcessTemplate processTemplate = await _processTemplateContainer.GetProcessTemplateByIdAsync((int)assignmentTemplate.ProcessTemplateId);
             foreach(var role in processTemplate.RolesWithAccess){
                 if(User.IsInRole(role.Name)|| User.IsInRole("Administrator")){
                 _assignmentTemplateContainer.DeleteAssignmentTemplate(id);

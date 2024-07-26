@@ -22,7 +22,7 @@ public class AssignmentTemplateContainer
         List<Contract>? forContractsList,
         AssigneeType assigneType,
         ApplicationRole? assignedRole,
-        int processTemplateId
+        int? processTemplateId
     )
     {
         AssignmentTemplate template = new AssignmentTemplate(

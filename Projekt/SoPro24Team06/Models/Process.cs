@@ -79,18 +79,19 @@ namespace SoPro24Team06.Models
             Assignments = new List<Assignment>(); //delete for production use
             foreach (AssignmentTemplate temp in Template.AssignmentTemplates) //delete for production use
             {
+                Assignment assignment = temp.ToAssignment(null);
                 switch (temp.AssigneeType)
                 {
                     case AssigneeType.SUPERVISOR:
-                        assignments.Add(temp.ToAssignment(this.Supervisor));
+                        assignment.Assignee = this.Supervisor;
                         break;
                     case AssigneeType.WORKER_OF_REF:
-                        assignments.Add(temp.ToAssignment(this.WorkerOfReference));
+                        assignment.Assignee = this.WorkerOfReference;
                         break;
                     default:
-                        assignments.Add(temp.ToAssignment(null));
                         break;
                 }
+                assignments.Add(assignment);
             }
             this.ContractOfRefWorker = Template.ContractOfRefWorker;
             this.DepartmentOfRefWorker = Template.DepartmentOfRefWorker;

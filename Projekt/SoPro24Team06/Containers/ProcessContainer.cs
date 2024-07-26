@@ -44,6 +44,38 @@ public class ProcessContainer
         return processList;
     }
 
+    public async Task<List<Process>> GetActiveProcessesAsync()
+    {
+        List<Process> processList = await GetProcessesAsync();
+        List<Process> activeProcesses = new List<Process> { };
+
+        foreach (var process in processList)
+        {
+            if (!process.IsArchived)
+            {
+                activeProcesses.Add(process);
+            }
+        }
+        
+        return activeProcesses;
+    }
+    
+    public async Task<List<Process>> GetArchivedProcessesAsync()
+    {
+        List<Process> processList = await GetProcessesAsync();
+        List<Process> archivedProcesses = new List<Process> { };
+        
+        foreach (var process in processList)
+        {
+            if (process.IsArchived)
+            {
+                archivedProcesses.Add(process);
+            }
+        }
+        
+        return archivedProcesses;
+    }
+
     // Vorgang per Id lesen
     public async Task<Process> GetProcessByIdAsync(int id)
     {
@@ -54,7 +86,6 @@ public class ProcessContainer
                 .Include(p => p.ContractOfRefWorker)
                 .Include(p => p.DepartmentOfRefWorker)
                 .Include(p => p.Assignments)
-                .Include(p => p.IsArchived)
                 .ToList()
                 .Find(p => p.Id == id)
             ?? throw new InvalidOperationException($"No Process found with Id {id}");
@@ -113,6 +144,38 @@ public class ProcessContainer
 
         return processList;
     }
+
+    public async Task<List<Process>> GetActiveProcessesOfUserAsync(string userId)
+    {
+        List<Process> processList = await GetProcessesOfUserAsync(userId);
+        List<Process> activeProcesses = new List<Process> {};
+
+        foreach (Process p  in processList)
+        {
+            if (!p.IsArchived)
+            {
+                activeProcesses.Add(p);
+            }
+        }
+
+        return activeProcesses;
+    }
+
+    public async Task<List<Process>> GetArchivedProcessesOfUserAsync(string userId)
+    {
+        List<Process> processList = await GetProcessesOfUserAsync(userId);
+        List<Process> archivedProcesses = new List<Process> {};
+
+        foreach (Process p  in processList)
+        {
+            if (p.IsArchived)
+            {
+                archivedProcesses.Add(p);
+            }
+        }
+
+        return archivedProcesses;
+    }
     
     // Alle Vorgänge die mit der Rolle (roleId) in Beziehung stehen
     public async Task<List<Process>> GetProcessesOfRoleAsync(string roleId)
@@ -139,10 +202,39 @@ public class ProcessContainer
     }
 
     // Neue Vorgang hinzufügen
-    public async Task AddProcessAsync(Process processToAdd)
+    public async Task<Process?> AddProcessAsync(Process processToAdd)
     {
-        _context.Processes.Add(processToAdd);
+        // Zuerst Assignments dem Context hinzufügen
+        foreach (var assignment in processToAdd.Assignments)
+        {
+            ApplicationUser? assignee = await _userManager.FindByIdAsync(processToAdd.Supervisor.Id);;
+            if (assignment.Assignee != null)
+            {
+                assignee = await _userManager.FindByIdAsync(assignment.Assignee.Id);
+            }
+            else
+            {
+                /* später implementieren
+                ApplicationRole role = assignment.AssignedRole ?? throw new NullReferenceException("Role cannot be null if there is no assignee");
+                assignment.AssignedRole = await _roleManager.FindByIdAsync(role.Id);
+                */
+            }
+
+            if (assignment.AssignedRole != null)
+            {
+                ApplicationRole assignedRole = await _roleManager.FindByIdAsync(assignment.AssignedRole.Id);
+                assignment.AssignedRole = assignedRole;
+            }
+            
+            assignment.Assignee = assignee;
+            
+            _context.Assignments.Add(assignment);
+        }
+        
+        var process = _context.Processes.Add(processToAdd);
         await _context.SaveChangesAsync();
+
+        return process.Entity;
     }
 
     // Vorgang Bearbeiten
@@ -168,9 +260,30 @@ public class ProcessContainer
         List<Assignment> assignmentsToRemove = processToUpdate
             .Assignments.Where(a => !newAssignmentTitles.Contains(a.Title))
             .ToList();
+        
+        // Zuerst Assignments dem Context hinzufügen
+        foreach (var assignment in assignments)
+        {
+            ApplicationUser? assignee = await _userManager.FindByIdAsync(supervisor.Id);;
+            if (assignment.Assignee != null)
+            {
+                assignee = await _userManager.FindByIdAsync(assignment.Assignee.Id);
+            }
+            else
+            {
+                /* später implementieren
+                ApplicationRole role = assignment.AssignedRole ?? throw new NullReferenceException("Role cannot be null if there is no assignee");
+                assignment.AssignedRole = await _roleManager.FindByIdAsync(role.Id);
+                */
+            }
 
-        assignmentsToRemove.ForEach(a => Console.WriteLine($"ToRemove({a.Title})"));
-        assignments.ForEach(a => Console.WriteLine($"ToAddKeep({a.Title})"));
+            var assignmentExists = await _context.Assignments.FindAsync(assignment.Id);
+            if (assignmentExists == null)
+            {
+                assignment.Assignee = assignee;
+                _context.Assignments.Add(assignment);
+            }
+        }
 
         _context.Assignments.RemoveRange(assignmentsToRemove);
 
