@@ -8,8 +8,8 @@ namespace SoPro24Team06.E2E
 {
     public class AssignmentUiTest : IDisposable
     {
-		private readonly string baseurl = "https://localhost:7003/";
-	    private readonly IWebDriver _driver;
+        private readonly string baseurl = "https://localhost:7003/";
+        private readonly IWebDriver _driver;
         private readonly WebDriverWait _wait;
 
         public AssignmentUiTest(IWebDriver driver, WebDriverWait wait)
@@ -41,7 +41,7 @@ namespace SoPro24Team06.E2E
             {
                 try
                 {
-					var emailElement = _wait.Until(
+                    var emailElement = _wait.Until(
                         SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
                             By.Id("Input_Email")
                         )
@@ -53,18 +53,20 @@ namespace SoPro24Team06.E2E
                             By.Id("Input_Password")
                         )
                     );
-					passwordElement.SendKeys("User@123");
+                    passwordElement.SendKeys("User@123");
 
-					var loginButton = _wait.Until(
-						SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
-							By.CssSelector("[aria-label='login-submit']")
-						)
-					);
-					loginButton.Click();
+                    var loginButton = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                            By.CssSelector("[aria-label='login-submit']")
+                        )
+                    );
+                    loginButton.Click();
                 }
                 catch (WebDriverTimeoutException exception)
                 {
-                    throw new Exception("WedDriver timedout during loginAttempt" + exception.Message);
+                    throw new Exception(
+                        "WedDriver timedout during loginAttempt" + exception.Message
+                    );
                 }
             }
         }
@@ -73,22 +75,46 @@ namespace SoPro24Team06.E2E
 
         public void LoginHRManager() { }
 
+        public void TestAssingmentListDisplay()
+        {
+            _driver.Navigate().GoToUrl(baseurl + "Assignment");
+            try
+            {
+                //test if AssignmentList is displayed
+                IWebElement assignmentList = _wait.Until(d =>
+                    d.FindElement(By.Id("MyAssignmentsList"))
+                );
+                Assert.True(
+                    assignmentList.Displayed,
+                    "assignmentList myAssignmentsList not displayed"
+                );
+                //test if there are no Assignments to show
+                var assignmentListBody = assignmentList.FindElement(By.TagName("tbody"));
+                try
+                {
+                    assignmentListBody.FindElement(
+                        By.XPath("//tr/td[text()='Keine Aufgaben vorhanden']")
+                    );
+                    throw new Exception("no Assignments shown");
+                }
+                catch (NoSuchElementException exception) { }
+                ;
 
-		public void TestAssingmentListDisplay ()
-		{
-			_driver.Navigate().GoToUrl(baseurl + "Assignment");
-			IWebElement assignmentList = _wait.Until(d => d.FindElement(By.Id("MyAssignmentsList")));
-			Assert.True((assignmentList).Displayed, "assignmentList myAssignmentsList not displayed");
+                //test if assignments are correctly formed
+                var assignments = assignmentListBody.FindElements(By.TagName("tr"));
 
-				var assignmentListBody = assignmentList.FindElements(By.TagName("tbody"));
-			int lineCount = assignmentListBody.Count(); 		//minus one for the headder
-			Assert.True(lineCount >= 1);
-
-			var assignmentCoun
-
-
-		}
-
+                foreach (var a in assignments)
+                {
+                    var assignmentDetails = a.FindElements(By.TagName("td"));
+                }
+            }
+            catch (NoSuchElementException e)
+            {
+                throw new Exception(
+                    "Error: MyAssignmentList not Displayed correctly: \n" + e.Message
+                );
+            }
+        }
 
         public void Dispose()
         {
