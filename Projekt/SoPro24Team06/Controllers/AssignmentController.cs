@@ -151,7 +151,7 @@ namespace SoPro24Team06.Controllers
                     _logger.LogInformation("EditAssignment Status Error");
                 }
                 //checks if DueDate is set
-                if (model.Assignment.DueDate != null)
+                if (model.Assignment.DueDate == null)
                 {
                     ModelState.AddModelError(
                         "Assignment.DueDate",
@@ -394,25 +394,28 @@ namespace SoPro24Team06.Controllers
                     userList.Remove(u);
             }
             List<ApplicationRole> roleList = _roleManager.Roles.ToList();
-            AssignmentEditViewModel model = new AssignmentEditViewModel(
-                assignment,
-                userList,
-                roleList,
-                process
-            );
             ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
             List<string> roles = new List<string>(await _userManager.GetRolesAsync(user));
-            if (roles.Contains("Administrator"))
+            if (roles.Contains("Administrator") || (process != null && process.Supervisor == user))
             {
+                AssignmentEditViewModel model = new AssignmentEditViewModel(
+                    assignment,
+                    userList,
+                    roleList,
+                    process
+                );
                 return View("~/Views/Assignments/EditAssignment.cshtml", model);
             }
-
-            if (process != null && process.Supervisor == user)
+            else
             {
-                return View("~/Views/Assignments/EditAssignment.cshtml", model);
+                EditAssignmentLimitedViewModel model = new EditAssignmentLimitedViewModel(
+                    assignment,
+                    userList,
+                    roleList,
+                    process
+                );
+                return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
             }
-
-            return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
         }
 
         /// <summary>
@@ -652,6 +655,7 @@ namespace SoPro24Team06.Controllers
             if (sortingMethod != null)
             {
                 model.SortAssingments(sortingMethod);
+                _logger.LogCritical(sortingMethod);
             }
 
             int? selectedProcess = HttpContext.Session.GetInt32("selectedProcessId");
