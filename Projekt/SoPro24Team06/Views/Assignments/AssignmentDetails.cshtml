@@ -1,0 +1,52 @@
+@model SoPro24Team06.ViewModels.AssignmentDetailsViewModel;
+@using SoPro24Team06.Enums;
+
+<div>
+	<fieldset>
+		<legend>Titel</legend>
+		<p>@Model.Assignment.Title</p>
+	</fieldset>
+	<fieldset>
+		<legend>Vorgang</legend>
+		<p>@Model.ProcessTitle</p>
+	</fieldset>
+	<fieldset>
+		<legend>Fälligkeit</legend>
+		<p>@Model.Assignment.DueDate.Date.ToString("dd.MM.yyyy")</p>
+	</fieldset>
+	<fieldset>
+		<legend>Anweisungen</legend>
+		<textarea class="form-control" rows="10" readonly>@Model.Assignment.Instructions</textarea>
+	</fieldset>
+	<fieldset>
+		<legend>Aufgabenverantwortlichkeit</legend>
+		<p>@SoPro24Team06.Helpers.EnumHelper.GetDisplayName(Model.Assignment.AssigneeType)</p>
+		@if (Model.Assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.ROLES)
+		{
+			@if(Model.Assignment.AssignedRole == null)
+			{
+				<p>Es konnte keine Verantwortliche Rolle gefunden werden</p>
+			}
+			else 
+			{
+				<p>@Model.Assignment.AssignedRole.Name</p>
+			}
+		}
+		else if (Model.Assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.USER)
+		{
+			@if(Model.Assignment.Assignee == null)
+			{
+				<p>Es konnte kein Verantwortlicher Nutzer gefunden werden</p>
+			}
+			else 
+			{
+				<p>@Model.Assignment.Assignee.FullName</p>
+			}
+		}
+	</fieldset>
+	<fieldset>
+		<legend>Status</legend>
+		<p>@SoPro24Team06.Helpers.EnumHelper.GetDisplayName(Model.Assignment.Status)</p>
+	</fieldset>
+	<a href="/Assignment" type="button" class="btn btn-secondary">Schließen</a>
+</div>
