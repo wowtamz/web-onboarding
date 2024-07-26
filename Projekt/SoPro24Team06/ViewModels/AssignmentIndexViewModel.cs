@@ -16,10 +16,7 @@ public class AssignmentIndexViewModel
     public List<Process> ProcessList { get; set; }
     public Boolean IsAdminOrSupervisor { get; set; }
 
-    public AssignmentIndexViewModel(
-        List<Assignment> assignmentList,
-        List<Process> processList
-    )
+    public AssignmentIndexViewModel(List<Assignment> assignmentList, List<Process> processList)
     {
         this.AssignmentList = assignmentList;
         this.ProcessList = processList;
@@ -43,10 +40,10 @@ public class AssignmentIndexViewModel
     {
         switch (sortingProperty)
         {
-            case "DueDate":
+            case "dueDate":
                 AssignmentList.Sort((x, y) => DateTime.Compare(x.DueDate, y.DueDate));
                 break;
-            case "Namen":
+            case "name":
                 this.AssignmentList.Sort((x, y) => String.Compare(x.Title, y.Title));
                 break;
         }
