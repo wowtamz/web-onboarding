@@ -431,6 +431,7 @@ namespace SoPro24Team06.Controllers
             if (assignment == null)
             {
                 return NotFound();
+            }
             List<Process> processList = await _processContainer.GetActiveProcessesAsync();
             Process? process = processList.FirstOrDefault(p => p.Assignments.Contains(assignment));
 
@@ -491,8 +492,7 @@ namespace SoPro24Team06.Controllers
                     //make processList only contain processes with Assignment with AssignedRole from current User
                     processList = processList
                         .Where(p =>
-                            !p.IsArchived
-                            && p.Assignments.Any(a =>
+                            p.Assignments.Any(a =>
                                 a.AssignedRole != null
                                 && a.AssigneeType == AssigneeType.ROLES
                                 && roles.Contains(a.AssignedRole.ToString())
@@ -524,12 +524,9 @@ namespace SoPro24Team06.Controllers
                     {
                         foreach (Process p in processList)
                         {
-                            if (!p.IsArchived)
+                            foreach (Assignment a in p.Assignments)
                             {
-                                foreach (Assignment a in p.Assignments)
-                                {
-                                    assignmentList.Add(a);
-                                }
+                                assignmentList.Add(a);
                             }
                         }
                         assignmentList = _assignmentContainer.GetAllAssignments();
@@ -538,17 +535,17 @@ namespace SoPro24Team06.Controllers
                     else if (processList.Any(p => p.Supervisor == user))
                     {
                         processList = processList
-                            .Where(p =>
-                                !p.IsArchived
-                                && (
-                                    p.Supervisor == user
-                                    || p.Assignments.Any(a =>
-                                        (a.Assignee != null && a.Assignee.Id == user.Id)
-                                        || (
-                                            a.AssignedRole != null
-                                            && roles.Contains(a.AssignedRole.ToString())
+                            .Where(
+                                (
+                                    p =>
+                                        p.Supervisor == user
+                                        || p.Assignments.Any(a =>
+                                            (a.Assignee != null && a.Assignee.Id == user.Id)
+                                            || (
+                                                a.AssignedRole != null
+                                                && roles.Contains(a.AssignedRole.ToString())
+                                            )
                                         )
-                                    )
                                 )
                             )
                             .ToList();
