@@ -58,11 +58,11 @@
 	<div class="d-flex flex-row gap-2">
 		<form id="assingmentFilterForm" method="post" oninput="this.submit()" asp-action="FilterAssignments">
 			<div class="dropdown-menue">
-				<select class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown"
+					<select class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown"
 					type="button" style="margin-bottom: 12px;" id="processDropdown" name="SelectedProcessId"
-					asp-items="@(new SelectList(Model.ProcessList, "ID", "Name", ViewData["selectedProcessId"]));">
-					<option value=null>Filtern</option>
-				</select>
+					asp-items="@(new SelectList(Model.ProcessList, "Id", "Title", ViewData["selectedProcessId"]));">
+						<option value=null>Filtern</option>
+					</select>
 				<input type="hidden" name="currentList" />
 			</div>
 		</form>

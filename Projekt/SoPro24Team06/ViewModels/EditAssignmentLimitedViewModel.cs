@@ -27,6 +27,10 @@ namespace SoPro24Team06.ViewModels
         )
         {
             this.Assignment = assignment;
+            if (assignment.AssignedRole != null)
+                SelectedRoleId = assignment.AssignedRole.Id;
+            if (assignment.Assignee != null)
+                SelectedUserId = assignment.Assignee.Id;
             if (process != null)
             {
                 this.ProcessTitle = process.Title;

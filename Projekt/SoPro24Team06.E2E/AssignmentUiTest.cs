@@ -1,11 +1,12 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras;
 using Xunit;
 
 namespace SoPro24Team06.E2E
 {
-    public class AssignmentUiTest
+    public class AssignmentUiTest : IDisposable
     {
         private readonly IWebDriver _driver;
         private readonly WebDriverWait _wait;
@@ -22,27 +23,36 @@ namespace SoPro24Team06.E2E
 
             if (_driver.Url.Contains("Identity/Account/Login"))
             {
-                // try
-                // {
-                // 	var emailElement = _wait.Until(
-                // 		SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("Input_Password"))
-                // 	);
-                // 	emailElement.SendKeys("user@example.com")
+                try
+                {
+                    var emailElement = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("Input_Email")
+                        )
+                    );
+                    emailElement.SendKeys("user@example.com");
 
-                // 	var passwordElement = _wait.Until(
-
-                // 	)
-                // }
-                // catch (System.Exception)
-                // {
-
-                // 	throw;
-                // }
+                    var passwordElement = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("Input_Password")
+                        )
+                    );
+                }
+                catch (System.Exception)
+                {
+                    throw;
+                }
             }
         }
 
         public void LoginAdmin() { }
 
         public void LoginHRManager() { }
+
+        public void Dispose()
+        {
+            _driver.Quit();
+            _driver.Dispose();
+        }
     }
 }
