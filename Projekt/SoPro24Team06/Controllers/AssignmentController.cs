@@ -419,9 +419,10 @@ namespace SoPro24Team06.Controllers
         }
 
         /// <summary>
-        ///
+        /// Opens Detail Page for Assignment with assignmentId
+        /// returns NotFound if Assignment can not be found in Database;
         /// </summary>
-        /// <param name="assignmentId"></param>
+        /// <param name="assignmentId">if from assignment for which details should be shown</param>
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -536,7 +537,7 @@ namespace SoPro24Team06.Controllers
                         }
                         assignmentList = _assignmentContainer.GetAllAssignments();
                     }
-                    //if process contains current user as Supervisor add all Assignments form that process to AssignmentList
+                    //if process contains current user as Supervisor add all Assignments form that process to AssignmentList, and all which match normally included Assignments
                     else if (processList.Any(p => p.Supervisor == user))
                     {
                         processList = processList
