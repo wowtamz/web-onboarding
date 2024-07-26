@@ -81,7 +81,7 @@ namespace SoPro24Team06.Controllers
             // check if model is Valid but still contains errors
             if (ModelState.IsValid)
             {
-                //check if model contais an Assignemnt
+                //check if model contains an Assignment
                 if (model.Assignment == null)
                 {
                     return NotFound("Assignment could not be found");
@@ -400,7 +400,19 @@ namespace SoPro24Team06.Controllers
                 roleList,
                 process
             );
-            return View("~/Views/Assignments/EditAssignment.cshtml", model);
+            ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
+            List<string> roles = new List<string>(await _userManager.GetRolesAsync(user));
+            if (roles.Contains("Administrator"))
+            {
+                return View("~/Views/Assignments/EditAssignment.cshtml", model);
+            }
+
+            if (process != null && process.Supervisor == user)
+            {
+                return View("~/Views/Assignments/EditAssignment.cshtml", model);
+            }
+
+            return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
         }
 
         /// <summary>
@@ -414,28 +426,14 @@ namespace SoPro24Team06.Controllers
         {
             Assignment? assignment = _assignmentContainer.GetAssignmentById(assignmentId);
             if (assignment == null)
+            {
                 return NotFound();
+            }
             List<Process> processList = await _processContainer.GetProcessesAsync();
             Process? process = processList.FirstOrDefault(p => p.Assignments.Contains(assignment));
-            List<ApplicationUser> userList = _userManager.Users.ToList();
-            foreach (ApplicationUser u in userList)
-            {
-                if (await _userManager.IsLockedOutAsync(u))
-                    userList.Remove(u);
-            }
-            List<ApplicationRole> roleList = _roleManager.Roles.ToList();
-            EditAssignmentLimitedViewModel model = new EditAssignmentLimitedViewModel(
-                assignment,
-                userList,
-                roleList,
-                process
-            );
-            return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
-        }
 
-        public async Task<IActionResult> Delete()
-        {
-            return View("~/Views/Assignments/Index.cshtml");
+            AssignmentDetailsViewModel model = new AssignmentDetailsViewModel(assignment, process);
+            return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
         }
 
         /// <summary>
