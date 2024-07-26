@@ -16,6 +16,33 @@ namespace SoPro24Team06.E2E
             _wait = wait;
         }
 
-        public void Login() { }
+        public void LoginNormalUser()
+        {
+            _driver.Navigate().GoToUrl("https://localhost.7003/");
+
+            if (_driver.Url.Contains("Identity/Account/Login"))
+            {
+                // try
+                // {
+                // 	var emailElement = _wait.Until(
+                // 		SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("Input_Password"))
+                // 	);
+                // 	emailElement.SendKeys("user@example.com")
+
+                // 	var passwordElement = _wait.Until(
+
+                // 	)
+                // }
+                // catch (System.Exception)
+                // {
+
+                // 	throw;
+                // }
+            }
+        }
+
+        public void LoginAdmin() { }
+
+        public void LoginHRManager() { }
     }
 }
