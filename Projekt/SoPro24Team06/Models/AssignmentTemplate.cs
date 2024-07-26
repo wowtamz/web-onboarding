@@ -37,7 +37,7 @@ namespace SoPro24Team06.Models
         public ApplicationRole? AssignedRole { get; set; }
         
         [ForeignKey("ProcessTemplate")]
-        public int ProcessTemplateId { get; set; }
+        public int? ProcessTemplateId { get; set; }
 
         public AssignmentTemplate() { }
 
@@ -49,7 +49,7 @@ namespace SoPro24Team06.Models
             List<Contract> forContractsList,
             AssigneeType assigneeType,
             ApplicationRole assignedRole,
-            int processTemplateId
+            int? processTemplateId
         )
         {
             this.Title = title;
@@ -59,7 +59,8 @@ namespace SoPro24Team06.Models
             this.ForContractsList = forContractsList;
             this.AssigneeType = assigneeType;
             this.AssignedRole = assignedRole;
-            this.ProcessTemplateId = processTemplateId;
+            this.ProcessTemplateId = processTemplateId > 0 ? processTemplateId : null;
+            
         }
 
         public Assignment ToAssignment(ApplicationUser? user)

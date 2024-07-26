@@ -1,443 +1,323 @@
-﻿<!------------------------- 
+﻿﻿<!------------------------- 
 < Author: Tamas Varadi
 <------------------------->
 
 @model SoPro24Team06.ViewModels.EditProcessViewModel
 @using SoPro24Team06.Helpers;
 @{
-    ViewData["Title"] = "Vorgang starten";
+ViewData["Title"] = "Vorgang starten";
 
-    List<ApplicationUser> Users = ViewData["Users"] as List<ApplicationUser>;
-    List<ProcessTemplate> ProcessTemplates = ViewData["ProcessTemplates"] as List<ProcessTemplate>;
-    List<AssignmentTemplate> AssignmentTemplates = ViewData["AssignmentTemplates"] as List<AssignmentTemplate>;
-    List<Contract> Contracts = ViewData["Contracts"] as List<Contract>;
-    List<Department> Departments = ViewData["Departments"] as List<Department>;
+List<ApplicationUser> Users = ViewData["Users"] as List<ApplicationUser>;
+List<ProcessTemplate> ProcessTemplates = ViewData["ProcessTemplates"] as List<ProcessTemplate>;
+List<AssignmentTemplate> AssignmentTemplates = ViewData["AssignmentTemplates"] as List<AssignmentTemplate>;
+List<Contract> Contracts = ViewData["Contracts"] as List<Contract>;
+List<Department> Departments = ViewData["Departments"] as List<Department>;
 }
-@using (Html.BeginForm("Edit", "Process", FormMethod.Post))
+@using (Html.BeginForm("Edit", "Process", FormMethod.Post, new { id = "formId" }))
 {
-    <!-- Start: Titel Select -->
-    <fieldset style="margin-top: 8px;">
+    
+    
+<!-- Start: Titel Select -->
+<fieldset style="margin-top: 8px;">
+    <input type="hidden" asp-for="Id" value="@Model.Id"/>
     <legend>Titel</legend>
-    <input type="text" asp-for="Title" value="@Model.Title" id="Title" />
+    <input type="text" asp-for="Title" value="@Model.Title" id="Title"/>
 </fieldset>
-    <span asp-validation-for="Title" class="text-danger"></span>
-    <!-- Ende: Titel Select -->
+<span asp-validation-for="Title" class="text-danger"></span>
+<!-- Ende: Titel Select -->
 
-    <!-- Start: Beschreibung Select -->
-    <fieldset style="margin-top: 8px;">
+<!-- Start: Beschreibung Select -->
+<fieldset style="margin-top: 8px;">
     <legend>Beschreibung</legend>
     <textarea id="Description" asp-for="Description" class="form-control">@Model.Description</textarea>
     <span asp-validation-for="Description" class="text-danger"></span>
 </fieldset>
-    <!-- Ende: Beschreibung Select -->
+<!-- Ende: Beschreibung Select -->
 
-    <!-- Start: Vorgangsverantwortlicher Select -->
-    <div class="form-group mt-2">
+<!-- Start: Vorgangsverantwortlicher Select -->
+<div class="form-group mt-2">
     <legend>Vorgangsverantwortlicher</legend>
-    <select asp-for="Supervisor" class="form-control" id="selectedSupervisor" placeholder="Sie">
-        @if (Model.Supervisor.FullName == null)
-            {
-                <option value="" disabled selected>Benutzer wählen</option>
-            }
-            else
-            {
-                <option value="" disabled>Benutzer wählen</option>
-            }
-            @foreach (var user in Users)
-            {
-                if (Model.Supervisor.FullName == user.FullName)
-                {
-                    <option value="@user.FullName" selected onclick="onSupervisorSelected('@user.Id', '@user.FullName')">
-                        @user.FullName</option>
-                }
-                else
-                {
-                    <option value="@user.FullName" onclick="onSupervisorSelected('@user.Id', '@user.FullName')">@user.FullName
-                    </option>
-                }
-            }
-        </select>
+    <select id="supervisorDropdown" asp-for="Supervisor" class="form-control" id="selectedSupervisor" placeholder="Sie">
+        @if(Model.Supervisor.FullName == null)
+        {
+        <option value="" disabled selected>Benutzer wählen</option>
+        }
+        else
+        {
+        <option value="" disabled>Benutzer wählen</option>
+        }
+        @foreach(var user in Users)
+        {
+        var userDict = @Html.Raw(Json.Serialize(user)).ToString();
 
-        <input type="hidden" asp-for="Supervisor.Id" value="@Model.Supervisor.Id" id="SupervisorId" />
-        <input type="hidden" asp-for="Supervisor.FullName" value="@Model.Supervisor.FullName" id="SupervisorName" />
+        if (Model.Supervisor.FullName == user.FullName)
+        {
+        <option value="@userDict" selected>@user.FullName</option>
+        }
+        else
+        {
+        <option value="@userDict">@user.FullName</option>
+        }
+        }
+    </select>
 
-        <span asp-validation-for="Supervisor.Id" class="text-danger"></span>
-        <span asp-validation-for="Supervisor.FullName" class="text-danger"></span>
-        <span asp-validation-for="Supervisor" class="text-danger"></span>
-    </div>
-    <!-- Ende: Vorgangsverantwortlicher Select -->
+    <input type="hidden" asp-for="Supervisor.Id" value="@Model.Supervisor.Id" id="SupervisorId"/>
+    <input type="hidden" asp-for="Supervisor.FullName" value="@Model.Supervisor.FullName" id="SupervisorName"/>
+
+    <span asp-validation-for="Supervisor.Id" class="text-danger"></span>
+    <span asp-validation-for="Supervisor.FullName" class="text-danger"></span>
+    <span asp-validation-for="Supervisor" class="text-danger"></span>
+</div>
+<!-- Ende: Vorgangsverantwortlicher Select -->
 
 
-    <!-- Start: Bezugsperson Select -->
-    <div class="form-group mt-2">
+<!-- Start: Bezugsperson Select -->
+<div class="form-group mt-2">
     <legend>Bezugsperson</legend>
-    <select asp-for="WorkerOfReference" class="form-control" id="selectedWorkerOfRef" placeholder="Benutzer wählen">
+    <select id="workerOfRefDropdown" asp-for="WorkerOfReference" class="form-control" id="selectedWorkerOfRef" placeholder="Benutzer wählen">
         @if (Model.WorkerOfReference.FullName == null)
-            {
-                <option value="" disabled selected>Benutzer wählen</option>
-            }
-            else
-            {
-                <option value="" disabled>Benutzer wählen</option>
-            }
-            @foreach (var user in Users)
-            {
-                if (Model.WorkerOfReference.FullName == user.FullName)
-                {
-                    <option value="@user.FullName" selected onclick="onWorkerOfRefSelected('@user.Id', '@user.FullName')">
-                        @user.FullName</option>
-                }
-                else
-                {
-                    <option value="@user.FullName" onclick="onWorkerOfRefSelected('@user.Id', '@user.FullName')">@user.FullName
-                    </option>
-                }
-            }
-        </select>
+        {
+        <option value="" disabled selected>Benutzer wählen</option>
+        }
+        else
+        {
+        <option value="" disabled>Benutzer wählen</option>
+        }
+        @foreach(var user in Users)
+        {
+        var userDict = @Html.Raw(Json.Serialize(user)).ToString();
 
-        <input type="hidden" asp-for="WorkerOfReference.Id" value="@Model.WorkerOfReference.Id" id="WorkerOfRefId" />
-        <input type="hidden" name="WorkerOfReference.FullName" value="@Model.WorkerOfReference.FullName"
-            id="WorkerOfRefName" />
+        if (Model.WorkerOfReference.FullName == user.FullName)
+        {
+        <option value="@userDict" selected>@user.FullName</option>
+        }
+        else
+        {
+        <option value="@userDict" >@user.FullName</option>
+        }
+        }
+    </select>
 
-        <span asp-validation-for="WorkerOfReference.FullName" class="text-danger"></span>
-        <span asp-validation-for="WorkerOfReference" class="text-danger"></span>
+    <input type="hidden" asp-for="WorkerOfReference.Id" value="@Model.WorkerOfReference.Id" id="WorkerOfRefId"/>
+    <input type="hidden" name="WorkerOfReference.FullName" value="@Model.WorkerOfReference.FullName" id="WorkerOfRefName"/>
 
-    </div>
+    <span asp-validation-for="WorkerOfReference.FullName" class="text-danger"></span>
+    <span asp-validation-for="WorkerOfReference" class="text-danger"></span>
 
-    <!-- Ende: Bezugsperson Select -->
+</div>
 
-    <!-- Start: Vertragstyp Select -->
-    <div class="form-group mt-2">
+<!-- Ende: Bezugsperson Select -->
+
+<!-- Start: Vertragstyp Select -->
+<div class="form-group mt-2">
     <legend>Vertragstyp</legend>
-    <select asp-for="ContractOfRefWorker" class="form-control" id="selectedContract">
+    <select id="contractDropdown" asp-for="ContractOfRefWorker" class="form-control" id="contractDropdown">
 
         @if (Model.ContractOfRefWorker.Label == null)
-            {
-                <option value="" disabled selected>Vertragstyp wählen</option>
-            }
-            else
-            {
-                <option value="" disabled>Vertragstyp wählen</option>
-            }
-            @foreach (var contract in Contracts)
-            {
-                if (Model.ContractOfRefWorker.Label == contract.Label)
-                {
-                    <option value="@contract.Label" selected onclick="onContractSelected(@contract.Id, '@contract.Label')">
-                        @contract.Label</option>
-                }
-                else
-                {
-                    <option value="@contract.Label" onclick="onContractSelected(@contract.Id, '@contract.Label')">@contract.Label
-                    </option>
-                }
-            }
-        </select>
+        {
+        <option value="" disabled selected>Vertragstyp wählen</option>
+        }
+        else
+        {
+        <option value="" disabled>Vertragstyp wählen</option>
+        }
+        @foreach(var contract in Contracts)
+        {
+        var contractDict = @Html.Raw(Json.Serialize(contract)).ToString();
 
-        <input type="hidden" asp-for="ContractOfRefWorker.Id" value="@Model.ContractOfRefWorker.Id" id="ContractId" />
-        <input type="hidden" asp-for="ContractOfRefWorker.Label" value="@Model.ContractOfRefWorker.Label"
-            id="ContractLabel" />
+        if (Model.ContractOfRefWorker.Label == contract.Label)
+        {
+        <option value="@contractDict" selected>@contract.Label</option>
+        }
+        else
+        {
+        <option value="@contractDict">@contract.Label</option>
+        }
+        }
+    </select>
 
-        <span asp-validation-for="ContractOfRefWorker.Label" class="text-danger"></span>
-        <span asp-validation-for="ContractOfRefWorker" class="text-danger"></span>
-    </div>
-    <!-- Ende: Vertragstyp Select -->
+    <input type="hidden" asp-for="ContractOfRefWorker.Id" value="@Model.ContractOfRefWorker.Id" id="ContractId"/>
+    <input type="hidden" asp-for="ContractOfRefWorker.Label" value="@Model.ContractOfRefWorker.Label" id="ContractLabel"/>
+
+    <span asp-validation-for="ContractOfRefWorker.Label" class="text-danger"></span>
+    <span asp-validation-for="ContractOfRefWorker" class="text-danger"></span>
+</div>
+<!-- Ende: Vertragstyp Select -->
 
 
-    <!-- Start: Abteilung Select -->
-    <div class="form-group mt-2">
+<!-- Start: Abteilung Select -->
+<div class="form-group mt-2">
     <legend>Abteilung</legend>
-    <select asp-for="DepartmentOfRefWorker" class="form-control" id="selectedDepartment">
-        @if (Model.DepartmentOfRefWorker.Name == null)
-            {
-                <option value="" disabled selected>Abteilung wählen</option>
-            }
-            else
-            {
-                <option value="" disabled>Abteilung wählen</option>
-            }
+    <select id="departmentDropdown" asp-for="DepartmentOfRefWorker" class="form-control" id="departmentDropdown">
+        @if (Model.DepartmentOfRefWorker.Name == null) {
+        <option value="" disabled selected>Abteilung wählen</option>
+        }
+        else
+        {
+        <option value="" disabled>Abteilung wählen</option>
+        }
 
-            @foreach (var department in Departments)
-            {
-                if (Model.DepartmentOfRefWorker.Name == department.Name)
-                {
-                    <option value="@department.Name" selected onclick="onDepartmentSelected(@department.Id, '@department.Name')">
-                        @department.Name</option>
-                }
-                else
-                {
-                    <option value="@department.Name" onclick="onDepartmentSelected(@department.Id, '@department.Name')">
-                        @department.Name</option>
-                }
-            }
-        </select>
-        <input type="hidden" asp-for="DepartmentOfRefWorker.Id" value="@Model.DepartmentOfRefWorker.Id" id="DepartmentId" />
-        <input type="hidden" asp-for="DepartmentOfRefWorker.Name" value="@Model.DepartmentOfRefWorker.Name"
-            id="DepartmentName" />
-        <span asp-validation-for="DepartmentOfRefWorker.Name" class="text-danger"></span>
-        <span asp-validation-for="DepartmentOfRefWorker" class="text-danger"></span>
-    </div>
-    <!-- Ende: Abteilung Select -->
+        @foreach(var department in Departments)
+        {
 
-    <!-- Start: Aufgaben Select -->
-    <div class="form-group mt-2">
-    <legend>Aufgabenvorlagen</legend>
-    <select class="form-control" id="selectedAssignmentTemplate">
-        <option value="" disabled selected>Aufgabe hinzufügen</option>
-        @foreach (var template in AssignmentTemplates)
-            {
-                var dueIn = @Html.Raw(Json.Serialize(template.DueIn)).ToString();
-                var forDepartments = @Html.Raw(Json.Serialize(template.ForDepartmentsList)).ToString();
-                var forContracts = @Html.Raw(Json.Serialize(template.ForContractsList)).ToString();
-                var assigneeType = @Html.Raw(Json.Serialize(template.AssigneeType)).ToString();
-                var assignedRole = @Html.Raw(Json.Serialize(template.AssignedRole)).ToString();
-                // Wird gefixt
-                //var assignedRole = @Html.Raw(Json.Serialize(template.AssignedRoles)).ToString();
+        var departmentDict = @Html.Raw(Json.Serialize(department)).ToString();
 
-                <option value="@template"
-                    onclick="onAssignmentTemplateSelected(@template.Id, '@template.Title', '@template.Instructions', @dueIn, @forDepartments, @forContracts, @assigneeType, @assignedRole)">
-                    @template.Title</option>
-            }
-        </select>
-        <span asp-validation-for="AssignmentTemplates" class="text-danger"></span>
+        if (Model.DepartmentOfRefWorker.Name == department.Name)
+        {
+        <option value="@departmentDict" selected>@department.Name</option>
+        }
+        else
+        {
+        <option value="@departmentDict">@department.Name</option>
+        }
+        }
+    </select>
+    <input type="hidden" asp-for="DepartmentOfRefWorker.Id" value="@Model.DepartmentOfRefWorker.Id" id="DepartmentId"/>
+    <input type="hidden" asp-for="DepartmentOfRefWorker.Name" value="@Model.DepartmentOfRefWorker.Name" id="DepartmentName"/>
+    <span asp-validation-for="DepartmentOfRefWorker.Name" class="text-danger"></span>
+    <span asp-validation-for="DepartmentOfRefWorker" class="text-danger"></span>
+</div>
+<!-- Ende: Abteilung Select -->
 
-    </div>
-    <!-- Ende: Aufgaben Select -->
+<!-- Start: Aufgaben Liste -->
 
-    <!-- Start: Aufgaben Template Liste -->
-    <fieldset style="margin-top: 8px;">
-    <button class="btn btn-primary" type="button" style="margin-left: 16px;" data-bs-target="#modal-assignment"
-        data-bs-toggle="modal">Neu Aufgaben erstellen</button>
-    <div class="table-responsive">
-        <table class="table" id="assignmentTemplateTable">
-            <thead>
-                <tr>
-                    <th>Titel</th>
-                    <th>Anleitung</th>
-                    <th>Aufgabenzuständiger</th>
-                    <th>Vertragsart</th>
-                    <th>Abteilung</th>
-                    <th>Fälligkeit</th>
-                    <th>Aktionen</th>
-                </tr>
-            </thead>
-            <tbody id="assignmentTemplates" name="assignmentTemplates">
-                @if (@Model.AssignmentTemplates != null && @Model.AssignmentTemplates.Count > 0)
-                    {
-                        @foreach (AssignmentTemplate template in @Model.AssignmentTemplates)
-                        {
-                            var title = template.Title;
-                            var description = template.Instructions;
-                            var assignee = template.AssigneeType;
-                            var due_in = template.DueIn;
-
-
-                            <tr>
-                                <td>title</td>
-                                <td><a href="#">Mehr anzeigen</a></td>
-                                <td>@assignee</td>
-                                <td>Vollzeit</td>
-                                <td>Personal</td>
-                                <td>@due_in.Label</td>
-                                <td class="d-flex flex-row justify-content-evenly"><a data-bs-target="#modal-1"
-                                        data-bs-toggle="modal"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
-                                            fill="currentColor" viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
-                                            <path fill-rule="evenodd"
-                                                d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5">
-                                            </path>
-                                            <path fill-rule="evenodd"
-                                                d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z">
-                                            </path>
-                                        </svg></a><a href="AssignmentTemplateEdit.html"><i class="far fa-edit"
-                                            style="font-size: 20px;color: rgb(0,0,0);"></i></a><button class="btn-close"
-                                        type="button" aria-label="Close"></button></td>
-                            </tr>
-                        }
-
-                    }
-                    else
-                    {
-                        <tr>
-                            <td>Keine Aufgabevorlagen vorhanden</td>
-                        </tr>
-                    }
-
-                </tbody>
-            </table>
-        </div>
-    </fieldset>
-    <!-- Ende: Aufgaben Template Liste -->
-
-    <!-- Start: Aufgaben Liste -->
-
-    <fieldset style="margin-top: 8px;">
-    <legend>Aktuelle Aufgaben</legend>
+<fieldset style="margin-top: 8px;">
+    <legend>Aufgaben</legend>
+    <button id="createAssignmentTemplateButton" class="btn" onclick="onCreateAssignmentTemplatePressed()" style="background-color: var(--ash); color: white;">Aufgabe hinzufügen</button>
     <div class="table-responsive">
         <table class="table" id="assignmentTable">
             <thead>
-                <tr>
-                    <th>Titel</th>
-                    <th>Anleitung</th>
-                    <th>Aufgabenzuständiger</th>
-                    <th>Vertragsart</th>
-                    <th>Abteilung</th>
-                    <th>Fälligkeit</th>
-                    <th>Aktionen</th>
-                </tr>
+            <tr>
+                <th>Titel</th>
+                <th>Anleitung</th>
+                <th>Aufgabenzuständiger</th>
+                <th>Vertragsart</th>
+                <th>Abteilung</th>
+                <th>Fälligkeit</th>
+                <th>Aktionen</th>
+            </tr>
             </thead>
             <tbody id="assignments" name="assignments">
-                @if (@Model.Assignments != null && @Model.Assignments.Count > 0)
-                    {
-                        var index = 0;
-                        @foreach (Assignment assignment in @Model.Assignments)
-                        {
-                            var title = assignment.Title;
-                            var description = assignment.Instructions;
-                            var assignee = EnumHelper.GetDisplayName(assignment.AssigneeType);
-                            var dueDate = assignment.DueDate;
+            @if (@Model.Assignments != null && @Model.Assignments.Count > 0)
+            {
+            var index = 0;
+            @foreach (Assignment assignment in @Model.Assignments)
+            {
+            var title = assignment.Title;
+            var description = assignment.Instructions;
+            var assignee = EnumHelper.GetDisplayName(assignment.AssigneeType);
+            var dueDate = assignment.DueDate;
 
-                            <tr id="assignmentItem">
-                                <td>@title</td>
-                                <td><a href="#">Mehr anzeigen</a></td>
-                                <td>@assignee</td>
-                                <td>Vollzeit</td>
-                                <td>Personal</td>
-                                <td>@dueDate.ToString()</td>
-                                <td class="d-flex flex-row justify-content-evenly">
-                                    <button class='btn btn-danger' type='button' style='margin-left: 16px;'
-                                        onclick='removeAssignment(this, @assignment.Id)'>Entfernen</button>
-                                </td>
+            <tr class="hoverTableRow" id="assignmentItem" name="" onclick="onEditAssignmentPressed(@assignment.Id)" id="assignmentItem">
+                <td>@title</td>
+                <td><a href="#">Mehr anzeigen</a></td>
+                <td>@assignee</td>
+                <td>Vollzeit</td>
+                <td>Personal</td>
+                <td>@dueDate.ToString()</td>
+                <td class="d-flex flex-row justify-content-evenly">
+                    <button class='btn btn-danger' type='button' style='margin-left: 16px;'
+                            onclick='removeAssignment(this, @assignment.Id)'>Entfernen</button>
+                </td>
 
-                                <input type='hidden' name='Assignments[@index].Id' value='@assignment.Id' />
-                                <input type='hidden' name='Assignments[@index].Title' value='@assignment.Title' />
-                                <input type='hidden' name='Assignments[@index].Instructions' value='@assignment.Instructions' />
+                <input type='hidden' name='Assignments[@index].Id' value='@assignment.Id' />
+                <input type='hidden' name='Assignments[@index].Title' value='@assignment.Title' />
+                <input type='hidden' name='Assignments[@index].Instructions' value='@assignment.Instructions' />
 
-                                <input type='hidden' name='Assignments[@index].DueDate' value='@assignment.DueDate' />
+                <input type='hidden' name='Assignments[@index].DueDate' value='@assignment.DueDate' />
 
-                                <input type='hidden' name='Assignments[@index].AssigneeType' value='@assignment.AssigneeType' />
+                <input type='hidden' name='Assignments[@index].AssigneeType' value='@assignment.AssigneeType' />
 
-                                <input type='hidden' name='Assignments[@index].Status' value='@assignment.Status' />
+                <input type='hidden' name='Assignments[@index].Status' value='@assignment.Status' />
 
-                                @if (assignment.AssignedRole != null)
-                                {
-                                    <input type='hidden' name='Assignments[@index].AssignedRole.Id'
-                                        value='@assignment.AssignedRole.Id' />
-                                    <input type='hidden' name='Assignments[@index].AssignedRole.Name'
-                                        value='@assignment.AssignedRole.Name' />
-                                }
+                @if (assignment.AssignedRole != null)
+                {
+                <input type='hidden' name='Assignments[@index].AssignedRole.Id'
+                       value='@assignment.AssignedRole.Id' />
+                <input type='hidden' name='Assignments[@index].AssignedRole.Name'
+                       value='@assignment.AssignedRole.Name' />
+                }
 
-                                @if (assignment.ForDepartmentsList != null)
-                                {
-                                    for (int i = 0; i < assignment.ForDepartmentsList.Count; i++)
-                                    {
-                                        var department = assignment.ForDepartmentsList[i];
-                                        <input type='hidden' name='Assignments[@index].ForDepartmentsList[@i].Id' value='@department.Id' />
-                                        <input type='hidden' name='Assignments[@index].ForDepartmentsList[@i].Name'
-                                            value='@department.Name' />
-                                    }
-                                }
+                @if (assignment.ForDepartmentsList != null)
+                {
+                for (int i = 0; i < assignment.ForDepartmentsList.Count; i++)
+                {
+                var department = assignment.ForDepartmentsList[i];
+                <input type='hidden' name='Assignments[@index].ForDepartmentsList[@i].Id' value='@department.Id' />
+                <input type='hidden' name='Assignments[@index].ForDepartmentsList[@i].Name'
+                       value='@department.Name' />
+                }
+                }
 
-                                @if (assignment.ForContractsList != null)
-                                {
-                                    for (int i = 0; i < assignment.ForContractsList.Count; i++)
-                                    {
-                                        var contract = assignment.ForContractsList[i];
-                                        <input type='hidden' name='Assignments[@index].ForContractsList[@i].Id' value='@contract.Id' />
-                                        <input type='hidden' name='Assignments[@index].ForContractsList[@i].Label'
-                                            value='@contract.Label' />
-                                    }
-                                }
-                            </tr>
+                @if (assignment.ForContractsList != null)
+                {
+                for (int i = 0; i < assignment.ForContractsList.Count; i++)
+                {
+                var contract = assignment.ForContractsList[i];
+                <input type='hidden' name='Assignments[@index].ForContractsList[@i].Id' value='@contract.Id' />
+                <input type='hidden' name='Assignments[@index].ForContractsList[@i].Label'
+                       value='@contract.Label' />
+                }
+                }
+            </tr>
 
-                            index++;
-                        }
+            index++;
+            }
 
-                    }
-                    else
-                    {
-                        <tr>
-                            <td>Keine Aufgabevorlagen vorhanden</td>
-                        </tr>
-                    }
+            }
+            else
+            {
+            <tr>
+                <td>Keine Aufgabevorlagen vorhanden</td>
+            </tr>
+            }
 
-                </tbody>
-            </table>
-        </div>
-    </fieldset>
-    <!-- Ende: Aufgaben Liste -->
+            </tbody>
+        </table>
+    </div>
+</fieldset>
+<!-- Ende: Aufgaben Liste -->
 
-    <button class="btn btn-primary" style="margin-left: 16px;">Bearbeiten</button>
+<div style="margin-top: 36px;">
+    <button class="btn" style="background-color: var(--lemming); color: white;">Speichern</button>
+</div>
 
 }
 
-<!-- Start: AufgabenModal -->
-<div class="modal fade visible" role="dialog" tabindex="-1" id="modal-assignment">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Wähle eine Aufgabe als Template aus</h4><button class="btn-close" type="button"
-                    aria-label="Close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Aufgabentitel</th>
-                                <th>Aktion</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (AssignmentTemplates != null && AssignmentTemplates.Count > 0)
-                            {
-                                @foreach (var assignmentTemplate in AssignmentTemplates)
-                                {
-                                    var id = assignmentTemplate.Id;
-                                    var title = assignmentTemplate.Title;
-                                    <tr>
-                                        <td>@title</td>
-                                        <td class="text-center">
-                                            <button class="btn btn-primary" type="button" data-bs-dismiss="modal"
-                                                style="margin-left: 16px;"
-                                                onclick="addAssignmentTemplate(@id)">Auswählen</button>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td>Keine Prozessvorlagen vorhanden</td>
-                                </tr>
-                            }
-
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- End: AufgabenModal -->
-
-<script src="assets/bootstrap/js/bootstrap.min.js"></script>
-
 @section Scripts {
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <partial name="_ValidationScriptsPartial" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<partial name="_ValidationScriptsPartial" />
 
 }
 
 
 <script>
 
-    function test() {
-        console.log("TEST");
+    function onEditAssignmentPressed(assignmentId) {
+
+        var form = document.getElementById("formId")
+
+        //client side validation ignorieren
+        if (typeof (form) === 'object' && form != null) {
+            form.setAttribute('novalidate', 'novalidate');
+        }
+
+        form.action = "/Process/EditRedirectEditAssignment?assignmentId="+assignmentId;
+        form.submit();
+    }
+
+    function onCreateAssignmentTemplatePressed() {
+        var form = document.getElementById("formId")
+
+        //client side validation ignorieren
+        if (typeof (form) === 'object' && form != null) {
+            form.setAttribute('novalidate', 'novalidate');
+        }
+
+        form.action = "/Process/EditRedirectToNewAssignment";
+        form.submit();
     }
 
     window.onload = function () {
@@ -448,63 +328,114 @@
         if ($('#preselectedTemplate').length) {
             $('#preselectedTemplate').click();
         }
+
+        var processTemplateDropdown = document.getElementById("processTemplateDropdown");
+
+        if (processTemplateDropdown) {
+            processTemplateDropdown.addEventListener("change", function () {
+                var selectedOption = processTemplateDropdown.options[processTemplateDropdown.selectedIndex];
+                onProcessTemplateSelected(selectedOption.value);
+            });
+        }
+
+        var supervisorDropdown = document.getElementById("supervisorDropdown");
+        supervisorDropdown.addEventListener("change", function () {
+            var selectedOption = supervisorDropdown.options[supervisorDropdown.selectedIndex];
+            onSupervisorSelected(selectedOption.value);
+        });
+
+        var workerOfRefDropdown = document.getElementById("workerOfRefDropdown");
+        workerOfRefDropdown.addEventListener("change", function () {
+            var selectedOption = workerOfRefDropdown.options[workerOfRefDropdown.selectedIndex];
+            onWorkerOfRefSelected(selectedOption.value);
+        });
+
+        var contractDropdown = document.getElementById("contractDropdown");
+        contractDropdown.addEventListener("change", function () {
+            var selectedOption = contractDropdown.options[contractDropdown.selectedIndex];
+            onContractSelected(selectedOption.value);
+        });
+
+        var departmentDropdown = document.getElementById("departmentDropdown");
+        departmentDropdown.addEventListener("change", function () {
+            var selectedOption = departmentDropdown.options[departmentDropdown.selectedIndex];
+            onDepartmentSelected(selectedOption.value);
+        });
+
+        /*
+        var createAssignmentTemplateButton = document.getElementById("createAssignmentTemplateButton");
+        createAssignmentTemplateButton.addEventListener("click", function () {
+            var form = document.getElementById("formId")
+
+            //client side validation ignorieren
+            if (typeof (form) === 'object' && form != null) {
+                form.setAttribute('novalidate', 'novalidate');
+            }
+
+            form.action = "/Process/EditRedirectToNewAssignment";
+            form.submit();
+        });
+        */
     }
 
-    function onProcessTemplateSelected(id, title, description, assignmentTemplates, contract, department, rolesWithAccess) {
+    function onProcessTemplateSelected(temp_string) {
 
-        $('#Title').val(title);
-        $('#Description').val(description);
+        template = JSON.parse(temp_string);
 
-        if (contract.id > 0) {
-            onContractSelected(contract.id, contract.label)
+        console.log(template);
+
+        $('#Title').val(template.title);
+        $('#Description').val(template.description);
+
+        if (template.contractOfRefWorker.id > 0) {
+            onContractSelected(template.contractOfRefWorker.id, template.contractOfRefWorker.label)
         }
-        if (department.id > 0) {
-            onDepartmentSelected(department.id, department.name)
+        if (template.departmentOfRefWorker.id > 0) {
+            onDepartmentSelected(template.departmentOfRefWorker.id, template.departmentOfRefWorker.name)
         }
 
 
-        $('#TemplateId').val(id);
-        $('#TemplateTitle').val(title);
-        $('#TemplateDescription').val(description);
-        $('#TemplateAssignmentTemplates').val(id);
+        $('#TemplateId').val(template.id);
+        $('#TemplateTitle').val(template.title);
+        $('#TemplateDescription').val(template.description);
+        $('#TemplateAssignmentTemplates').val(template.id);
 
-        $('#TemplateContractId').val(contract.id);
-        $('#TemplateContractLabel').val(contract.label);
-        $('#TemplateDepartmentId').val(department.id);
-        $('#TemplateDepartmentName').val(department.name);
+        $('#TemplateContractId').val(template.contractOfRefWorker.id);
+        $('#TemplateContractLabel').val(template.contractOfRefWorker.label);
+        $('#TemplateDepartmentId').val(template.departmentOfRefWorker.id);
+        $('#TemplateDepartmentName').val(template.departmentOfRefWorker.name);
+
+        var assignmentTemplates = template.assignmentTemplates;
 
         for (var i = 0; i < assignmentTemplates.length; i++) {
-            var assignmentId = assignmentTemplates[i].id;
-            var assignmentTitle = assignmentTemplates[i].title;
-            var assignmentInstructions = assignmentTemplates[i].instructions;
-            var assignmentDueIn = assignmentTemplates[i].dueIn;
-            var assignmentForDepartments = assignmentTemplates[i].forDepartments;
-            var assignmentForContracts = assignmentTemplates[i].forContracts;
-            var assignmentAssigneeType = assignmentTemplates[i].assigneeType;
-            var assignmentAssignedRole = assignmentTemplates[i].assignedRole;
 
-            onAssignmentTemplateSelected(assignmentId, assignmentTitle, assignmentInstructions, assignmentDueIn, assignmentForDepartments, assignmentForContracts, assignmentAssigneeType, assignmentAssignedRole);
+            var assignmentTemplate_string = JSON.stringify(assignmentTemplates[i]);
+
+            onAssignmentTemplateSelected(assignmentTemplate_string);
         }
     }
 
-    function onAssignmentTemplateSelected(id, title, instructions, dueIn, forDepartments, forContracts, assigneeType, assignedRole) {
+    function onAssignmentTemplateSelected(temp_string) {
 
-        document.getElementById("selectedAssignmentTemplate").selectedIndex = "0";
+        var template = JSON.parse(temp_string);
 
-        var dueInDict = JSON.parse(JSON.stringify(dueIn));
-        var departmentArray = JSON.parse(JSON.stringify(forDepartments));
-        var contractArray = JSON.parse(JSON.stringify(forContracts));
-        var roleDict = JSON.parse(JSON.stringify(assignedRole));
+        console.log(template);
 
+        document.getElementById("assignmentTemplateDropdown").selectedIndex = "0";
+
+        var dueInDict = template.dueIn;
+        var departmentArray = template.forDepartments;
+        var contractArray = template.forContracts;
+        var roleDict = template.assignedRole;
 
         const assignmentTemplate = {
-            id: id,
-            title: title,
-            instructions: instructions,
+            id: template.id,
+            title: template.title,
+            instructions: template.instructions,
             dueIn: dueInDict,
             forDepartmentsList: departmentArray,
             forContractsList: contractArray,
-            assigneeType: assigneeType,
+            assigneeType: template.assigneeType,
             assignedRole: roleDict
 
         };
@@ -514,17 +445,19 @@
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(assignmentTemplate),
-            success: function (result) {
+            success: function(result) {
                 let html = JSON.parse(JSON.stringify(result)).html;
 
-                let obj = $('tr[name="templateItem' + id + '"]')
+                let obj = $('tr[name="templateItem'+ template.id +'"]')
 
                 if (obj.length) {
-                    alert('Die Aufgabe "' + title + '" wurde bereits hinzugefügt');
+                    alert('Die Aufgabe "' + template.title + '" wurde bereits hinzugefügt');
                 } else {
                     if ($('#templateItem').length) {
+                        console.log("Append");
                         $('#assignmentTemplates').append(html);
                     } else {
+                        console.log("Wiped List");
                         $('#assignmentTemplates').html(html);
                     }
                 }
@@ -535,26 +468,32 @@
         });
     }
 
-    function onContractSelected(id, label) {
-        $('#ContractId').val(id);
-        $('#ContractLabel').val(label)
+    function onContractSelected(contract_string) {
+        var contract = JSON.parse(contract_string);
+        $('#ContractId').val(contract.id);
+        $('#ContractLabel').val(contract.label)
     }
 
-    function onDepartmentSelected(id, name) {
-        $('#DepartmentId').val(id);
-        $('#DepartmentName').val(name)
+    function onDepartmentSelected(department_string) {
+        var department = JSON.parse(department_string);
+        $('#DepartmentId').val(department.id);
+        $('#DepartmentName').val(department.name)
     }
 
 
-    function onSupervisorSelected(id, name) {
-        $('#SupervisorId').val(id);
-        $('#SupervisorName').val(name)
+    function onSupervisorSelected(supervisor_string)
+    {
+        var supervisor = JSON.parse(supervisor_string);
+        $('#SupervisorId').val(supervisor.id);
+        $('#SupervisorName').val(supervisor.fullName)
     }
 
-    function onWorkerOfRefSelected(id, name) {
-        $('#WorkerOfRefId').val(id);
-        $('#WorkerOfRefName').val(name)
-        $('#WorkerOfRefStr').val(name)
+    function onWorkerOfRefSelected(workerOfRef_string)
+    {
+        var workerOfRef = JSON.parse(workerOfRef_string);
+        $('#WorkerOfRefId').val(workerOfRef.id);
+        $('#WorkerOfRefName').val(workerOfRef.fullName)
+        //$('#WorkerOfRefStr').val(workerOfRef.name)
 
     }
 
@@ -578,6 +517,7 @@
     }
 
     function removeAssignment(obj, assignmentId) {
+        event.stopPropagation();
         obj.closest('tr').remove();
         window.assignmentCount--;
 
