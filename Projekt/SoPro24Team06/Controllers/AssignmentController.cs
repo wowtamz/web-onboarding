@@ -483,6 +483,7 @@ namespace SoPro24Team06.Controllers
             List<string> roles = new List<string>(await _userManager.GetRolesAsync(user));
 
             List<Process> processList = await _processContainer.GetActiveProcessesAsync();
+            List<Process> processList = await _processContainer.GetActiveProcessesAsync();
             // überprüfung einfügen ob Process noch nicht Archiviert ist.
             List<Assignment> assignmentList = new List<Assignment>();
             //changes contents of Lists depending on which list was selected in Index ViewModel
@@ -629,6 +630,7 @@ namespace SoPro24Team06.Controllers
             if (sortingMethod != null)
             {
                 model.SortAssingments(sortingMethod);
+                _logger.LogCritical(sortingMethod);
             }
 
             int? selectedProcess = HttpContext.Session.GetInt32("selectedProcessId");
