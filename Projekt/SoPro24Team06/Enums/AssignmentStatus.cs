@@ -5,7 +5,7 @@ namespace SoPro24Team06.Enums
 {
     public enum AssignmentStatus
     {
-        [Display(Name = "noch zu Erledigen")]
+        [Display(Name = "noch zu Erliedigen")]
         NOT_STARTED,
 
         [Display(Name = "In Bearbeitung")]

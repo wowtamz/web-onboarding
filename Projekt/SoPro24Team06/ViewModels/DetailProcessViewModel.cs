@@ -23,8 +23,6 @@ public class DetailProcessViewModel
     public ApplicationUser WorkerOfReference { get; set; }
     public Contract ContractOfRefWorker { get; set; }
     public Department DepartmentOfRefWorker { get; set; }
-    
-    public bool IsArchived { get; set; }
 
     public DetailProcessViewModel(Process process)
     {
@@ -40,7 +38,6 @@ public class DetailProcessViewModel
         this.WorkerOfReference = process.WorkerOfReference;
         this.ContractOfRefWorker = process.ContractOfRefWorker;
         this.DepartmentOfRefWorker = process.DepartmentOfRefWorker;
-        this.IsArchived = process.IsArchived;
     }
 
     public Process ToProcess()

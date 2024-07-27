@@ -17,22 +17,13 @@ public class AssingmentContainer
 
     public Assignment? GetAssignmentById(int id)
     {
-        return _context
-            .Assignments.Include(a => a.AssignedRole)
-            .Include(a => a.Assignee)
-            .ToList()
-            .Find(a => a.Id == id);
+        return _context.Assignments.SingleOrDefault(a => a.Id == id);
     }
 
     public async Task AddAssingmentAsync(Assignment assignmentToAdd)
     {
         _context.Assignments.Add(assignmentToAdd);
         await _context.SaveChangesAsync();
-    }
-
-    public List<Assignment> GetAllAssignments()
-    {
-        return _context.Assignments.Include(a => a.AssignedRole).Include(a => a.Assignee).ToList();
     }
 
     public async Task DeleteAssignmentAsync(Assignment assignment)

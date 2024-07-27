@@ -87,4 +87,9 @@ public class ProcessViewModel
             DepartmentOfRefWorker
         );
     }
+
+    public ComposeProcessViewModel ToComposeProcessViewModel()
+    {
+        return new ComposeProcessViewModel(this.Template);
+    }
 }

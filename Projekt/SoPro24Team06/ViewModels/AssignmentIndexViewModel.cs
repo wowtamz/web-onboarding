@@ -5,7 +5,6 @@ using System.Reflection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SoPro24Team06.Enums;
-using SoPro24Team06.Helpers;
 using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels;
@@ -16,7 +15,10 @@ public class AssignmentIndexViewModel
     public List<Process> ProcessList { get; set; }
     public Boolean IsAdminOrSupervisor { get; set; }
 
-    public AssignmentIndexViewModel(List<Assignment> assignmentList, List<Process> processList)
+    public AssignmentIndexViewModel(
+        List<Assignment> assignmentList,
+        List<Process> processList
+    )
     {
         this.AssignmentList = assignmentList;
         this.ProcessList = processList;
@@ -40,26 +42,11 @@ public class AssignmentIndexViewModel
     {
         switch (sortingProperty)
         {
-            case "dueDate":
+            case "DueDate":
                 AssignmentList.Sort((x, y) => DateTime.Compare(x.DueDate, y.DueDate));
-                List<Assignment> tempAssignmentList = new List<Assignment>();
-                foreach (Assignment a in AssignmentList)
-                {
-                    if (a.Status == AssignmentStatus.DONE)
-                    {
-                        tempAssignmentList.Add(a);
-                    }
-                    else
-                    {
-                        tempAssignmentList.Insert(0, a);
-                    }
-                }
-                AssignmentList = tempAssignmentList;
                 break;
-            case "name":
+            case "Namen":
                 this.AssignmentList.Sort((x, y) => String.Compare(x.Title, y.Title));
-                break;
-            default:
                 break;
         }
     }
@@ -70,12 +57,22 @@ public class AssignmentIndexViewModel
             return "done";
         if (assignment.GetDaysTillDueDate() < 0)
             return "overdue";
-        return string.Empty;
+        return "";
     }
 
     public string GetAssignmentStatus(Assignment assignment)
     {
-        return EnumHelper.GetDisplayName(assignment.Status);
+        switch (assignment.Status)
+        {
+            case AssignmentStatus.NOT_STARTED:
+                return "Noch nicht Begonnen";
+            case AssignmentStatus.IN_PROGRESS:
+                return "In Bearbeitung";
+            case AssignmentStatus.DONE:
+                return "Fertig";
+            default:
+                return "Unbekannt";
+        }
     }
 
     public string GetProcessByAssingment(Assignment assignment)

@@ -4,16 +4,13 @@
 
 using System.Collections.Immutable;
 using System.Security.Claims;
-using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using NuGet.Protocol;
 using SoPro24Team06.Containers;
 using SoPro24Team06.Data;
@@ -53,24 +50,35 @@ namespace SoPro24Team06.Controllers
         public async Task<IActionResult> Index()
         {
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            List<ActiveProcess> userProcessList = await _processContainer.GetProcessesOfUserAsync(
+                userId
+            );
             
-            List<ActiveProcess> myProcessList = await _processContainer.GetActiveProcessesOfUserAsync(
-                userId
-            );
-            List<ActiveProcess> archivedProcessList = await _processContainer.GetArchivedProcessesOfUserAsync(
-                userId
-            );
+            List<ActiveProcess> myProcessList = new List<ActiveProcess> {};
+            List<ActiveProcess> archivedProcessList = new List<ActiveProcess> {};
+            
+            foreach (var process in userProcessList)
+            {
+                if (process.IsArchived)
+                {
+                    archivedProcessList.Add(process);
+                }
+                else
+                {
+                    myProcessList.Add(process);
+                }
+            }
 
             ViewData["MyProcesses"] = myProcessList;
+
             ViewData["ArchivedProcesses"] = archivedProcessList;
-            
+
             if (User.IsInRole("Administrator"))
             {
-                List<ActiveProcess> allActiveProcessList = await _processContainer.GetActiveProcessesAsync();
-                List<ActiveProcess> allArchivedProcessList = await _processContainer.GetArchivedProcessesAsync();
-                
-                ViewData["AllProcesses"] = allActiveProcessList;
-                ViewData["AllArchivedProcesses"] = allArchivedProcessList;
+                List<ActiveProcess> ProcessList = await _processContainer.GetProcessesAsync();
+                ViewData["AllProcesses"] = ProcessList.Where(p => !p.IsArchived);
+                ViewData["AllArchivedProcesses"] = ProcessList.Where(p => p.IsArchived);
             }
 
             ProcessListViewModel processListViewModel = new ProcessListViewModel(myProcessList);
@@ -82,20 +90,8 @@ namespace SoPro24Team06.Controllers
         public async Task<IActionResult> Start()
         {
             await AddModelsToViewData();
-            
-            
-            StartProcessViewModel? startProcessViewModel = new StartProcessViewModel(new Process());
-            
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            ApplicationUser defaultSupervisor = await _userManager.FindByIdAsync(userId);
 
-            startProcessViewModel.Supervisor = defaultSupervisor;
-
-            if (TempData["startProcessViewModel"] != null)
-            {
-                string jsonViewModel = TempData["startProcessViewModel"] as string;
-                startProcessViewModel = JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
-            }
+            StartProcessViewModel startProcessViewModel = new StartProcessViewModel(new Process());
 
             return View(startProcessViewModel);
         }
@@ -104,32 +100,19 @@ namespace SoPro24Team06.Controllers
         [HttpGet("/Process/Start/{templateId}")]
         public async Task<IActionResult> Start(int templateId)
         {
+            Console.WriteLine($"Template ID: {templateId}");
             await AddModelsToViewData();
+
             StartProcessViewModel startProcessViewModel = new StartProcessViewModel(new Process());
-            
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            ApplicationUser defaultSupervisor = await _userManager.FindByIdAsync(userId);
-            startProcessViewModel.Supervisor = defaultSupervisor;
 
             if (templateId > 0)
             {
                 ProcessTemplate template =
                     await _processTemplateContainer.GetProcessTemplateByIdAsync(templateId);
                 startProcessViewModel.Template = template;
-                
-                IList<string> userRoles = await _userManager.GetRolesAsync(defaultSupervisor);
-                List<string> rolesWithAcess = new List<string> { };
-                template.RolesWithAccess.ForEach(r => rolesWithAcess.Add(r.Name));
-
-                bool hasAccess = rolesWithAcess.Intersect(userRoles.ToList()).Any() || User.IsInRole("Administrator");
-
-                if (hasAccess)
-                {
-                    return View(startProcessViewModel);
-                }
             }
 
-            return RedirectToAction("Index");
+            return View(startProcessViewModel);
         }
         
         [HttpPost("/Process/Start/{templateId}")]
@@ -286,13 +269,6 @@ namespace SoPro24Team06.Controllers
             try
             {
                 ActiveProcess newProcess = startProcessViewModel.ToProcess();
-                
-                //AssignmentTempaltes die nicht zu ein ProcessTemplate gehören löschen
-
-                startProcessViewModel.AssignmentTemplates
-                    .Where(t => t.ProcessTemplateId == null)
-                    .ToList()
-                    .ForEach(t => _assignmentTemplateContainer.DeleteAssignmentTemplate(t.Id));
 
                 newProcess.WorkerOfReference = await _userManager.FindByIdAsync(
                     startProcessViewModel.WorkerOfReference.Id
@@ -323,75 +299,6 @@ namespace SoPro24Team06.Controllers
             }
 
             return View("Start", startProcessViewModel);
-        }
-
-        public async Task<IActionResult> StartRedirectToNewAssignment(
-            [Bind(
-                "Title, Description, Template, AssignmentTemplates, Supervisor, WorkerOfReference, ContractOfRefWorker, DepartmentOfRefWorker"
-            )]
-            [FromForm]
-            StartProcessViewModel startProcessViewModel
-            )
-        {   
-            string jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
-            TempData["startProcessViewModel"] = jsonViewModel;
-
-            // Auf Create mit processId = 0 redirecten, da wir noch kein process haben
-            return Redirect("/AssignmentTemplate/Create/0");
-        }
-        
-        public async Task<IActionResult> StartRedirectEditAssignment(
-            int assignmentTemplateId,
-            [Bind(
-                "Title, Description, Template, AssignmentTemplates, Supervisor, WorkerOfReference, ContractOfRefWorker, DepartmentOfRefWorker"
-            )]
-            [FromForm]
-            StartProcessViewModel startProcessViewModel
-            )
-        {   
-            string jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
-            TempData["startProcessViewModel"] = jsonViewModel;
-
-            // Auf Create mit processId = 0 redirecten, da wir noch kein process haben
-            return Redirect($"/AssignmentTemplate/Edit/{assignmentTemplateId}");
-        }
-        
-        public async Task<IActionResult> EditRedirectToNewAssignment(
-            [Bind(
-                "Id, Title, Description, DueDate, WorkerOfReference, Supervisor, Assignments, AssignmentTemplates, ContractOfRefWorker, DepartmentOfRefWorker"
-            )]
-            [FromForm]
-            EditProcessViewModel editProcessViewModel
-        )
-        {   
-            string jsonViewModel = JsonConvert.SerializeObject(editProcessViewModel);
-            TempData["editProcessViewModel"] = jsonViewModel;
-            Console.WriteLine(jsonViewModel);
-            // Auf Create mit processId = 0, weil processId sich auf ProcessTemplateBezieht
-            return Redirect("/AssignmentTemplate/Create/0");
-        }
-
-        public async Task<IActionResult> EditRedirectEditAssignment(
-            int assignmentId,
-            [Bind(
-                "Id, Title, Description, DueDate, WorkerOfReference, Supervisor, Assignments, AssignmentTemplates, ContractOfRefWorker, DepartmentOfRefWorker"
-            )]
-            [FromForm]
-            EditProcessViewModel editProcessViewModel
-        )
-        {
-            string jsonViewModel = JsonConvert.SerializeObject(editProcessViewModel);
-            TempData["editProcessViewModel"] = jsonViewModel;
-            return Redirect($"/Assignment/Edit/{assignmentId}");
-        }
-        
-        public async Task<IActionResult> DetailRedirectEditAssignment(
-            int processId,
-            int assignmentId
-            )
-        {
-            TempData["detailProcessId"] = processId;
-            return Redirect($"/Assignment/Edit/{assignmentId}");
         }
 
         [HttpPost]
@@ -475,18 +382,10 @@ namespace SoPro24Team06.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            
             ActiveProcess process = await _processContainer.GetProcessByIdAsync(id);
-            EditProcessViewModel editProcessViewModel = TempData["editProcessViewModel"] as EditProcessViewModel ?? new EditProcessViewModel(process);
-            
-            editProcessViewModel.Id = id;
+            EditProcessViewModel editProcessViewModel = new EditProcessViewModel(process);
 
-            bool hasAccess = process.Supervisor.Id == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value || User.IsInRole("Administrator");
-            
-            if (process.IsArchived || !hasAccess)
-            {
-                return RedirectToAction("Index");
-            }
+            Console.WriteLine("GET EditProcessViewModel:");
 
             await AddModelsToViewData();
 
@@ -539,11 +438,6 @@ namespace SoPro24Team06.Controllers
                 }
             }
             //end codeownership Jan Pfluger
-
-            if (editProcessViewModel.Assignments == null)
-            {
-                editProcessViewModel.Assignments = new List<Assignment> { };
-            }
 
             List<Assignment> currentAssignments = new List<Assignment> { };
             foreach (Assignment assignment in editProcessViewModel.Assignments)
@@ -616,41 +510,6 @@ namespace SoPro24Team06.Controllers
             return View("Detail", detailProcessViewModel);
         }
 
-        [HttpGet("/Process/UpdateAssignmentStatus/{processId}")]
-        public async Task<IActionResult> UpdateAssignmentStatus(int processId, [FromQuery] int assignmentId, [FromQuery] AssignmentStatus status)
-        {
-
-            Assignment assignmentToChange = _context.Assignments.Find(assignmentId);
-            
-            /*
-            assignmentToChange.Status = status;
-
-            await _context.SaveChangesAsync();
-            */
-
-            ActiveProcess process = await _processContainer.GetProcessByIdAsync(processId);
-
-            foreach (Assignment assignment in process.Assignments)
-            {
-                if (assignment.Id == assignmentId)
-                {
-                    assignment.Status = status;
-                }
-            }
-
-            await _processContainer.UpdateProcessAsync(
-                processId,
-                process.Title,
-                process.Description,
-                process.Assignments,
-                process.Supervisor,
-                process.WorkerOfReference,
-                process.ContractOfRefWorker,
-                process.DepartmentOfRefWorker);
-
-            return RedirectToAction("Detail", new { id = processId});
-        }
-
         [HttpPost("/Process/Stop/{id}")]
         public async Task<IActionResult> Stop(int id)
         {
@@ -673,32 +532,13 @@ namespace SoPro24Team06.Controllers
             List<ApplicationUser> users = _userManager.Users.ToList();
             List<ProcessTemplate> processTemplates =
                 await _processTemplateContainer.GetProcessTemplatesAsync();
-            
-            // Rollen der aktuellen User bestimmen
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            ApplicationUser user = await _userManager.FindByIdAsync(userId);
-            IList<string> userRoles = await _userManager.GetRolesAsync(user);
 
-            
-            foreach (ProcessTemplate processTemplate in processTemplates.ToList()) // ToList() damit man im loop aus der Liste löschen kann
-            {
-                List<string> rolesWithAcess = new List<string> { };
-                processTemplate.RolesWithAccess.ForEach(r => rolesWithAcess.Add(r.Name));
-                bool hasAccess = rolesWithAcess.Intersect(userRoles.ToList()).Any() || User.IsInRole("Administrator");
-
-                // Liste leeren um Json serialization Fehler zu vermeiden
-                processTemplate.RolesWithAccess = new List<ApplicationRole> { };
-                
-                if (!hasAccess)
-                {
-                    processTemplates.Remove(processTemplate);
-                }
-            }
+            processTemplates.ForEach(p => p.RolesWithAccess = new List<ApplicationRole> { });
 
             List<AssignmentTemplate> assignmentTemplates =
                 _assignmentTemplateContainer.GetAllAssignmentTemplates();
 
-             assignmentTemplates.ForEach(a => a.ProcessTemplateId = processTemplates.FirstOrDefault()?.Id ?? 0);
+            assignmentTemplates.ForEach(a => a.ProcessTemplates = new List<ProcessTemplate> { });
 
             // Replace with Containers
             List<Assignment> assignments = _context.Assignments.ToList();
