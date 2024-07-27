@@ -59,6 +59,8 @@ public class AssignmentIndexViewModel
             case "name":
                 this.AssignmentList.Sort((x, y) => String.Compare(x.Title, y.Title));
                 break;
+            default:
+                break;
         }
     }
 

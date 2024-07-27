@@ -74,11 +74,19 @@
 					{
 						<option value="name" selected>Name</option>
 						<option value="dueDate">Fälligkeit</option>
+						<option value="">Sortieren</option>
 					}
-					else
+					else if(ViewData["sortingMethod"] as string == "dueDate")
 					{
 						<option value="name">Name</option>
 						<option value="dueDate" selected>Fälligkeit</option>
+						<option value="none">Sortieren</option>
+					}
+					else 
+					{
+						<option value="name">Name</option>
+						<option value="dueDate">Fälligkeit</option>
+						<option value="none" selected>Sortieren</option>
 					}
 				</select>
 				<input type="hidden" name="currentList" />
