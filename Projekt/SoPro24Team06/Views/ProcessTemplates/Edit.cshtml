@@ -95,33 +95,87 @@
   <!-- Create: Abteilung -->
 
   <!-- Start: Aufgaben Select -->
-  <div class="form-group" style="margin-top: 12px">
+  <fieldset style="margin-top: 12px;">
     <legend>Aufgaben</legend>
-    @if (AssignmentTemplates == null || AssignmentTemplates.Count == 0)
-    {
-      <p>Keine Aufgaben vorhanden</p>
-    }
-    else
-    {
+    <button asp-action="RedirectAssignmentTemplateCreate" type="submit" class="btn "
+      style="background-color: var(--ash); color: white;">
+      Aufgabe hinzufügen
+    </button>
+    <div class="table-responsive">
+      @if (AssignmentTemplates == null || AssignmentTemplates.Count == 0 || @Model.SelectedAssignmentTemplateIds.Count
+      == 0 || @Model.SelectedAssignmentTemplateIds == null)
+      {
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Titel</th>
+              <th>Anleitung</th>
+              <th>Aufgabenverantwortlicher</th>
+              <th>Zugewiesene Rolle</th>
+              <th>Zu Erledigen bis:</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody>
+            <td colspan="6">
+              <p>Keine Aufgaben vorhanden</p>
+            </td>
+          </tbody>
+        </table>
+      }
+      else
+      {
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Titel</th>
+              <th>Anleitung</th>
+              <th>Aufgabenverantwortlicher</th>
+              <th>Zugewiesene Rolle</th>
+              <th>Zu Erledigen bis:</th>
+              <th>Aktionen</th>
+            </tr>
+          </thead>
+          <tbody id="assignments" name="assignments">
+            @foreach (var at in AssignmentTemplates)
+            {
+              @if (at.ProcessTemplateId == @Model.Id)
+              {
+                <tr>
+                  <td>@at.Title</td>
+                  <td>@at.Instructions</td>
+                  <td>@at.AssigneeType</td>
+                  <td>@at.AssignedRole</td>
+                  <td>@at.DueIn.Label</td>
+                  <td class="d-flex flex-row justify-content-evenly gap-3">
+                    <a href="/AssignmentTemplate/Edit/@at.Id"><i class="far fa-edit"
+                        style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
+                    <button type="button" class="btn-close" type="button" aria-label="Close"
+                      onclick="deleteItem(@at.Id)"></button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
 
-      <select id="selectedAssignmentTemplate" asp-for="SelectedAssignmentTemplateIds" class="form-control"
-        multiple="multiple">
-        @foreach (var template in AssignmentTemplates)
-        {
-          <option value="@template.Id">@template.Title</option>
-        }
-      </select>
-      <span asp-validation-for="SelectedAssignmentTemplateIds" class="text-danger"></span>
-    }
-  </div>
+        <div class="form-group" style="margin-top: 12px; display: none;">
+          <select id="selectedAssignmentTemplate" asp-for="SelectedAssignmentTemplateIds" class="form-control"
+            multiple="multiple">
+            @foreach (var template in AssignmentTemplates)
+            {
+              <option value="@template.Id">@template.Title</option>
+            }
+          </select>
+          <span asp-validation-for="SelectedAssignmentTemplateIds" class="text-danger"></span>
+        </div>
+      }
+    </div>
+  </fieldset>
   <!-- Ende: Aufgaben Select -->
   <div style="margin-top: 36px;">
     <button asp-action="Edit" class="btn" type="submit" style="background-color: var(--lemming); color: white;">
-      Bearbeiten
-    </button>
-    <button asp-action="RedirectAssignmentTemplateCreate" type="submit" class="btn "
-      style="background-color: var(--ash); color: white;">
-      Weitere Aufgaben erstellen
+      Bearbeitung speichern
     </button>
   </div>
 </form>
@@ -140,5 +194,22 @@
         allowClear: true
       });
     });
+  </script>
+  <script>
+    function deleteItem(id) {
+      if (confirm('Bist du sicher, dass du diesen Eintrag löschen möchtest?')) {
+        $.ajax({
+          url: '@Url.Action("Delete", "AssignmentTemplate")',
+          type: 'POST',
+          data: { id: id },
+          success: function () {
+            location.reload();  // optional: Seite neu laden
+          },
+          error: function () {
+            alert('Es gab ein Problem beim Löschen des Eintrags.');
+          }
+        });
+      }
+    }
   </script>
 }

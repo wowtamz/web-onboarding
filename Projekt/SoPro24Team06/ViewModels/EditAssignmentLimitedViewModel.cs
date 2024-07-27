@@ -1,3 +1,5 @@
+//beginn codeownership Jan Pfluger
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SoPro24Team06.Enums;
 using SoPro24Team06.Helpers;
@@ -5,19 +7,19 @@ using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels
 {
-    public class AssignmentEditViewModel
+    public class EditAssignmentLimitedViewModel
     {
         public Assignment Assignment { get; set; }
         public string? SelectedUserId { get; set; }
         public string? SelectedRoleId { get; set; }
-        public string? SelectedDate { get; set; }
         public SelectList UserList { get; set; }
         public SelectList RoleList { get; set; }
         public string ProcessTitle { get; set; }
         public IEnumerable<SelectListItem> AssignmentStatusList { get; set; }
+
         public IEnumerable<SelectListItem> AssigneeTypeList { get; set; }
 
-        public AssignmentEditViewModel(
+        public EditAssignmentLimitedViewModel(
             Assignment assignment,
             List<ApplicationUser> userList,
             List<ApplicationRole> roleList,
@@ -37,10 +39,10 @@ namespace SoPro24Team06.ViewModels
             {
                 this.ProcessTitle = "es konnte kein zugehöriger Vorgang gefunden werden";
             }
-            InitialiseSelectLists(userList, roleList);
+            InitialiseSelectList(userList, roleList);
         }
 
-        public AssignmentEditViewModel()
+        public EditAssignmentLimitedViewModel()
         {
             UserList = new SelectList(new List<SelectListItem>());
             RoleList = new SelectList(new List<SelectListItem>());
@@ -48,7 +50,7 @@ namespace SoPro24Team06.ViewModels
             AssigneeTypeList = new List<SelectListItem>();
         }
 
-        public void InitialiseSelectLists(
+        public void InitialiseSelectList(
             List<ApplicationUser> userList,
             List<ApplicationRole> roleList
         )
@@ -86,7 +88,6 @@ namespace SoPro24Team06.ViewModels
             {
                 this.RoleList = new SelectList(roleList, "Id", "Name");
             }
-
             List<AssignmentStatus> assignmentStatusList =
                 EnumHelper.GetEnumList<AssignmentStatus>();
             this.AssignmentStatusList = assignmentStatusList.Select(status => new SelectListItem
@@ -110,3 +111,4 @@ namespace SoPro24Team06.ViewModels
         }
     }
 }
+//end codeownership Jan Pfluger

@@ -35,8 +35,9 @@ namespace SoPro24Team06.Models
 
         [JsonProperty("assignedRoles")]
         public ApplicationRole? AssignedRole { get; set; }
-
-        public List<ProcessTemplate>? ProcessTemplates { get; set; }
+        
+        [ForeignKey("ProcessTemplate")]
+        public int? ProcessTemplateId { get; set; }
 
         public AssignmentTemplate() { }
 
@@ -47,7 +48,8 @@ namespace SoPro24Team06.Models
             List<Department> forDepartmentsList,
             List<Contract> forContractsList,
             AssigneeType assigneeType,
-            ApplicationRole assignedRole
+            ApplicationRole assignedRole,
+            int? processTemplateId
         )
         {
             this.Title = title;
@@ -57,6 +59,8 @@ namespace SoPro24Team06.Models
             this.ForContractsList = forContractsList;
             this.AssigneeType = assigneeType;
             this.AssignedRole = assignedRole;
+            this.ProcessTemplateId = processTemplateId > 0 ? processTemplateId : null;
+            
         }
 
         public Assignment ToAssignment(ApplicationUser? user)

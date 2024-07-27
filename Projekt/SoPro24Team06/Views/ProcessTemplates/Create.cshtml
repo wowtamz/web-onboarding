@@ -89,33 +89,40 @@
     </fieldset>
     <!-- Create: Abteilung -->
     <!-- Start: Aufgaben Select -->
-    <div class="form-group" style="margin-top: 12px">
+    <fieldset style="margin-top: 12px;">
         <legend>Aufgaben</legend>
-        @if (AssignmentTemplates == null || AssignmentTemplates.Count == 0)
-        {
-            <p>Keine Aufgaben vorhanden</p>
-        }
-        else
-        {
-
-            <select id="selectedAssignmentTemplate" asp-for="SelectedAssignmentTemplateIds" class="form-control"
-                multiple="multiple">
-                @foreach (var template in AssignmentTemplates)
-                {
-                    <option value="@template.Id">@template.Title</option>
-                }
-            </select>
-            <span asp-validation-for="SelectedAssignmentTemplateIds" class="text-danger"></span>
-        }
-    </div>
+        <button asp-action="RedirectAssignmentTemplateCreate" type="submit" class="btn "
+            style="background-color: var(--ash); color: white;">
+            Aufgabe hinzufügen
+        </button>
+        <div class="table-responsive">
+            @if (AssignmentTemplates == null || AssignmentTemplates.Count == 0 ||
+            @Model.SelectedAssignmentTemplateIds.Count
+            == 0 || @Model.SelectedAssignmentTemplateIds == null)
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Titel</th>
+                            <th>Anleitung</th>
+                            <th>Aufgabenverantwortlicher</th>
+                            <th>Zugewiesene Rolle</th>
+                            <th>Zu Erledigen bis:</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <td colspan="5">
+                            <p>Keine Aufgaben vorhanden</p>
+                        </td>
+                    </tbody>
+                </table>
+            }
+        </div>
+    </fieldset>
     <!-- Ende: Aufgaben Select -->
     <div style="margin-top: 36px">
         <button asp-action="Create" class="btn" type="submit" style="background-color: var(--lemming); color: white;">
             Erstellen
-        </button>
-        <button asp-action="RedirectAssignmentTemplateCreate" type="submit" class="btn "
-            style="background-color: var(--ash); color: white;">
-            Weitere Aufgaben erstellen
         </button>
     </div>
 </form>

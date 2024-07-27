@@ -1,149 +1,52 @@
-@model SoPro24Team06.ViewModels.AssignmentDetailsViewModel
+@model SoPro24Team06.ViewModels.AssignmentDetailsViewModel;
+@using SoPro24Team06.Enums;
 
-<form id="Details" method="post" asp-action="UpdateDetails">
-	@Html.AntiForgeryToken()
+<div>
 	<fieldset>
-		<legend>Title</legend>
+		<legend>Titel</legend>
 		<p>@Model.Assignment.Title</p>
 	</fieldset>
 	<fieldset>
-		@if (Model.Process != null)
-		{
-			<legent>Vorgang</legent>
-			<p>@Model.Process.Title</p>
-		}
+		<legend>Vorgang</legend>
+		<p>@Model.ProcessTitle</p>
 	</fieldset>
-	<fieldset style="margin-top: 8px">
+	<fieldset>
+		<legend>Fälligkeit</legend>
+		<p>@Model.Assignment.DueDate.Date.ToString("dd.MM.yyyy")</p>
+	</fieldset>
+	<fieldset>
 		<legend>Anweisungen</legend>
 		<textarea class="form-control" rows="10" readonly>@Model.Assignment.Instructions</textarea>
 	</fieldset>
-	@if (Model.Assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.ROLES)
-	{
-		<fieldset style="margin-top: 4px">
-			<legend>Zugewiesene Rolle</legend>
-			<p>@Model.Assignment.AssignedRole</p>
-		</fieldset>
-	}
-	<fieldset style="margin-top: 4px">
+	<fieldset>
 		<legend>Aufgabenverantwortlichkeit</legend>
-		<select id="assignmentTypeDropdown" asp-for="Assignment.AssigneeType" class="btn btn-primary dropdown-toggle"
-			aria-expanded="false" data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;">
-			<option value=null>Bitte Auswählen</option>
-			@if (Model.Assignment.AssigneeType == @SoPro24Team06.Enums.AssigneeType.ROLES)
+		<p>@SoPro24Team06.Helpers.EnumHelper.GetDisplayName(Model.Assignment.AssigneeType)</p>
+		@if (Model.Assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.ROLES)
+		{
+			@if(Model.Assignment.AssignedRole == null)
 			{
-				<otpion value="@SoPro24Team06.Enums.AssigneeType.ROLES" selected>Rolle</otpion>
-				<option value="@SoPro24Team06.Enums.AssigneeType.USER">Nutzer</option>
+				<p>Es konnte keine Verantwortliche Rolle gefunden werden</p>
 			}
-			else
+			else 
 			{
-				<otpion value="@SoPro24Team06.Enums.AssigneeType.ROLES">Rolle</otpion>
-				<option value="@SoPro24Team06.Enums.AssigneeType.USER" selected>Nutzer</option>
+				<p>@Model.Assignment.AssignedRole.Name</p>
 			}
-		</select>
-		<div id="assignedRoleGroup" style="display:none;">
-			<select id="assignedRoleDropdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
-				data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.AssignedRole"
-				asp-items="@Model.RoleList">
-				<option value=null>Bitte Auswählen</option>
-			</select>
-		</div>
-		<div id="assigneeGroup" style="display:none;">
-			<select id="assigneedropdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
-				data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.Assignee"
-				asp-items="@Model.UserList">
-				<option value=null>Bitte Auswählen</option>
-			</select>
-		</div>
+		}
+		else if (Model.Assignment.AssigneeType == SoPro24Team06.Enums.AssigneeType.USER)
+		{
+			@if(Model.Assignment.Assignee == null)
+			{
+				<p>Es konnte kein Verantwortlicher Nutzer gefunden werden</p>
+			}
+			else 
+			{
+				<p>@Model.Assignment.Assignee.FullName</p>
+			}
+		}
 	</fieldset>
-	<fieldset style="margin-top: 4px">
+	<fieldset>
 		<legend>Status</legend>
-		<select id="assignmentStatusDrowpdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
-			data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.Status" aps-items=>
-
-			@if (Model.Assignment.Status == SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED)
-			{
-				<option selected value="@SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED">
-					@SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED.ToString()
-				</option>
-			}
-			else
-			{
-				<option value="@SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED">
-					@SoPro24Team06.Enums.AssignmentStatus.NOT_STARTED.ToString()</option>
-			}
-
-			@if (Model.Assignment.Status == SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS)
-			{
-				<option selected value="@SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS">
-					@SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS.ToString()
-				</option>
-			}
-			else
-			{
-				<option value="@SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS">
-					@SoPro24Team06.Enums.AssignmentStatus.IN_PROGRESS.ToString()</option>
-			}
-
-			@if (Model.Assignment.Status == SoPro24Team06.Enums.AssignmentStatus.DONE)
-			{
-				<option selected value="@SoPro24Team06.Enums.AssignmentStatus.DONE">
-					@SoPro24Team06.Enums.AssignmentStatus.DONE.ToString()
-				</option>
-			}
-			else
-			{
-				<option value="@SoPro24Team06.Enums.AssignmentStatus.DONE">
-					@SoPro24Team06.Enums.AssignmentStatus.DONE.ToString()
-				</option>
-			}
-		</select>
+		<p>@SoPro24Team06.Helpers.EnumHelper.GetDisplayName(Model.Assignment.Status)</p>
 	</fieldset>
-	<div style="margin-top: 12px">
-		<button type="submit" class="btn btn-primary">Bestätigen</button>
-		<button type="button" class="btn btn-secondary" onclick="history.back()">Schließen ohne Speicher</button>
-	</div>
-</form>
-
-
-<script>
-	// anzeigen der zugehörigen Dropdownmenues
-	document.getElementById('assignmentTypeDropdown').addEventListener('change', function () {
-		var assignedRoleGroup = document.getelementById('assignedRoleGroup');
-		var assingeeGroup = document.getElementById('assigneeGroup');
-
-		if (this.value == '@SoPro24Team06.Enums.AssigneeType.ROLES') {
-			assignedroleGroup.style.display = 'block';
-			assingeeGroup.style.display = 'none';
-		} else if (this.value == '@SoPro24Team06.Enums.AssigneeType.USER') {
-			assignedroleGroup.style.display = 'none';
-			assingeeGroup.style.display = 'block'
-		} else {
-			assignedroleGroup.style.display = 'none';
-			assingeeGroup.style.display = 'none'
-		}
-	});
-	// Trigger change event on page load
-	document.getElementById('assingmentTypeDropdown').dispatchEvent(new Event('change'));
-
-	function validateForm() {
-		const assignmentTpe = document.getElementById('assignmentTypeDropdown').value;
-		if (!assignmentType) {
-			alert('Bitte wählen Sie eine Aufgabenverantwortlichkeit aus.');
-			isValid = false;
-		}
-		if (assignmentTpe === '@SoPro24Team06.Enums.AssigneeType.ROLES') {
-			const assingedRole = document.getElementById('assignedRoleDropdown').value;
-			if (!assingedRole) {
-				alert('Bitte wählen Sie eine Rolle aus');
-				isValid = false;
-			}
-		} else if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.USER') {
-			const assignedUser = document.getElementById('assignedUserDropdown').value;
-			if (!assignedUser) {
-				alert('Bitte wählen Sie einen Nutzer aus.');
-				isValid = false;
-			}
-		}
-		return isValid;
-	}
-</script>
+	<a href="/Assignment" type="button" class="btn btn-secondary">Schließen</a>
+</div>
