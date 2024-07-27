@@ -14,6 +14,7 @@ using SoPro24Team06.ViewModels;
 
 namespace SoPro24Team06.Controllers
 {
+    [Authorize]
     public class ProcessTemplateController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -41,7 +42,7 @@ namespace SoPro24Team06.Controllers
         public async Task<IActionResult> Index()
         {
             List<ProcessTemplate> processTemplates =
-                await _processTemplateContainer.GetProcessListByAccessRights(User.Identity.Name);
+                await _processTemplateContainer.GetProcessTemplatesAsync();
 
             ProcessTemplateListViewModel model = new() { ProcessTemplateList = processTemplates };
             return View("~/Views/ProcessTemplates/Index.cshtml", model);
@@ -70,7 +71,6 @@ namespace SoPro24Team06.Controllers
             }
         }
 
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Create()
         {
             ProcessTemplateViewModel model = new();
@@ -79,7 +79,6 @@ namespace SoPro24Team06.Controllers
             return View("~/Views/ProcessTemplates/Create.cshtml", model);
         }
 
-        [Authorize(Roles = "Administrator")]
         [HttpPost("ProcessTemplate/Create")]
         public async Task<IActionResult> Create([FromForm] ProcessTemplateViewModel model)
         {
@@ -87,7 +86,16 @@ namespace SoPro24Team06.Controllers
 
             if (!ModelState.IsValid)
             {
-                LogModelErrors(model);
+                _logger.LogError("Model: {Model}", model.ToJson());
+                foreach (var modelState in ModelState.Values)
+                {
+                    _logger.LogError("Model state: {ModelState}", modelState.ToJson());
+                    foreach (var error in modelState.Errors)
+                    {
+                        _logger.LogError("Error: {Error}", error.ErrorMessage);
+                    }
+                }
+                _logger.LogWarning("Create operation failed due to invalid model state.");
                 return RedirectToAction("Create");
             }
 
@@ -156,7 +164,15 @@ namespace SoPro24Team06.Controllers
 
             if (!ModelState.IsValid)
             {
-                LogModelErrors(model);
+                _logger.LogError("Model: {Model}", model.ToJson());
+                foreach (var modelState in ModelState.Values)
+                {
+                    _logger.LogError("Model state: {ModelState}", modelState.ToJson());
+                    foreach (var error in modelState.Errors)
+                    {
+                        _logger.LogError("Error: {Error}", error.ErrorMessage);
+                    }
+                }
                 if (model.Id != null)
                 {
                     return RedirectToAction("Edit", model);
@@ -233,7 +249,6 @@ namespace SoPro24Team06.Controllers
                         AssignmentTemplates = assignments
                     };
                     await _processTemplateContainer.UpdateProcessTemplateAsync(processTemplate);
-
                     return RedirectToAction(
                         "CreateStart",
                         "AssignmentTemplate",
@@ -255,13 +270,14 @@ namespace SoPro24Team06.Controllers
                     var t = await _processTemplateContainer.AddProcessTemplateAsync(
                         processTemplate
                     );
-
                     return RedirectToAction(
                         "CreateStart",
                         "AssignmentTemplate",
                         new { processId = t.Id }
                     );
                 }
+
+                // redirect to        [HttpGet("AssignmentTemplate/Create/{processId}")]
             }
             catch (Exception ex)
             {
@@ -276,14 +292,6 @@ namespace SoPro24Team06.Controllers
             ProcessTemplate processTemplate = _processTemplateContainer
                 .GetProcessTemplateByIdAsync(id)
                 .Result;
-
-            foreach (var role in processTemplate.RolesWithAccess)
-            {
-                if (!IsAuthorized(role.Name))
-                {
-                    return View("~/Views/Index.cshtml");
-                }
-            }
 
             ProcessTemplateViewModel model =
                 new()
@@ -307,18 +315,21 @@ namespace SoPro24Team06.Controllers
         [HttpPost("ProcessTemplate/Edit/{id:int}")]
         public async Task<IActionResult> Edit([FromForm] ProcessTemplateViewModel model)
         {
-            foreach (var role in model.RolesWithAccess)
-            {
-                if (!IsAuthorized(role))
-                {
-                    return View("~/Views/Index.cshtml");
-                }
-            }
-
             _logger.LogInformation("Editing process template with {template}", model.ToJson());
             if (!ModelState.IsValid)
             {
-                LogModelErrors(model);
+                foreach (var modelState in ModelState.Values)
+                {
+                    _logger.LogError("Model state: {ModelState}", modelState);
+                    foreach (var error in modelState.Errors)
+                    {
+                        _logger.LogError("Error: {Error}", error.ErrorMessage);
+                    }
+                }
+                _logger.LogWarning(
+                    "Edit operation failed due to invalid model state for template ID: {TemplateId}",
+                    model.Id
+                );
                 return RedirectToAction("Edit", model);
             }
 
@@ -390,7 +401,6 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles = "Administrator")]
         [HttpGet("ProcessTemplate/Delete/{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -428,30 +438,6 @@ namespace SoPro24Team06.Controllers
             ViewData["Contracts"] = contracts;
             ViewData["Departments"] = departments;
             ViewData["Roles"] = roles;
-        }
-
-        public bool IsAuthorized(string role)
-        {
-            if (User.IsInRole("Administrator"))
-            {
-                return true;
-            }
-            else
-            {
-                return User.IsInRole(role);
-            }
-        }
-
-        private void LogModelErrors(ProcessTemplateViewModel model)
-        {
-            _logger.LogError("Model: {Model}", model);
-            foreach (var modelState in ModelState.Values)
-            {
-                foreach (var error in modelState.Errors)
-                {
-                    _logger.LogError("Error: {Error}", error.ErrorMessage);
-                }
-            }
         }
     }
 }

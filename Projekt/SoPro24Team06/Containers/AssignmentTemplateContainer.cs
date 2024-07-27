@@ -21,8 +21,7 @@ public class AssignmentTemplateContainer
         List<Department>? forDepartmentsList,
         List<Contract>? forContractsList,
         AssigneeType assigneType,
-        ApplicationRole? assignedRole,
-        int? processTemplateId
+        ApplicationRole? assignedRole
     )
     {
         AssignmentTemplate template = new AssignmentTemplate(
@@ -32,8 +31,7 @@ public class AssignmentTemplateContainer
             forDepartmentsList,
             forContractsList,
             assigneType,
-            assignedRole,
-            processTemplateId
+            assignedRole
         );
         var assignmentTemplateID = _context.AssignmentTemplates.Add(template);
         _context.SaveChanges();

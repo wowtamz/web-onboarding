@@ -96,24 +96,22 @@ public class StartProcessViewModel
                 )
             )
             .ToList();
-        
-        foreach (AssignmentTemplate temp in assignmentTemplates) //delete for production use
+
+        foreach (AssignmentTemplate temp in assignmentTemplates)
         {
-            Assignment assignment = temp.ToAssignment(null);
             switch (temp.AssigneeType)
             {
                 case AssigneeType.SUPERVISOR:
-                    assignment.Assignee = this.Supervisor;
+                    assignmentList.Add(temp.ToAssignment(this.Supervisor));
                     break;
                 case AssigneeType.WORKER_OF_REF:
-                    assignment.Assignee = this.WorkerOfReference;
+                    assignmentList.Add(temp.ToAssignment(this.WorkerOfReference));
                     break;
                 default:
+                    assignmentList.Add(temp.ToAssignment(null));
                     break;
             }
-            assignmentList.Add(assignment);
         }
-        
         return new Process(
             Title,
             Description,

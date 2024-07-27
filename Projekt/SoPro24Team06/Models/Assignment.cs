@@ -11,38 +11,33 @@ namespace SoPro24Team06.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonProperty("id")]
-
         public int Id { get; set; }
-		[Required(ErrorMessage = "Title is Required")]
+
         [JsonProperty("title")]
         public string Title { get; set; }
 
         [JsonProperty("instructions")]
         public string? Instructions { get; set; }
 
-		[Required(ErrorMessage = "DueDate is Required")]
         [JsonProperty("dueDate")]
         public DateTime DueDate { get; set; }
 
-		
         [JsonProperty("forDepartments")]
         public List<Department> ForDepartmentsList { get; set; } = new List<Department>();
 
         [JsonProperty("forContract")]
         public List<Contract> ForContractsList { get; set; } = new List<Contract>();
 
-		[Required(ErrorMessage = "AssigneeType is Required")]
         [JsonProperty("assigneeType")]
         public AssigneeType AssigneeType { get; set; }
 
-		[JsonProperty("assingee")]
+        [JsonProperty("assingee")]
         public ApplicationUser? Assignee { get; set; }
 
-		[JsonProperty("assignedRole")]
+        [JsonProperty("assignedRole")]
         public ApplicationRole? AssignedRole { get; set; }
 
-		[Required(ErrorMessage = "Status is Required")]
-		[JsonProperty("status")]
+        [JsonProperty("status")]
         public AssignmentStatus Status { get; set; }
 
         public Assignment(AssignmentTemplate template, DateTime dueDate, ApplicationUser? assignee)
@@ -63,7 +58,7 @@ namespace SoPro24Team06.Models
                     this.Assignee = assignee;
                 this.AssigneeType = AssigneeType.USER;
             }
-            this.DueDate = dueDate.Date;
+            this.DueDate = dueDate;
             this.Status = AssignmentStatus.NOT_STARTED;
         }
 
@@ -71,7 +66,7 @@ namespace SoPro24Team06.Models
 
         public int GetDaysTillDueDate()
         {
-            return (this.DueDate.Date - DateTime.Today).Days;
+            return (this.DueDate - DateTime.Today).Days;
         }
     }
 }

@@ -1,148 +1,115 @@
 @model SoPro24Team06.ViewModels.AssignmentEditViewModel
 
-<form id="Edit" method="post" asp-action="EditAssignment">
+<form onsubmit="return validateForm()">
 	@Html.AntiForgeryToken()
-	@Html.HiddenFor(model => model.Assignment.Id)
-	@Html.HiddenFor(model => model.ProcessTitle)
-	@Html.HiddenFor(model => model.Assignment)
 	<fieldset>
 		<legend>Title</legend>
-		<input class="form-control" type="text" asp-for="Assignment.Title" id="title">
-		@Html.ValidationMessageFor(model => model.Assignment.Title, "", new { @class = "text-danger" })
+		<input class="form-control" type="text" asp-for="Assignment.Title" value=@Model.Assignment.Title required>
 	</fieldset>
 	<fieldset style="margin-top: 4px">
 		<legend>Vorgang</legend>
-		<p>@Model.ProcessTitle</p>
+		<div class="dropdown-menue">
+			<select id="processDropdown" asp-for="SelectedProcessId" class="btn btn-primary dropdown-toggle"
+				aria-expanded="false" data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;"
+				asp-items="@(new SelectList(Model.ProcessList, "Id", "Titel"))">
+				<option value=0>Filtern</option>
+			</select>
+		</div>
 	</fieldset>
 	<fieldset>
 		<legend>Anleitung</legend>
-		<textarea class="form-control" asp-for="Assignment.Instructions" rows="10"></textarea>
-		@Html.ValidationMessageFor(model => model.Assignment.Instructions, "", new { @class = "text-danger" })
+		<textarea class="form-control" asp-for="Assignment.Instructions"
+			rows="10">@Model.Assignment.Instructions</textarea>
 	</fieldset>
 	<fieldset style="margin-top: 4px">
 		<legend>Aufgabenverantwortlichkeit</legend>
-		@Html.DropDownListFor(
-					model => model.Assignment.AssigneeType,
-					Model.AssigneeTypeList,
-					new { @id = "assignmentTypeDropdown", @class = "form-control", }
-					)
-		@Html.ValidationMessageFor(model => model.Assignment.AssigneeType, "", new { @class = "text-danger" })
-		<div id="assignedRoleGroup" style="display:none; margin-top:8px;">
-			@Html.DropDownListFor(
-							model => model.SelectedRoleId,
-							Model.RoleList,
-							new { @class = "form-control", @id = "assignedRoleDropdown" }
-							)
-			@Html.ValidationMessageFor(model => model.Assignment.AssignedRole, "", new { @class = "text-danger" })
-			<div class="text-danger" id="roleError"></div>
+		<select id="assigneeTypeDropdown" asp-for="Assignment.AssigneeType" class="btn btn-primary dropdown-toggle"
+			aria-expanded="false" data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;">
+			<option value=null>Bitte Auswählen</option>
+			<otpion value="@SoPro24Team06.Enums.AssigneeType.ROLES">Rolle</otpion>
+			<option value="@SoPro24Team06.Enums.AssigneeType.USER">Nutzer</option>
+		</select>
+		<div id="assignedRoleGroup" style="display:none;">
+			<select id="assignedRoleDropdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
+				data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.AssignedRole"
+				asp-items="@Model.RoleList">
+				<option value=null>Bitte Auswählen</option>
+			</select>
 		</div>
-		<div id="assigneeGroup" style="display:none; margin-top:8px;">
-			@Html.DropDownListFor(
-							model => model.SelectedUserId,
-							Model.UserList,
-							new { @class = "form-control", @id = "assignedUserDropdown" }
-							)
-			@Html.ValidationMessageFor(model => model.Assignment.Assignee, "", new { @class = "text-danger" })
+		<div id="assigneeGroup" style="display:none;">
+			<select id="assigneeDropdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
+				data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.Assignee"
+				asp-items="@Model.UserList">
+				<option value=null>Bitte Auswählen</option>
+			</select>
 		</div>
 	</fieldset>
-	<fieldset>
+	<fiedset>
 		<legend>Fällig am:</legend>
-		<input class="form-control" type="date" asp-for="Assignment.DueDate" asp-asp-format="{0:yyyy-MM-dd}"
-			value="@Model.Assignment.DueDate.ToString("yyyy-MM-dd")" id="dueDate" name="Assignment.DueDate">
-		@Html.ValidationMessageFor(model => model.Assignment.DueDate, "", new { @class = "text-danger" })
-	</fieldset>
+		<input class="form-control" type="date" asp-for="Assignment.DueDate"
+			value="@Model.Assignment.DueDate.ToString("yyyy-MM-dd")" required>
+	</fiedset>
 	<fieldset style="margin-top: 4px">
 		<legend>Status</legend>
-		@Html.DropDownListFor(
-					model => model.Assignment.Status,
-					Model.AssignmentStatusList,
-					new { @class = "form-control", @id = "assignmentStatusDropdown" }
-					)
-		@Html.ValidationMessageFor(model => model.Assignment.Status, "", new { @class = "text-danger" })
+		<select id="assignmentTypeDropdown" class="btn btn-primary dropdown-toggle" aria-expanded="false"
+			data-bs-toggle="dropdown" type="button" style="margin-bottom: 12px;" asp-for="Assignment.Status" ,
+			asp-items="@Model.AssignmentStatusList">
+		</select>
 	</fieldset>
-	</fieldset>
-	<div style="margin-top: 12px">
-		<button type="submit" class="btn btn-primary">Bestätigen</button>
-		<a href="/Assignment" type="button" class="btn btn-secondary">Schließen
-			ohne
-			Speicher</a>
-	</div>
+	<button class="btn btn-primary" type="submit">Speichern</button>
+	<button type="button" class="btn btn-secondary" onclick="history.back()">Schließen ohne Speichern</button>
 </form>
 
 <script>
-	document.addEventListener('DOMContentLoaded', function () {
-		updateDropdownVisibility();
-		document.getElementById('assignmentTypeDropdown').addEventListener('change', updateDropdownVisibility);
-
-		document.getElementById('Details').addEventListener('submit', function (event) {
-			if (!validateForm()) {
-				event.preventDefault(); // Verhindert das Abschicken des Formulars
-			}
-		});
-	});
-
-	function updateDropdownVisibility() {
+	// anzeigen der zugehörigen Dropdownmenues
+	document.getElementById('assigeeTypeDropdown').addEventListener('change', function () {
 		var assignedRoleGroup = document.getElementById('assignedRoleGroup');
 		var assigneeGroup = document.getElementById('assigneeGroup');
-		var assignmentType = document.getElementById('assignmentTypeDropdown').value;
 
-		if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.ROLES.ToString()') {
+		if (this.value == '@SoPro24Team06.Enums.AssigneeType.ROLES') {
 			assignedRoleGroup.style.display = 'block';
 			assigneeGroup.style.display = 'none';
-		} else if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.USER.ToString()') {
+		} else if (this.value == '@SoPro24Team06.Enums.AssigneeType.USER') {
 			assignedRoleGroup.style.display = 'none';
-			assigneeGroup.style.display = 'block';
+			assigneeGroup.style.display = 'block'
 		} else {
 			assignedRoleGroup.style.display = 'none';
-			assigneeGroup.style.display = 'none';
+			assigneeGroup.style.display = 'none'
 		}
-	}
+	});
+	// Trigger change event on page load
+	document.getElementById('assingmentTypeDropdown').dispatchEvent(new Event('change'));
 
+	// überprüfung ob alles gesetzt ist
 	function validateForm() {
-		
+		const assignmentTpe = document.getElementById('assignmentTypeDropdown').value;
 		let isValid = true;
-		document.querySelectorAll('.text-danger').forEach(function (element) {
-			element.textContent = '';
-		});
 
-		const assignmentTitle = document.getElementById('title').textContent;
-		if (!assignmentTitle || assignmentTitle === "" || assignmentTitle === " ") {
-			document.getElementById('Assignment_Title').textContent = 'Bitte legen sie einen Title fest.';
-			isValid = false;
-		}
-
-		const assignmentType = document.getElementById('assignmentTypeDropdown').value;
 		if (!assignmentType) {
-			document.getElementById('Assignment_AssigneeType').textContent = 'Bitte wählen Sie eine Aufgabenverantwortlichkeit aus.';
+			alert('Bitte wählen Sie eine Aufgabenverantwortlichkeit aus.');
 			isValid = false;
 		}
-		if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.ROLES') {
-			const assignedRole = document.getElementById('assignedRoleDropdown').value;
-			if (assignedRole === '') {
-				document.getElementById('Assignment_AssignedRole').textContent = 'Bitte wählen Sie eine Rolle aus.';
+
+		if (assignmentTpe === '@SoPro24Team06.Enums.AssigneeType.ROLES') {
+			const assingedRole = document.getElementById('assignedRoleDropdown').value;
+			if (!assingedRole) {
+				alert('Bitte wählen Sie eine Rolle aus');
 				isValid = false;
 			}
 		} else if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.USER') {
 			const assignedUser = document.getElementById('assignedUserDropdown').value;
-			if (assignedUser === '') {
-				document.getElementById('Assignment_Assignee').textContent = 'Bitte wählen Sie einen Nutzer aus.';
+			if (!assignedUser) {
+				alert('Bitte wählen Sie einen Nutzer aus.');
 				isValid = false;
 			}
 		}
-		const assignmentStatus = document.getElementById('assignmentStatusDropdown').value;
-		if (!assignmentStatus) {
-			document.getElementById('Assignment_Status').textContent = 'Bitte wählen Sie einen Bearbeitungsstatus aus.';
+
+		const statusDropdown = document.getElementById('statusDropdown').value;
+		if (!statusDropdown) {
+			alert('Bitte wählen Sie einen Status aus.');
 			isValid = false;
 		}
-		const assignmentDueDate = document.getElementById('dueDate').value;
-		if (!assignmentDueDate || !assignmentDueDate.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
-			document.getElementById('Assignment_DueDate').textContent = 'Bitte wählen Sie einen Fälligkeitsdatum im Format (TT.MM.YYYY) aus.';
-			isValid = false;
-		}
-		@* if (!assignmentDueDate || assignmentDueDate.match(/^\d{2}.\d{2}.\d{4})) {
-			document.getElementById('Assignment_DueDate').textContent = 'Bitte wählen Sie einen Fälligkeitsdatum im Format (TT.MM.YYYY) aus.';
-			isValid = false;
-		} *@
+
 		return isValid;
 	}
 </script>
