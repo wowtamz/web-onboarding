@@ -99,7 +99,7 @@
 	}
 
 	function validateForm() {
-		
+
 		let isValid = true;
 		document.querySelectorAll('.text-danger').forEach(function (element) {
 			element.textContent = '';
@@ -139,10 +139,10 @@
 			document.getElementById('Assignment_DueDate').textContent = 'Bitte wählen Sie einen Fälligkeitsdatum im Format (TT.MM.YYYY) aus.';
 			isValid = false;
 		}
-		@* if (!assignmentDueDate || assignmentDueDate.match(/^\d{2}.\d{2}.\d{4})) {
+	@* if (!assignmentDueDate || assignmentDueDate.match(/^\d{2}.\d{2}.\d{4})) {
 			document.getElementById('Assignment_DueDate').textContent = 'Bitte wählen Sie einen Fälligkeitsdatum im Format (TT.MM.YYYY) aus.';
 			isValid = false;
-		} *@
+			} *@
 		return isValid;
 	}
 </script>

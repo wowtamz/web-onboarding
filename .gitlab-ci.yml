@@ -1,12 +1,26 @@
 stages:
+  - build
   - test-unit
   - test-e2e
-  - build
   - deploy
 
 variables:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
   DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DISABLE_HTTPS_REDIRECT: "true"
+
+build_project:
+  tags:
+    - sopro
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:6.0
+  script:
+    - echo "Build project job."
+    - cd ./Projekt
+    - sh ./migrations.sh
+    - cd ./SoPro24Team06
+    - dotnet restore
+    - dotnet build -c Release
 
 unit_test_project:
   tags:
@@ -27,20 +41,17 @@ e2e_test_project:
   script:
     - echo "E2E test job."
     - sh ./e2e-install-dep.sh
-    - cd ./Projekt/SoPro24Team06.E2E
+    - cd ./Projekt
+    - sh ./migrations.sh
     - dotnet restore
-    - dotnet test --logger "trx;LogFileName=test_results.trx"
+    - dotnet build
+    - dotnet dev-certs https --clean
+    - dotnet dev-certs https --trust
+    - dotnet run --project SoPro24Team06/SoPro24Team06.csproj  &
+    - sleep 30
+    - cd ./SoPro24Team06.E2E
+    - xvfb-run -a dotnet test --logger "trx;LogFileName=test_results.trx"
 
-build_project:
-  tags:
-    - sopro
-  stage: build
-  image: mcr.microsoft.com/dotnet/sdk:6.0
-  script:
-    - echo "Build project job."
-    - cd ./Projekt/SoPro24Team06
-    - dotnet restore
-    - dotnet build -c Release
 
 deploy_project:
   tags:

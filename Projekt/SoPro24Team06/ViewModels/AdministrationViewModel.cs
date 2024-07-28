@@ -1,5 +1,16 @@
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 namespace SoPro24Team06.ViewModels
 {
+    /// <summary>
+    /// ViewModel for the administration view
+    /// CreateUserViewModel: ViewModel for creating a new user
+    /// UserRoles: List of all users with their roles
+    /// Roles: List of all roles
+    /// RoleViewModel: ViewModel for a role
+    /// </summary>
     public class AdministrationViewModel
     {
         public AdministrationViewModel()

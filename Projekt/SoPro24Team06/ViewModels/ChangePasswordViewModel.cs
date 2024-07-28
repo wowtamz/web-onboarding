@@ -1,7 +1,16 @@
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 using System.ComponentModel.DataAnnotations;
 
 namespace SoPro24Team06.ViewModels
 {
+    /// <summary>
+    /// ViewModel for changing the password
+    /// Email: Email address of the user
+    /// Password: New password
+    /// </summary>
     public class ChangePasswordViewModel
     {
         [Required]

@@ -29,11 +29,11 @@ public class ProcessTemplate
 
     [Required(ErrorMessage = "Vertrag ist erforderlich")]
     [JsonProperty("contractOfRefWorker")]
-    public Contract ContractOfRefWorker { get; set; }
+    public Contract? ContractOfRefWorker { get; set; }
 
     [Required(ErrorMessage = "Abteilung ist erforderlich")]
     [JsonProperty("departmentOfRefWorker")]
-    public Department DepartmentOfRefWorker { get; set; }
+    public Department? DepartmentOfRefWorker { get; set; }
 
     [JsonProperty("rolesWithAccess")]
     [Required(ErrorMessage = "Mindestens eine Rolle ist erforderlich")]

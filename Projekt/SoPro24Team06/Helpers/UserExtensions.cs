@@ -3,8 +3,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using SoPro24Team06.Models;
 
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 public static class UserExtensions
 {
+    /// <summary>
+    /// Checks if the user is locked out
+    /// </summary>
     public static async Task<bool> IsLockedOutAsync(
         this ClaimsPrincipal user,
         IServiceProvider services

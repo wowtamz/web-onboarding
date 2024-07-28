@@ -8,9 +8,15 @@ using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
 using SoPro24Team06.Data;
 
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 namespace SoPro24Team06.Controllers
 {
-    // Nur sichtbar mit Admin Rolle
+    /// <summary>
+    /// Controller for the Administration page
+    /// </summary>
     [Authorize(Roles = "Administrator")]
     public class AdministrationController : Controller
     {
@@ -35,6 +41,9 @@ namespace SoPro24Team06.Controllers
 
         }
 
+        /// <summary>
+        /// Index page for the Administration page
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -63,6 +72,9 @@ namespace SoPro24Team06.Controllers
             return View("~/Views/Administration/Index.cshtml", model);
         }
 
+        /// <summary>
+        /// Create User page for the Administration page
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> CreateUser()
         {
@@ -71,6 +83,10 @@ namespace SoPro24Team06.Controllers
             return View("~/Views/Administration/CreateUser.cshtml", model);
         }
 
+        /// <summary>
+        /// Creates a new user
+        /// </summary>
+        /// <param name="model"> The Inputmodel for the User </param>
         [HttpPost]
         public async Task<IActionResult> CreateUser(CreateUserViewModel model)
         {
@@ -112,72 +128,19 @@ namespace SoPro24Team06.Controllers
             return View("~/Views/Administration/CreateUser.cshtml", model);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> DeleteUser(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user != null && user.Email != "admin@example.com")
-            {
-                var involvedProcesses = _context.Processes
-                    .Where(p => p.Supervisor.Id == userId)
-                    .ToList();
-                
-                var involvedAssignments = _context.Assignments
-                    .Where(a => a.Assignee.Id == userId)
-                    .ToList();
-
-                if (involvedProcesses.Any() || involvedAssignments.Any())
-                {
-                    var processNames = involvedProcesses.Any() 
-                        ? string.Join(", ", involvedProcesses.Select(p => p.Title)) 
-                        : "";
-                    
-                    var assignmentNames = involvedAssignments.Any() 
-                        ? string.Join(", ", involvedAssignments.Select(a => a.Title)) 
-                        : "";
-                    
-                    var involvementDetails = string.Empty;
-                    if (!string.IsNullOrEmpty(processNames))
-                    {
-                        involvementDetails += $"Processes: {processNames}";
-                    }
-                    if (!string.IsNullOrEmpty(assignmentNames))
-                    {
-                        if (!string.IsNullOrEmpty(involvementDetails))
-                        {
-                            involvementDetails += " and ";
-                        }
-                        involvementDetails += $"Assignments: {assignmentNames}";
-                    }
-
-                    TempData["UserDeleteMessage"] = $"User {user.FullName} cannot be deleted because they are involved in the following: {involvementDetails}.";
-                    return RedirectToAction("Index");
-                }
-
-                _logger.LogInformation($"Deleting user {user.FullName}.");
-                var result = await _userManager.DeleteAsync(user);
-
-                if (result.Succeeded)
-                {
-                    TempData["UserDeleteMessage"] = $"Nutzer {user.FullName} gelöscht";
-                    return RedirectToAction("Index");
-                }
-
-                foreach (var error in result.Errors)
-                {
-                    _logger.LogError($"Error deleting user: {error.Description}");
-                    ModelState.AddModelError("", error.Description);
-                }
-            }
-
-            return RedirectToAction("Index");
-        }
-
+        /// <summary>
+        /// Gets the roles of a user
+        /// </summary>
+        /// <param name="user"> The User to get the roles from </param>
         private async Task<List<string>> GetUserRoles(ApplicationUser user)
         {
             return new List<string>(await _userManager.GetRolesAsync(user));
         }
 
+        /// <summary>
+        /// Locks a user
+        /// </summary>
+        /// <param name="userId"> Id of the User to be unlocked </param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LockUser(string userId)
@@ -192,6 +155,10 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Unlocks a user
+        /// </summary>
+        /// <param name="userId"> Id of the User to be unlocked </param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnlockUser(string userId)
@@ -206,6 +173,10 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Edits the details of a user, including roles, name and email
+        /// </summary>
+        /// <param name="email"> Email of the User to be edited </param>
         [HttpGet]
         public async Task<IActionResult> EditUserDetails(string email)
         {
@@ -237,6 +208,10 @@ namespace SoPro24Team06.Controllers
             return View("~/Views/Administration/EditUserDetails.cshtml", model);
         }
 
+        /// <summary>
+        /// Edits the details of a user, including roles, name and email
+        /// </summary>
+        /// <param name="model"> The Model of the user to be edited </param>
         [HttpPost]
         public async Task<IActionResult> EditUserDetails(UserDetailsViewModel model)
         {
@@ -289,6 +264,11 @@ namespace SoPro24Team06.Controllers
             return View("~/Views/Administration/EditUserDetails.cshtml", model);
         }
 
+        /// <summary>
+        /// Checks if the email is valid and returns the user details
+        /// Seperate from EditUserDetails
+        /// </summary>
+        /// <param name="email"> Email of the User whose Password is to be changed </param>
         [HttpGet]
         public async Task<IActionResult> ChangeUserPassword(string email)
         {
@@ -308,6 +288,10 @@ namespace SoPro24Team06.Controllers
             return View("~/Views/Administration/ChangeUserPassword.cshtml", model);
         }
 
+        /// <summary>
+        /// Changes the password of a user using the Details from the ChangePasswordViewModel
+        /// </summary>
+        /// <param name="model"> Model including the User Details </param>
         [HttpPost]
         public async Task<IActionResult> ChangeUserPassword(ChangePasswordViewModel model)
         {
@@ -343,6 +327,10 @@ namespace SoPro24Team06.Controllers
             return View("~/Views/Administration/ChangeUserPassword.cshtml", model);
         }
 
+        /// <summary>
+        /// Creates a role, including necessary checks if the role exists and if the name is valid
+        /// </summary>
+        /// <param name="model"> Roleviewmodel with the name of the role to be edited </param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateRole(RoleViewModel model)
@@ -381,6 +369,11 @@ namespace SoPro24Team06.Controllers
             return Json(new { success = false, error = $"Invalid role name: {errorDetails}" });
         }
 
+        /// <summary>
+        /// Deletes a role
+        /// Checks if the Role is involved in any Assignments, AssignmentTemplates or ProcessTemplates
+        /// </summary>
+        /// <param name="model"> RoleViewModel with the name of the role to be deleted </param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteRole(RoleViewModel model)
@@ -425,7 +418,7 @@ namespace SoPro24Team06.Controllers
 
                 if (!string.IsNullOrEmpty(assignmentNames))
                 {
-                    involvementDetails += $"Assignments: {assignmentNames}";
+                    involvementDetails += $"Aufgaben: {assignmentNames}";
                 }
 
                 if (!string.IsNullOrEmpty(assignmentTemplateNames))
@@ -434,7 +427,7 @@ namespace SoPro24Team06.Controllers
                     {
                         involvementDetails += " and ";
                     }
-                    involvementDetails += $"Assignment Templates: {assignmentTemplateNames}";
+                    involvementDetails += $"Aufgabenvorlagen: {assignmentTemplateNames}";
                 }
 
                 if (!string.IsNullOrEmpty(processTemplateNames))
@@ -443,11 +436,11 @@ namespace SoPro24Team06.Controllers
                     {
                         involvementDetails += " and ";
                     }
-                    involvementDetails += $"Process Templates: {processTemplateNames}";
+                    involvementDetails += $"Prozesse: {processTemplateNames}";
                 }
 
-                TempData["RoleDeleteMessage"] = $"Role {model.RoleName} cannot be deleted because it is involved in the following: {involvementDetails}.";
-                return RedirectToAction("Index");
+                TempData["RoleDeleteMessage"] = $"Role {model.RoleName} wird nicht gelöscht, da sie in folgendem involviert ist {involvementDetails}.";
+                return Json(new { success = false, error = TempData["RoleDeleteMessage"] });
             }
 
 
@@ -469,6 +462,11 @@ namespace SoPro24Team06.Controllers
             return Json(new { success = false, error = "Role not found." });
         }
 
+        /// <summary>
+        /// Changes the role name
+        /// </summary>
+        /// <param name="oldRoleName"> Der alte Rollenname, wird genutzt um die entsprechende Rolle zu finden </param>
+        /// <param name="newRoleName"> Der neue Rollenname </param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditRole(string oldRoleName, string newRoleName)
@@ -500,6 +498,9 @@ namespace SoPro24Team06.Controllers
             return Json(new { success = false, error = "Role not found." });
         }
 
+        /// <summary>
+        /// Gets all roles from the RoleManager and returns them as a JSON
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetRoles()
         {
