@@ -1,5 +1,5 @@
 //-------------------------
-// Author: Vincent Steiner 
+// Author: Vincent Steiner
 //-------------------------
 
 using Microsoft.AspNetCore.Authorization;
@@ -11,9 +11,9 @@ using Newtonsoft.Json;
 using SoPro24Team06.Containers;
 using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
+using SoPro24Team06.Interfaces;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
-using SoPro24Team06.Interfaces;
 
 namespace SoPro24Team06.Controllers
 {
@@ -28,7 +28,6 @@ namespace SoPro24Team06.Controllers
         private readonly IDueTime _dueTimeContainer;
         private readonly IDepartment _departmentContainer;
         private readonly IContract _contractContainer;
-
 
         public AssignmentTemplateController( // Initialisieren des Controllers
             ApplicationDbContext context,
@@ -60,7 +59,7 @@ namespace SoPro24Team06.Controllers
             if (processId > 0)
             {
                 ProcessTemplate processTemplate =
-                await _processTemplateContainer.GetProcessTemplateByIdAsync(processId);
+                    await _processTemplateContainer.GetProcessTemplateByIdAsync(processId);
                 foreach (var role in processTemplate.RolesWithAccess) // Sucht aus dem ProcessTemplate die Rollen raus die Zugriff auf das ProcessTemplate haben. Damit wird im Backend abgesichert wer Zugriff auf die Erstellung der AssignmentTemplates hat
                 {
                     if (User.IsInRole(role.Name) || User.IsInRole("Administrator"))
@@ -68,7 +67,7 @@ namespace SoPro24Team06.Controllers
                         ViewData["processRoles"] = processTemplate.RolesWithAccess;
                         return View("~/Views/Assignments/Create.cshtml", assignmentTemplateVM);
                         break;
-                    } 
+                    }
                 }
                 return NotFound();
             }
@@ -77,11 +76,10 @@ namespace SoPro24Team06.Controllers
                 ViewData["processRoles"] = _roleManager.Roles.ToList();
             }
             return View("~/Views/Assignments/Create.cshtml", assignmentTemplateVM);
-            
         }
 
         [HttpPost("AssignmentTemplate/Create")]
-        public async Task<IActionResult> Create(    // CreateEditAssignmentTemplateViewModel besteht aus einfachen Datentypen und die werden zu komplexen Datentypen umgewandelt und dann als AssignmentTemplate abgespeichert
+        public async Task<IActionResult> Create( // CreateEditAssignmentTemplateViewModel besteht aus einfachen Datentypen und die werden zu komplexen Datentypen umgewandelt und dann als AssignmentTemplate abgespeichert
             [FromForm] CreateEditAssignmentTemplateViewModel model
         )
         {
@@ -146,7 +144,7 @@ namespace SoPro24Team06.Controllers
                     _dueTimeContainer.AddDueTime(dueIn);
                 }
             }
-           
+
             AssignmentTemplate at = _assignmentTemplateContainer.AddAssignmentTemplate(
                 model.Title ?? "",
                 model.Instructions,
@@ -161,7 +159,8 @@ namespace SoPro24Team06.Controllers
                     : (int)model.processId
             );
 
-            if(at == null){
+            if (at == null)
+            {
                 _logger.LogError("Error creating assignment template.");
                 return RedirectToAction("Create");
             }
@@ -171,80 +170,81 @@ namespace SoPro24Team06.Controllers
                 model.Title
             );
 
-                // Author: Tamas Varadi
-                // Begin
+            // Author: Tamas Varadi
+            // Begin
 
-                bool redirectFromProcessController =
-                    TempData["startProcessViewModel"] != null
-                    || TempData["editProcessViewModel"] != null;
+            bool redirectFromProcessController =
+                TempData["startProcessViewModel"] != null
+                || TempData["editProcessViewModel"] != null;
 
-                if (redirectFromProcessController)
+            if (redirectFromProcessController)
+            {
+                at.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);
+                at.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null);
+
+                if (TempData["startProcessViewModel"] != null)
                 {
-                    at.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);
-                    at.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null);
+                    string jsonViewModel = TempData["startProcessViewModel"] as string;
+                    StartProcessViewModel startProcessViewModel =
+                        JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
 
-                    if (TempData["startProcessViewModel"] != null)
-                    {
-                        string jsonViewModel = TempData["startProcessViewModel"] as string;
-                        StartProcessViewModel startProcessViewModel =
-                            JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
+                    startProcessViewModel.AssignmentTemplates.Add(at);
 
-                        startProcessViewModel.AssignmentTemplates.Add(at);
+                    jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
+                    TempData["startProcessViewModel"] = jsonViewModel;
 
-                        jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
-                        TempData["startProcessViewModel"] = jsonViewModel;
-
-                        return RedirectToAction("Start", "Process");
-                    }
-
-                    if (TempData["editProcessViewModel"] != null)
-                    {
-                        string jsonViewModel = TempData["editProcessViewModel"] as string;
-                        EditProcessViewModel editProcessViewModel =
-                            JsonConvert.DeserializeObject<EditProcessViewModel>(jsonViewModel);
-
-                        Process activeProcess = await _context.Processes.FindAsync(
-                            editProcessViewModel.Id
-                        );
-                        ApplicationUser? assignee = await _userManager.FindByIdAsync(
-                            editProcessViewModel.Supervisor.Id
-                        );
-
-                        if (at.AssigneeType == AssigneeType.WORKER_OF_REF)
-                        {
-                            assignee = await _userManager.FindByIdAsync(
-                                editProcessViewModel.WorkerOfReference.Id
-                            );
-                        }
-
-                        Assignment newAssignment = at.ToAssignment(assignee, activeProcess.DueDate);
-                        _context.Assignments.Add(newAssignment);
-
-                        activeProcess.Assignments.Add(newAssignment);
-
-                        await _context.SaveChangesAsync();
-
-                        return RedirectToAction(
-                            "Edit",
-                            "Process",
-                            new { id = editProcessViewModel.Id }
-                        );
-                    }
+                    return RedirectToAction("Start", "Process");
                 }
 
-                // End
+                if (TempData["editProcessViewModel"] != null)
+                {
+                    string jsonViewModel = TempData["editProcessViewModel"] as string;
+                    EditProcessViewModel editProcessViewModel =
+                        JsonConvert.DeserializeObject<EditProcessViewModel>(jsonViewModel);
+
+                    Process activeProcess = await _context.Processes.FindAsync(
+                        editProcessViewModel.Id
+                    );
+                    ApplicationUser? assignee = await _userManager.FindByIdAsync(
+                        editProcessViewModel.Supervisor.Id
+                    );
+
+                    if (at.AssigneeType == AssigneeType.WORKER_OF_REF)
+                    {
+                        assignee = await _userManager.FindByIdAsync(
+                            editProcessViewModel.WorkerOfReference.Id
+                        );
+                    }
+
+                    Assignment newAssignment = at.ToAssignment(assignee, activeProcess.DueDate);
+                    _context.Assignments.Add(newAssignment);
+
+                    activeProcess.Assignments.Add(newAssignment);
+
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(
+                        "Edit",
+                        "Process",
+                        new { id = editProcessViewModel.Id }
+                    );
+                }
+            }
+
+            // End
 
             return RedirectToAction("Edit", "ProcessTemplate", new { id = model.processId });
         }
 
-        public async Task<IActionResult> Edit(int id) 
+        public async Task<IActionResult> Edit(int id)
         {
             ViewData["roles"] = _roleManager.Roles.ToList();
             ViewData["dueIns"] = _context.DueTimes.ToList();
             ViewData["departments"] = _context.Departments.ToList();
             ViewData["contracts"] = _context.Contracts.ToList();
 
-            AssignmentTemplate assignmentTemplate = _assignmentTemplateContainer.GetAssignmentTemplate(id);
+            AssignmentTemplate assignmentTemplate =
+                _assignmentTemplateContainer.GetAssignmentTemplate(id);
 
             if (assignmentTemplate == null)
             {
@@ -254,15 +254,25 @@ namespace SoPro24Team06.Controllers
             // Überprüfen ob man das AssignmentTemplate einer ProcessTemplate oder Process bearbeitet
             if (assignmentTemplate.ProcessTemplateId > 0)
             {
-                ProcessTemplate processTemplate = await _processTemplateContainer.GetProcessTemplateByIdAsync((int)assignmentTemplate.ProcessTemplateId);
+                ProcessTemplate processTemplate =
+                    await _processTemplateContainer.GetProcessTemplateByIdAsync(
+                        (int)assignmentTemplate.ProcessTemplateId
+                    );
                 ViewData["processRoles"] = processTemplate.RolesWithAccess;
 
-                foreach (var role in processTemplate.RolesWithAccess) 
+                foreach (var role in processTemplate.RolesWithAccess)
                 {
                     if (User.IsInRole(role.Name) || User.IsInRole("Administrator"))
                     {
-                        CreateEditAssignmentTemplateViewModel createEditAssignmentTemplateVM = new CreateEditAssignmentTemplateViewModel(assignmentTemplate, assignmentTemplate.ProcessTemplateId);
-                        return View("~/Views/Assignments/Edit.cshtml", createEditAssignmentTemplateVM);
+                        CreateEditAssignmentTemplateViewModel createEditAssignmentTemplateVM =
+                            new CreateEditAssignmentTemplateViewModel(
+                                assignmentTemplate,
+                                assignmentTemplate.ProcessTemplateId
+                            );
+                        return View(
+                            "~/Views/Assignments/Edit.cshtml",
+                            createEditAssignmentTemplateVM
+                        );
                     }
                 }
             }
@@ -271,7 +281,11 @@ namespace SoPro24Team06.Controllers
                 ViewData["processRoles"] = _roleManager.Roles.ToList();
                 if (User.IsInRole("Administrator"))
                 {
-                    CreateEditAssignmentTemplateViewModel createEditAssignmentTemplateVM = new CreateEditAssignmentTemplateViewModel(assignmentTemplate, assignmentTemplate.ProcessTemplateId);
+                    CreateEditAssignmentTemplateViewModel createEditAssignmentTemplateVM =
+                        new CreateEditAssignmentTemplateViewModel(
+                            assignmentTemplate,
+                            assignmentTemplate.ProcessTemplateId
+                        );
                     return View("~/Views/Assignments/Edit.cshtml", createEditAssignmentTemplateVM);
                 }
             }
@@ -390,7 +404,6 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Edit", "ProcessTemplate", new { id = model.processId });
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Delete(int id) // Sucht mit der Id ein Assignment Template aus der DB und löscht dieses dann
         {
@@ -400,7 +413,7 @@ namespace SoPro24Team06.Controllers
                 await _processTemplateContainer.GetProcessTemplateByIdAsync(
                     (int)assignmentTemplate.ProcessTemplateId
                 );
-            foreach (var role in processTemplate.RolesWithAccess)  // Sucht aus dem ProcessTemplate die Rollen raus die Zugriff auf das ProcessTemplate haben. Damit wird im Backend abgesichert wer Zugriff auf die Bearbeitung der AssignmentTemplate hat und dieses löschen kann
+            foreach (var role in processTemplate.RolesWithAccess) // Sucht aus dem ProcessTemplate die Rollen raus die Zugriff auf das ProcessTemplate haben. Damit wird im Backend abgesichert wer Zugriff auf die Bearbeitung der AssignmentTemplate hat und dieses löschen kann
             {
                 if (User.IsInRole(role.Name) || User.IsInRole("Administrator"))
                 {

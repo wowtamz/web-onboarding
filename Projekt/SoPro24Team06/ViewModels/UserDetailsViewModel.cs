@@ -2,8 +2,20 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using SoPro24Team06.Enums;
 
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 namespace SoPro24Team06.ViewModels
 {
+    /// <summary>
+    /// ViewModel for the user details
+    /// FullName: Full name of the user
+    /// Email: Email address of the user
+    /// Status: Status of the user
+    /// SelectedRoles: List of selected roles
+    /// Roles: List of all roles the user will have
+    /// </summary>
     public class UserDetailsViewModel
     {
         [Required]

@@ -7,13 +7,23 @@ using SoPro24Team06.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 namespace SoPro24Team06.Areas.Identity.Pages.Account
 {
+    /// <summary>
+    /// Model for the Login page
+    /// </summary>
     public class LoginModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
 
+        /// <summary>
+        /// Constructor for the Login Model
+        /// </summary>
         public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
@@ -31,6 +41,9 @@ namespace SoPro24Team06.Areas.Identity.Pages.Account
         [TempData]
         public string ErrorMessage { get; set; }
 
+        /// <summary>
+        /// Input Model for the Login Page
+        /// </summary>
         public class InputModel
         {
             [Required]
@@ -47,6 +60,11 @@ namespace SoPro24Team06.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
+        /// <summary>
+        /// Loads the Login Page
+        /// </summary>
+        /// <param name="returnUrl"> Redirection Url after Login </param>
+        /// <returns></returns>
         public async Task OnGetAsync(string? returnUrl = null)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
@@ -60,6 +78,11 @@ namespace SoPro24Team06.Areas.Identity.Pages.Account
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         }
 
+        /// <summary>
+        /// Checks the Login Data and logs in the User
+        /// </summary>
+        /// <param name="returnUrl"> Redirection Url after Login </param>
+        /// <returns></returns>
         public async Task<IActionResult> OnPostAsync(string? returnUrl = null) 
         {
             returnUrl ??= Url.Content("~/");

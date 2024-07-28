@@ -3,8 +3,21 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using SoPro24Team06.Enums;
 
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 namespace SoPro24Team06.ViewModels
 {
+    /// <summary>
+    /// ViewModel for creating a user
+    /// FullName: Full name of the user
+    /// Email: Email address of the user
+    /// Password: Password of the user
+    /// Status: Status of the user (Locked, Active)
+    /// SelectedRoles: List of selected roles
+    /// Roles: List of all roles the user will have
+    /// </summary>
     public class CreateUserViewModel
     {
         [Required]

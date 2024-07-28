@@ -70,6 +70,10 @@ namespace SoPro24Team06.Controllers
             }
         }
 
+        /// <summary>
+        /// Displays the create view for a new ProcessTemplate.
+        /// </summary>
+        /// <returns>The create view.</returns>
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Create()
         {
@@ -93,7 +97,7 @@ namespace SoPro24Team06.Controllers
 
             try
             {
-                /** ----- Start: Fetch objects by primitve values ----- */
+                /** ----- Start: Fetch objects by primitive values ----- */
                 var roles = await _roleManager
                     .Roles.Where(role => model.RolesWithAccess.Contains(role.Name))
                     .ToListAsync();
@@ -126,7 +130,7 @@ namespace SoPro24Team06.Controllers
                     return RedirectToAction("Create");
                 }
 
-                /** ----- End: Fetch objects by primitve values ----- */
+                /** ----- End: Fetch objects by primitive values ----- */
 
                 ProcessTemplate processTemplate = new ProcessTemplate
                 {
@@ -169,7 +173,7 @@ namespace SoPro24Team06.Controllers
 
             try
             {
-                /** ----- Start: Fetch objects by primitve values ----- */
+                /** ----- Start: Fetch objects by primitive values ----- */
                 var roles = await _roleManager
                     .Roles.Where(role => model.RolesWithAccess.Contains(role.Name))
                     .ToListAsync();
@@ -217,7 +221,7 @@ namespace SoPro24Team06.Controllers
                     }
                 }
 
-                /** ----- End: Fetch objects by primitve values ----- */
+                /** ----- End: Fetch objects by primitive values ----- */
 
 
                 if (model.Id != null)
@@ -330,7 +334,7 @@ namespace SoPro24Team06.Controllers
                     return RedirectToAction("Index");
                 }
 
-                /** ----- Start: Fetch objects by primitve values ----- */
+                /** ----- Start: Fetch objects by primitive values ----- */
                 var roles = await _roleManager
                     .Roles.Where(role => model.RolesWithAccess.Contains(role.Name))
                     .ToListAsync();
@@ -362,7 +366,7 @@ namespace SoPro24Team06.Controllers
                     );
                     return RedirectToAction("Edit", model);
                 }
-                /** ----- End: Fetch objects by primitve values ----- */
+                /** ----- End: Fetch objects by primitive values ----- */
 
                 ProcessTemplate templateToEdit = new ProcessTemplate
                 {
@@ -407,6 +411,9 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Adds necessary data to ViewData for views to use.
+        /// </summary>
         public async Task AddModelsToViewData()
         {
             List<ApplicationUser> users = _userManager.Users.ToList();
@@ -430,6 +437,11 @@ namespace SoPro24Team06.Controllers
             ViewData["Roles"] = roles;
         }
 
+        /// <summary>
+        /// Checks if the current user is authorized based on the specified role.
+        /// </summary>
+        /// <param name="role">The role to check authorization for.</param>
+        /// <returns>True if the user is authorized or administrator, otherwise false.</returns>
         public bool IsAuthorized(string role)
         {
             if (User.IsInRole("Administrator"))
@@ -442,6 +454,10 @@ namespace SoPro24Team06.Controllers
             }
         }
 
+        /// <summary>
+        /// Logs model errors for debugging purposes.
+        /// </summary>
+        /// <param name="model">The ProcessTemplate view model.</param>
         private void LogModelErrors(ProcessTemplateViewModel model)
         {
             _logger.LogError("Model: {Model}", model);

@@ -1,12 +1,6 @@
 @model SoPro24Team06.ViewModels.AdministrationViewModel
 
-@if (TempData["UserDeleteMessage"] != null)
-{
-    <div id="userdelete-popup" class="alert alert-danger text-center"
-    style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1050;">
-    @TempData["UserDeleteMessage"]
-</div>
-}
+<!-- Ganze Datei bis auf den Banner: Code Ownership Michael Adolf -->
 
 @if (TempData["Message"] != null)
 {
@@ -29,7 +23,7 @@
                     style="background: rgb(204, 212, 217);border-style: none;">Nutzer erstellen
                 </a>
                 <button class="btn btn-primary btn-lg me-2" role="button" data-bs-target="#modal-1"
-                    data-bs-toggle="modal" style="background: rgb(204, 212, 217);border-style: none;">Rolle erstellen
+                    data-bs-toggle="modal" style="background: rgb(204, 212, 217);border-style: none;">Rollenverwaltung
                 </button>
             </div>
         </div>
@@ -45,7 +39,7 @@
             <th>Email Adresse</th>
             <th>Voller Name</th>
             <th>Rollen</th>
-            <th>Aktionexn</th>
+            <th>Aktionen</th>
         </tr>
     </thead>
     <tbody>
@@ -83,13 +77,6 @@
                                     style="background-color: var(--amaranth); color: white;">Sperren</button>
                             </form>
                         }
-                        <form asp-action="DeleteUser" method="post" style="display:inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="userId" value="@user.UserId" />
-                            <button type="submit" class="btn btn-sm" style="background-color: var(--amaranth); color: white;">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
                     }
                 </td>
             </tr>
@@ -103,7 +90,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Rolle erstellen</h4>
+                <h4 class="modal-title">Rollenverwaltung</h4>
                 <button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">

@@ -1,27 +1,9 @@
 #!/bin/bash
 
-apt-get update && apt-get install -y wget
-wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-apt-get update && apt-get install -y apt-transport-https
-apt-get update && apt-get install -y dotnet-sdk-6.0
-apt-get install -y sudo
-sudo apt-get update
-sudo apt-get install -y openjdk-11-jre-headless
-sudo apt-get install -y xvfb
-sudo apt-get install -y libxi6 libgconf-2-4
-apt-get update && apt-get install -y gnupg
-wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
-apt-get update
-apt-get install -y google-chrome-stable
-apt-get install -y unzip
-CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3 | cut -d '.' -f 1)
-CHROMEDRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-wget https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip
-unzip chromedriver_linux64.zip
-mv chromedriver /usr/bin/chromedriver
-chmod +x /usr/bin/chromedriver
-export DISPLAY=:99
-Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
-sleep 3
+apt update -q -y
+apt --yes install libnss3 xvfb libxi6 libgconf-2-4 unzip gnupg wget
+wget -nv https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+apt install ./google-chrome-stable_current_amd64.deb -y
+uname -a
+ls /usr/bin | grep -i google
+google-chrome --version

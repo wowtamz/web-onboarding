@@ -1,5 +1,17 @@
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 namespace SoPro24Team06.ViewModels
 {
+    /// <summary>
+    /// Constructor for the UserRolesViewModel
+    /// Includes a User and the roles of the user
+    /// UserId: Id of the user
+    /// Email: Email address of the user
+    /// FullName: Full name of the user
+    /// Roles: List of roles of the user
+    /// </summary>
     public class UserRolesViewModel
     {
         public UserRolesViewModel()
