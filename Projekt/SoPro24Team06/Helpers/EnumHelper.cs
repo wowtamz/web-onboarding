@@ -21,25 +21,16 @@ public static class EnumHelper
         return displayAttribute?.Name ?? value.ToString();
     }
 
-    public static SelectListItem GetSelectListItem<T>(Enum value)
-    {
-        return new SelectListItem
-        {
-            Text = EnumHelper.GetDisplayName(value),
-            Value = value.ToString()
-        };
-    }
-
-    public static List<SelectListItem> GetEnumList<T>()
+    /// <summary>
+    ///  Codeownership Jan Pfluger
+    ///  Method used to get list of all enums of a sepcific type
+    ///  Returns List
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static List<T> GetEnumList<T>()
         where T : Enum
     {
-        return Enum.GetValues(typeof(T))
-            .Cast<T>()
-            .Select(e => new SelectListItem
-            {
-                Text = EnumHelper.GetDisplayName(e),
-                Value = e.ToString(),
-            })
-            .ToList();
+        return Enum.GetValues(typeof(T)).Cast<T>().ToList();
     }
 }

@@ -21,7 +21,7 @@ public class EditProcessViewModel
 
     public List<Assignment>? Assignments { get; set; }
     public DateTime? StartDate { get; set; }
-    public DateTime? DueDate { get; set; }
+    public DateTime DueDate { get; set; }
 
     [Required(ErrorMessage = "Vorgangsverantwortlicher ist erforderlich")]
     public ApplicationUser Supervisor { get; set; }

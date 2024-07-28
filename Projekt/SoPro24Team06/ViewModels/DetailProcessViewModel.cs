@@ -23,6 +23,8 @@ public class DetailProcessViewModel
     public ApplicationUser WorkerOfReference { get; set; }
     public Contract ContractOfRefWorker { get; set; }
     public Department DepartmentOfRefWorker { get; set; }
+    
+    public bool IsArchived { get; set; }
 
     public DetailProcessViewModel(Process process)
     {
@@ -30,14 +32,13 @@ public class DetailProcessViewModel
         this.Title = process.Title;
         this.Description = process.Description;
         this.StartDate = process.StartDate;
-        this.DueDate =
-            process.DueDate
-            ?? throw new ArgumentException("Must have a value", nameof(process.DueDate));
+        this.DueDate = process.DueDate;
         this.Assignments = process.Assignments;
         this.Supervisor = process.Supervisor;
         this.WorkerOfReference = process.WorkerOfReference;
         this.ContractOfRefWorker = process.ContractOfRefWorker;
         this.DepartmentOfRefWorker = process.DepartmentOfRefWorker;
+        this.IsArchived = process.IsArchived;
     }
 
     public Process ToProcess()

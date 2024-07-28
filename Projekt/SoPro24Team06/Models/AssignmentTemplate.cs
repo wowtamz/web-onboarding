@@ -1,6 +1,11 @@
+//-------------------------
+// Author: Vincent Steiner
+//-------------------------
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using SoPro24Team06.Enums;
 
@@ -36,7 +41,8 @@ namespace SoPro24Team06.Models
         [JsonProperty("assignedRoles")]
         public ApplicationRole? AssignedRole { get; set; }
 
-        public List<ProcessTemplate>? ProcessTemplates { get; set; }
+        [ForeignKey("ProcessTemplate")]
+        public int? ProcessTemplateId { get; set; }
 
         public AssignmentTemplate() { }
 
@@ -47,7 +53,8 @@ namespace SoPro24Team06.Models
             List<Department> forDepartmentsList,
             List<Contract> forContractsList,
             AssigneeType assigneeType,
-            ApplicationRole assignedRole
+            ApplicationRole assignedRole,
+            int? processTemplateId
         )
         {
             this.Title = title;
@@ -57,11 +64,23 @@ namespace SoPro24Team06.Models
             this.ForContractsList = forContractsList;
             this.AssigneeType = assigneeType;
             this.AssignedRole = assignedRole;
+            this.ProcessTemplateId = processTemplateId > 0 ? processTemplateId : null;
         }
 
-        public Assignment ToAssignment(ApplicationUser? user)
+        public Assignment ToAssignment(ApplicationUser? user, DateTime? ProcessDueDate)
         {
-            DateTime dueDate = DateTime.Now; // sollte berechnet werden
+            DateTime dueDate = DateTime.Today;
+            if (ProcessDueDate != null)
+            {
+                dueDate = ProcessDueDate.Value;
+            }
+            if (DueIn != null)
+            {
+                dueDate = dueDate.AddMonths(DueIn.Months);
+                dueDate = dueDate.AddDays(DueIn.Weeks * 7);
+                dueDate = dueDate.AddDays(DueIn.Days);
+            }
+            // sollte berechnet werden
             return new Assignment(this, dueDate, user);
         }
     }

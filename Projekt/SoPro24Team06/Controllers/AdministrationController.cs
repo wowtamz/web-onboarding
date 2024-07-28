@@ -6,6 +6,7 @@ using SoPro24Team06.Enums;
 using SoPro24Team06.Helpers;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
+using SoPro24Team06.Data;
 
 namespace SoPro24Team06.Controllers
 {
@@ -18,15 +19,20 @@ namespace SoPro24Team06.Controllers
 
         private readonly ILogger<AdministrationController> _logger;
 
+        private readonly ApplicationDbContext _context;
+
         public AdministrationController(
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
-            ILogger<AdministrationController> logger
+            ILogger<AdministrationController> logger,
+            ApplicationDbContext context
         )
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
+            _context = context;
+
         }
 
         [HttpGet]
@@ -112,6 +118,42 @@ namespace SoPro24Team06.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null && user.Email != "admin@example.com")
             {
+                var involvedProcesses = _context.Processes
+                    .Where(p => p.Supervisor.Id == userId)
+                    .ToList();
+                
+                var involvedAssignments = _context.Assignments
+                    .Where(a => a.Assignee.Id == userId)
+                    .ToList();
+
+                if (involvedProcesses.Any() || involvedAssignments.Any())
+                {
+                    var processNames = involvedProcesses.Any() 
+                        ? string.Join(", ", involvedProcesses.Select(p => p.Title)) 
+                        : "";
+                    
+                    var assignmentNames = involvedAssignments.Any() 
+                        ? string.Join(", ", involvedAssignments.Select(a => a.Title)) 
+                        : "";
+                    
+                    var involvementDetails = string.Empty;
+                    if (!string.IsNullOrEmpty(processNames))
+                    {
+                        involvementDetails += $"Processes: {processNames}";
+                    }
+                    if (!string.IsNullOrEmpty(assignmentNames))
+                    {
+                        if (!string.IsNullOrEmpty(involvementDetails))
+                        {
+                            involvementDetails += " and ";
+                        }
+                        involvementDetails += $"Assignments: {assignmentNames}";
+                    }
+
+                    TempData["UserDeleteMessage"] = $"User {user.FullName} cannot be deleted because they are involved in the following: {involvementDetails}.";
+                    return RedirectToAction("Index");
+                }
+
                 _logger.LogInformation($"Deleting user {user.FullName}.");
                 var result = await _userManager.DeleteAsync(user);
 
@@ -352,6 +394,62 @@ namespace SoPro24Team06.Controllers
             {
                 return Json(new { success = false, error = "The Admin role cannot be deleted." });
             }
+
+            var involvedAssignments = _context.Assignments
+                .Where(a => a.AssignedRole.Name == model.RoleName)
+                .ToList();
+
+            var involvedAssignmentTemplates = _context.AssignmentTemplates
+                .Where(at => at.AssignedRole.Name == model.RoleName)
+                .ToList();
+
+            var involvedProcessTemplates = _context.ProcessTemplates
+                .Where(pt => pt.RolesWithAccess.Any(r => r.Name == model.RoleName))
+                .ToList();
+
+            if (involvedAssignments.Any() || involvedAssignmentTemplates.Any() || involvedProcessTemplates.Any())
+            {
+                var assignmentNames = involvedAssignments.Any() 
+                    ? string.Join(", ", involvedAssignments.Select(a => a.Title)) 
+                    : "";
+
+                var assignmentTemplateNames = involvedAssignmentTemplates.Any() 
+                    ? string.Join(", ", involvedAssignmentTemplates.Select(at => at.Title)) 
+                    : "";
+
+                var processTemplateNames = involvedProcessTemplates.Any() 
+                    ? string.Join(", ", involvedProcessTemplates.Select(pt => pt.Title)) 
+                    : "";
+
+                var involvementDetails = string.Empty;
+
+                if (!string.IsNullOrEmpty(assignmentNames))
+                {
+                    involvementDetails += $"Assignments: {assignmentNames}";
+                }
+
+                if (!string.IsNullOrEmpty(assignmentTemplateNames))
+                {
+                    if (!string.IsNullOrEmpty(involvementDetails))
+                    {
+                        involvementDetails += " and ";
+                    }
+                    involvementDetails += $"Assignment Templates: {assignmentTemplateNames}";
+                }
+
+                if (!string.IsNullOrEmpty(processTemplateNames))
+                {
+                    if (!string.IsNullOrEmpty(involvementDetails))
+                    {
+                        involvementDetails += " and ";
+                    }
+                    involvementDetails += $"Process Templates: {processTemplateNames}";
+                }
+
+                TempData["RoleDeleteMessage"] = $"Role {model.RoleName} cannot be deleted because it is involved in the following: {involvementDetails}.";
+                return RedirectToAction("Index");
+            }
+
 
             var role = await _roleManager.FindByNameAsync(model.RoleName);
             if (role != null)

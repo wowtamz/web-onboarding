@@ -19,24 +19,42 @@ public class ProcessTemplateContainer
 
     public async Task<List<ProcessTemplate>> GetProcessTemplatesAsync()
     {
-        List<ProcessTemplate> processTemplateList = await _context
-            .ProcessTemplates.Include(pt => pt.DepartmentOfRefWorker)
-            .Include(pt => pt.AssignmentTemplates)
-            .Include(pt => pt.ContractOfRefWorker)
-            .Include(pt => pt.RolesWithAccess)
-            .ToListAsync();
-        return processTemplateList;
+        return await GetProcessTemplatesWithIncludes().ToListAsync();
+    }
+
+    public async Task<List<ProcessTemplate>> GetProcessListByAccessRights(string userName)
+    {
+        var user = _context.Users.Where(u => u.UserName == userName).FirstOrDefault();
+
+        if (user == null)
+        {
+            throw new InvalidOperationException($"No User found with UserName {userName}");
+        }
+
+        var userRole = _context.UserRoles.Where(r => r.UserId == user.Id).FirstOrDefault();
+        var role = _context.Roles.Where(r => r.Id == userRole.RoleId).FirstOrDefault();
+
+        if (role == null)
+        {
+            throw new InvalidOperationException($"No Role found for User {userName}");
+        }
+
+        if (role.Name == "Administrator")
+        {
+            return await GetProcessTemplatesAsync();
+        }
+        else
+        {
+            return await GetProcessTemplatesWithIncludes()
+                .Where(pt => pt.RolesWithAccess.Contains(role))
+                .ToListAsync();
+        }
     }
 
     public async Task<ProcessTemplate> GetProcessTemplateByIdAsync(int id)
     {
         ProcessTemplate processTemplate =
-            await _context
-                .ProcessTemplates.Include(pt => pt.DepartmentOfRefWorker)
-                .Include(pt => pt.AssignmentTemplates)
-                .Include(pt => pt.ContractOfRefWorker)
-                .Include(pt => pt.RolesWithAccess)
-                .FirstOrDefaultAsync(pt => pt.Id.Equals(id))
+            await GetProcessTemplatesWithIncludes().FirstOrDefaultAsync(pt => pt.Id == id)
             ?? throw new InvalidOperationException($"No Process found with Id {id}");
         return processTemplate;
     }
@@ -79,5 +97,14 @@ public class ProcessTemplateContainer
             ?? throw new InvalidOperationException($"No Process found with Id {id}");
         _context.ProcessTemplates.Remove(processTemplate);
         await _context.SaveChangesAsync();
+    }
+
+    private IQueryable<ProcessTemplate> GetProcessTemplatesWithIncludes()
+    {
+        return _context
+            .ProcessTemplates.Include(pt => pt.DepartmentOfRefWorker)
+            .Include(pt => pt.AssignmentTemplates)
+            .Include(pt => pt.ContractOfRefWorker)
+            .Include(pt => pt.RolesWithAccess);
     }
 }

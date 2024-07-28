@@ -1,3 +1,7 @@
+//-------------------------
+// Author: Vincent Steiner
+//-------------------------
+
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using SoPro24Team06.Enums;
@@ -34,6 +38,37 @@ namespace SoPro24Team06.ViewModels
 
         public CreateEditAssignmentTemplateViewModel() { }
 
+        public CreateEditAssignmentTemplateViewModel( 
+            int id,
+            int? processId,
+            string title,
+            string? instructions,
+            string dueIn,
+            List<string>? forDepartmentsList,
+            List<string>? forContractsList,
+            string assigneeType,
+            string assignedRole,
+            int days,
+            int weeks,
+            int months,
+            string? vorNach
+        )
+        {
+            Id = id;
+            this.processId = processId;
+            Title = title;
+            Instructions = instructions;
+            DueIn = dueIn;
+            ForDepartmentsList = forDepartmentsList;
+            ForContractsList = forContractsList;
+            AssigneeType = assigneeType;
+            AssignedRole = assignedRole;
+            Days = days;
+            Weeks = weeks;
+            Months = months;
+            VorNach = vorNach;
+        }
+
         public CreateEditAssignmentTemplateViewModel(int? processId)
         {
             this.processId = processId ?? null;
@@ -52,7 +87,7 @@ namespace SoPro24Team06.ViewModels
             VorNach = "nach Arbeitsbeginn";
         }
 
-        public CreateEditAssignmentTemplateViewModel(
+        public CreateEditAssignmentTemplateViewModel( 
             AssignmentTemplate assignmentTemplate,
             int? processId
         )
@@ -62,9 +97,9 @@ namespace SoPro24Team06.ViewModels
             {
                 foreach (var fd in assignmentTemplate.ForDepartmentsList)
                 {
-                    if (fd != null) // Check for null before accessing properties
+                    if (fd != null) 
                     {
-                        ForDepartmentsList.Add(fd.Name ?? ""); // Ensure fd.Name is not null
+                        ForDepartmentsList.Add(fd.Name ?? ""); 
                     }
                 }
             }
@@ -74,14 +109,16 @@ namespace SoPro24Team06.ViewModels
             {
                 foreach (var fc in assignmentTemplate.ForContractsList)
                 {
-                    if (fc != null) // Check for null before accessing properties
+                    if (fc != null) 
                     {
-                        ForContractsList.Add(fc.Label ?? ""); // Ensure fc.Label is not null
+                        ForContractsList.Add(fc.Label ?? "");
                     }
                 }
             }
-
-            string vorNach = "nach Arbeitsbeginn"; // Default value
+            int daysHelper = 0;
+            int weeksHelper = 0;
+            int monthsHelper = 0;
+            string vorNach = "nach Arbeitsbeginn"; 
             if (assignmentTemplate.DueIn != null)
             {
                 if (
@@ -90,20 +127,27 @@ namespace SoPro24Team06.ViewModels
                     || assignmentTemplate.DueIn.Months < 0
                 )
                 {
+                    daysHelper = assignmentTemplate.DueIn.Days * -1;
+                    weeksHelper = assignmentTemplate.DueIn.Weeks * -1;
+                    monthsHelper = assignmentTemplate.DueIn.Months * -1;
                     vorNach = "vor Start";
+                }else{
+                    daysHelper = assignmentTemplate.DueIn.Days;
+                    weeksHelper = assignmentTemplate.DueIn.Weeks;
+                    monthsHelper = assignmentTemplate.DueIn.Months;
                 }
             }
 
             Id = assignmentTemplate.Id;
             this.processId = processId ?? null;
             Title = assignmentTemplate.Title;
-            Instructions = assignmentTemplate.Instructions ?? ""; // Ensure Instructions is not null
-            DueIn = assignmentTemplate.DueIn?.Label ?? ""; // Ensure DueIn.Label is not null
+            Instructions = assignmentTemplate.Instructions ?? ""; 
+            DueIn = assignmentTemplate.DueIn?.Label ?? ""; 
             AssigneeType = assignmentTemplate.AssigneeType.ToString() ?? "";
-            AssignedRole = assignmentTemplate.AssignedRole?.Name ?? ""; // Ensure AssignedRole.Name is not null
-            Days = assignmentTemplate.DueIn?.Days ?? 0; // Ensure DueIn.Days is not null
-            Weeks = assignmentTemplate.DueIn?.Weeks ?? 0; // Ensure DueIn.Weeks is not null
-            Months = assignmentTemplate.DueIn?.Months ?? 0; // Ensure DueIn.Months is not null
+            AssignedRole = assignmentTemplate.AssignedRole?.Name ?? ""; 
+            Days = daysHelper;
+            Weeks = weeksHelper; 
+            Months = monthsHelper; 
             VorNach = vorNach;
         }
     }

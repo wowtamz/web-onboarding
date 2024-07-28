@@ -1,24 +1,31 @@
 <!-- beginn codeownership Jan Pfluger  -->
-@model SoPro24Team06.ViewModels.AssignmentEditViewModel
+@model SoPro24Team06.ViewModels.EditAssignmentLimitedViewModel;
 
-<form id="Edit" method="post" asp-action="EditAssignment">
+<form id="Details" method="post" asp-action="UpdateDetails">
 	@Html.AntiForgeryToken()
 	@Html.HiddenFor(model => model.Assignment.Id)
+	@Html.HiddenFor(model => model.Assignment.Assignee)
+	@Html.HiddenFor(model => model.Assignment.Assignee)
+	@Html.HiddenFor(model => model.Assignment.Title)
+	@Html.HiddenFor(model => model.Assignment.Instructions)
+	@Html.HiddenFor(model => model.Assignment.DueDate)
 	@Html.HiddenFor(model => model.ProcessTitle)
 	@Html.HiddenFor(model => model.Assignment)
 	<fieldset>
 		<legend>Title</legend>
-		<input class="form-control" type="text" asp-for="Assignment.Title" id="title">
-		@Html.ValidationMessageFor(model => model.Assignment.Title, "", new { @class = "text-danger" })
+		<p>@Model.Assignment.Title</p>
 	</fieldset>
-	<fieldset style="margin-top: 4px">
+	<fieldset>
 		<legend>Vorgang</legend>
 		<p>@Model.ProcessTitle</p>
 	</fieldset>
 	<fieldset>
-		<legend>Anleitung</legend>
-		<textarea class="form-control" asp-for="Assignment.Instructions" rows="10"></textarea>
-		@Html.ValidationMessageFor(model => model.Assignment.Instructions, "", new { @class = "text-danger" })
+		<legend>Fälligkeit</legend>
+		<p>@Model.Assignment.DueDate.Date.ToString("dd.MM.yyyy")</p>
+	</fieldset>
+	<fieldset style="margin-top: 8px">
+		<legend>Anweisungen</legend>
+		<textarea class="form-control" rows="10" readonly>@Model.Assignment.Instructions</textarea>
 	</fieldset>
 	<fieldset style="margin-top: 4px">
 		<legend>Aufgabenverantwortlichkeit</legend>
@@ -46,12 +53,6 @@
 			@Html.ValidationMessageFor(model => model.Assignment.Assignee, "", new { @class = "text-danger" })
 		</div>
 	</fieldset>
-	<fieldset>
-		<legend>Fällig am:</legend>
-		<input class="form-control" type="date" asp-for="Assignment.DueDate" asp-asp-format="{0:yyyy-MM-dd}"
-			value="@Model.Assignment.DueDate.ToString("yyyy-MM-dd")" id="dueDate" name="Assignment.DueDate">
-		@Html.ValidationMessageFor(model => model.Assignment.DueDate, "", new { @class = "text-danger" })
-	</fieldset>
 	<fieldset style="margin-top: 4px">
 		<legend>Status</legend>
 		@Html.DropDownListFor(
@@ -59,11 +60,11 @@
 					Model.AssignmentStatusList,
 					new { @class = "form-control", @id = "assignmentStatusDropdown" }
 					)
-		@Html.ValidationMessageFor(model => model.Assignment.Status, "", new { @class = "text-danger" })
+		<div class="text-danger" id="statusError"></div>
 	</fieldset>
 	<div style="margin-top: 12px">
 		<button type="submit" class="btn btn-primary">Bestätigen</button>
-		<a href="/Assignment/OnEditCanceled" type="button" class="btn btn-secondary">Schließen
+		<a href="/Assignment" type="button" class="btn btn-secondary">Schließen
 			ohne
 			Speicher</a>
 	</div>
@@ -99,51 +100,36 @@
 	}
 
 	function validateForm() {
-		
 		let isValid = true;
-		document.querySelectorAll('.text-danger').forEach(function (element) {
-			element.textContent = '';
-		});
-
-		const assignmentTitle = document.getElementById('title').textContent;
-		if (!assignmentTitle || assignmentTitle === "" || assignmentTitle === " ") {
-			document.getElementById('Assignment_Title').textContent = 'Bitte legen sie einen Title fest.';
-			isValid = false;
-		}
+		document.getElementById('assigneeTypeError').textContent = '';
+		document.getElementById('roleError').textContent = '';
+		document.getElementById('userError').textContent = '';
+		document.getElementById('statusError').textContent = '';
 
 		const assignmentType = document.getElementById('assignmentTypeDropdown').value;
-		if (!assignmentType) {
-			document.getElementById('Assignment_AssigneeType').textContent = 'Bitte wählen Sie eine Aufgabenverantwortlichkeit aus.';
+		if (assignmentType === '') {
+			document.getElementById('assigneeTypeError').textContent = 'Bitte wählen Sie eine Aufgabenverantwortlichkeit aus.';
 			isValid = false;
 		}
 		if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.ROLES') {
 			const assignedRole = document.getElementById('assignedRoleDropdown').value;
 			if (assignedRole === '') {
-				document.getElementById('Assignment_AssignedRole').textContent = 'Bitte wählen Sie eine Rolle aus.';
+				document.getElementById('roleError').textContent = 'Bitte wählen Sie eine Rolle aus.';
 				isValid = false;
 			}
 		} else if (assignmentType === '@SoPro24Team06.Enums.AssigneeType.USER') {
 			const assignedUser = document.getElementById('assignedUserDropdown').value;
 			if (assignedUser === '') {
-				document.getElementById('Assignment_Assignee').textContent = 'Bitte wählen Sie einen Nutzer aus.';
+				document.getElementById('userError').textContent = 'Bitte wählen Sie einen Nutzer aus.';
 				isValid = false;
 			}
 		}
 		const assignmentStatus = document.getElementById('assignmentStatusDropdown').value;
-		if (!assignmentStatus) {
-			document.getElementById('Assignment_Status').textContent = 'Bitte wählen Sie einen Bearbeitungsstatus aus.';
+		if (assignmentStatus === '') {
+			document.getElementById('statusError').textContent = 'Bitte wählen Sie einen Bearbeitungsstatus aus.';
 			isValid = false;
 		}
-		const assignmentDueDate = document.getElementById('dueDate').value;
-		if (!assignmentDueDate || !assignmentDueDate.match(/^\d{2}\.\d{2}\.\d{4}$/)) {
-			document.getElementById('Assignment_DueDate').textContent = 'Bitte wählen Sie einen Fälligkeitsdatum im Format (TT.MM.YYYY) aus.';
-			isValid = false;
-		}
-		@* if (!assignmentDueDate || assignmentDueDate.match(/^\d{2}.\d{2}.\d{4})) {
-			document.getElementById('Assignment_DueDate').textContent = 'Bitte wählen Sie einen Fälligkeitsdatum im Format (TT.MM.YYYY) aus.';
-			isValid = false;
-		} *@
 		return isValid;
 	}
 </script>
-<!-- end codeownership Jan Pfluger -->
+<!-- end codeownership Jan Pfluger  * -->

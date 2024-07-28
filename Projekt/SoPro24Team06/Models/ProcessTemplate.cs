@@ -71,4 +71,24 @@ public class ProcessTemplate
         /** #TODO: Roles with Access?? */
         return new Process(this);
     }
+
+    // Für Unit Test
+    public ProcessTemplate(
+        int id,
+        string title,
+        string description,
+        List<AssignmentTemplate> assignmentTemplates,
+        Contract contractOfRefWorker,
+        Department departmentOfRefWorker,
+        List<ApplicationRole> rolesWithAccess
+    )
+    {
+        this.Id = id;
+        this.Title = title;
+        this.Description = description;
+        this.AssignmentTemplates = assignmentTemplates;
+        this.ContractOfRefWorker = contractOfRefWorker;
+        this.DepartmentOfRefWorker = departmentOfRefWorker;
+        this.RolesWithAccess = rolesWithAccess;
+    }
 }

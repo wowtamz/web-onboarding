@@ -1,3 +1,7 @@
+//-------------------------
+// Author: Vincent Steiner 
+//-------------------------
+
 using System.ComponentModel.DataAnnotations;
 
 namespace SoPro24Team06.Enums

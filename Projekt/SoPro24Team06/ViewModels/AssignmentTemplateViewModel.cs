@@ -1,3 +1,6 @@
+//-------------------------
+// Author: Vincent Steiner
+//-------------------------
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using SoPro24Team06.Enums;

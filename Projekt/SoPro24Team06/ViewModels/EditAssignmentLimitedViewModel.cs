@@ -1,4 +1,5 @@
 //beginn codeownership Jan Pfluger
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SoPro24Team06.Enums;
 using SoPro24Team06.Helpers;
@@ -6,61 +7,19 @@ using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels
 {
-    public class AssignmentEditViewModel
+    public class EditAssignmentLimitedViewModel
     {
-        /// <summary>
-        /// Assignment wich will be edited
-        /// </summary>
         public Assignment Assignment { get; set; }
-
-        /// <summary>
-        /// Id of the in View Selected User
-        /// </summary>
         public string? SelectedUserId { get; set; }
-
-        /// <summary>
-        /// Id of the in View Selected Role
-        /// </summary>
         public string? SelectedRoleId { get; set; }
-
-        /// <summary>
-        /// in View Selected Due Date
-        /// </summary>
-        public string? SelectedDate { get; set; }
-
-        /// <summary>
-        /// SelectList of Users wich can be Selected
-        /// </summary>
         public SelectList UserList { get; set; }
-
-        /// <summary>
-        /// SelectList of Roles wich can be Selected
-        /// </summary>
         public SelectList RoleList { get; set; }
-
-        /// <summary>
-        /// Title of Process to wich the Assignment belongs
-        /// </summary>
         public string ProcessTitle { get; set; }
-
-        /// <summary>
-        /// IEnumerable of possible Assignment Stauses ()
-        /// </summary>
         public IEnumerable<SelectListItem> AssignmentStatusList { get; set; }
 
-        /// <summary>
-        /// IEnumerable of possible AssigneeTypes ()
-        /// </summary>
         public IEnumerable<SelectListItem> AssigneeTypeList { get; set; }
 
-        /// <summary>
-        /// Constructs AssignmentEditViewModel
-        /// </summary>
-        /// <param name="assignment">Assignment wich will be edited</param>
-        /// <param name="userList">List of users wich will be selectable</param>
-        /// <param name="roleList">List of roles wich will be selectable</param>
-        /// <param name="process">Process of the Assignment</param>
-        public AssignmentEditViewModel(
+        public EditAssignmentLimitedViewModel(
             Assignment assignment,
             List<ApplicationUser> userList,
             List<ApplicationRole> roleList,
@@ -80,16 +39,10 @@ namespace SoPro24Team06.ViewModels
             {
                 this.ProcessTitle = "es konnte kein zugehöriger Vorgang gefunden werden";
             }
-            InitialiseSelectLists(userList, roleList);
+            InitialiseSelectList(userList, roleList);
         }
 
-        /// <summary>
-        /// Creates Empty AssignmentEditViewModel
-        /// Do not use in Codemaually
-        /// Only meant to be used by the ViewBindings
-        /// Ititalises Lists with empty selectLists
-        /// </summary>
-        public AssignmentEditViewModel()
+        public EditAssignmentLimitedViewModel()
         {
             UserList = new SelectList(new List<SelectListItem>());
             RoleList = new SelectList(new List<SelectListItem>());
@@ -97,12 +50,7 @@ namespace SoPro24Team06.ViewModels
             AssigneeTypeList = new List<SelectListItem>();
         }
 
-        /// <summary>
-        /// used to reinitialise the selectList for this viewModel
-        /// </summary>
-        /// <param name="userList">List of users wich will be selectable</param>
-        /// <param name="roleList">List of roles wich will be selectable</param>
-        public void InitialiseSelectLists(
+        public void InitialiseSelectList(
             List<ApplicationUser> userList,
             List<ApplicationRole> roleList
         )
@@ -140,7 +88,6 @@ namespace SoPro24Team06.ViewModels
             {
                 this.RoleList = new SelectList(roleList, "Id", "Name");
             }
-
             List<AssignmentStatus> assignmentStatusList =
                 EnumHelper.GetEnumList<AssignmentStatus>();
             this.AssignmentStatusList = assignmentStatusList.Select(status => new SelectListItem

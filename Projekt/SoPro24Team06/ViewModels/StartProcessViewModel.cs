@@ -24,7 +24,9 @@ public class StartProcessViewModel
     [MinLength(1, ErrorMessage = "Mindestens eine Aufgaben muss hinzugefügt werden")]
     public List<AssignmentTemplate> AssignmentTemplates { get; set; }
     public DateTime? StartDate { get; set; }
-    public DateTime? DueDate { get; set; }
+    
+    [Required(ErrorMessage = "Zieldatum ist erforderlich")]
+    public DateTime DueDate { get; set; }
 
     [Required(ErrorMessage = "Vorgangsverantwortlicher ist erforderlich")]
     public ApplicationUser Supervisor { get; set; }
@@ -97,21 +99,23 @@ public class StartProcessViewModel
             )
             .ToList();
 
-        foreach (AssignmentTemplate temp in assignmentTemplates)
+        foreach (AssignmentTemplate temp in assignmentTemplates) //delete for production use
         {
+            Assignment assignment = temp.ToAssignment(null, this.DueDate); //change !!!!
             switch (temp.AssigneeType)
             {
                 case AssigneeType.SUPERVISOR:
-                    assignmentList.Add(temp.ToAssignment(this.Supervisor));
+                    assignment.Assignee = this.Supervisor;
                     break;
                 case AssigneeType.WORKER_OF_REF:
-                    assignmentList.Add(temp.ToAssignment(this.WorkerOfReference));
+                    assignment.Assignee = this.WorkerOfReference;
                     break;
                 default:
-                    assignmentList.Add(temp.ToAssignment(null));
                     break;
             }
+            assignmentList.Add(assignment);
         }
+
         return new Process(
             Title,
             Description,

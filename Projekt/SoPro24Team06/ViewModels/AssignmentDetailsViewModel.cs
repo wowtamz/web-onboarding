@@ -1,7 +1,8 @@
 //beginn codeownership Jan Pfluger
-using Microsoft.AspNetCore.Mvc.Rendering;
-using SoPro24Team06.Enums;
-using SoPro24Team06.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using SoPro24Team06.Models;
 
 namespace SoPro24Team06.ViewModels
@@ -9,47 +10,25 @@ namespace SoPro24Team06.ViewModels
     public class AssignmentDetailsViewModel
     {
         public Assignment Assignment { get; set; }
-        public SelectList UserList { get; set; }
-        public SelectList RoleList { get; set; }
-        public Process? Process { get; set; }
-        public SelectList AssignmentStatusList { get; set; }
+        public string? ProcessTitle { get; set; }
 
-        public AssignmentDetailsViewModel(
-            Assignment assignment,
-            List<ApplicationUser> userList,
-            List<ApplicationRole> roleList,
-            Process? process
-        )
+        /// <summary>
+        /// Constructs AssignmentDetails Viewmodel
+        /// if process = null ProcessTitle = "es konnte kein zugehöriger Vorgang gefunden werden"
+        /// </summary>
+        /// <param name="assignment">Assignment wich should be Displayed</param>
+        /// <param name="process">process to wich the Assignment belongs can be null</param>
+        public AssignmentDetailsViewModel(Assignment assignment, Process? process)
         {
-            this.Assignment = assignment;
-            if (this.Assignment.Assignee != null)
+            if (process != null)
             {
-                this.UserList = new SelectList(userList, "Id", "Name", this.Assignment.Assignee.Id);
+                ProcessTitle = process.Title;
             }
             else
             {
-                this.UserList = new SelectList(userList, "Id", "Name");
+                ProcessTitle = "es konnte kein zugehöriger Vorgang gefunden werden";
             }
-
-            if (this.Assignment.AssignedRole != null)
-            {
-                this.RoleList = new SelectList(
-                    roleList,
-                    "Id",
-                    "Name",
-                    this.Assignment.AssignedRole.Id
-                );
-            }
-            else
-            {
-                this.RoleList = new SelectList(roleList, "Id", "Name");
-            }
-            this.Process = process;
-            this.AssignmentStatusList = new SelectList(
-                EnumHelper.GetEnumList<AssignmentStatus>(),
-                "Value",
-                "Text"
-            );
+            Assignment = assignment;
         }
     }
 }

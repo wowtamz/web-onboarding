@@ -1,11 +1,16 @@
+//-------------------------
+// Author: Vincent Steiner
+//-------------------------
+
 using Microsoft.EntityFrameworkCore;
 using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
 using SoPro24Team06.Models;
+using SoPro24Team06.Interfaces;
 
 namespace SoPro24Team06.Containers;
 
-public class AssignmentTemplateContainer
+public class AssignmentTemplateContainer : IAssignmentTemplate
 {
     private readonly ApplicationDbContext _context;
 
@@ -14,31 +19,40 @@ public class AssignmentTemplateContainer
         _context = context;
     }
 
-    public AssignmentTemplate AddAssignmentTemplate(
+    public AssignmentTemplate AddAssignmentTemplate( // Assignment Templates werden zur DB hinzugefügt
         string title,
         string? instructions,
         DueTime dueIn,
         List<Department>? forDepartmentsList,
         List<Contract>? forContractsList,
-        AssigneeType assigneType,
-        ApplicationRole? assignedRole
+        AssigneeType assigneeType,
+        ApplicationRole? assignedRole,
+        int? processTemplateId
     )
     {
-        AssignmentTemplate template = new AssignmentTemplate(
-            title,
-            instructions,
-            dueIn,
-            forDepartmentsList,
-            forContractsList,
-            assigneType,
-            assignedRole
-        );
-        var assignmentTemplateID = _context.AssignmentTemplates.Add(template);
-        _context.SaveChanges();
-        return assignmentTemplateID.Entity;
+        try
+        {
+            AssignmentTemplate template = new AssignmentTemplate(
+                title,
+                instructions,
+                dueIn,
+                forDepartmentsList,
+                forContractsList,
+                assigneeType,
+                assignedRole,
+                processTemplateId
+            );
+            var assignmentTemplateID = _context.AssignmentTemplates.Add(template);
+            _context.SaveChanges();
+            return assignmentTemplateID.Entity;
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
     }
 
-    public void DeleteAssignmentTemplate(int id)
+    public void DeleteAssignmentTemplate(int id) // Assignment Templates werden aus der DB gelöscht
     {
         if (_context.AssignmentTemplates != null)
         {
@@ -51,7 +65,7 @@ public class AssignmentTemplateContainer
         }
     }
 
-    public void EditAssignmentTemplates(
+    public void EditAssignmentTemplates( // Assignment Templates aus der DB werden editiert und dann wieder zurück gespeichert
         int id,
         string title,
         string? instructions,
@@ -64,6 +78,7 @@ public class AssignmentTemplateContainer
     {
         if (_context.AssignmentTemplates != null)
         {
+            try{
             AssignmentTemplate? assignmentTemplate = GetAssignmentTemplateWithDepartmentsAsync(id);
             if (assignmentTemplate != null)
             {
@@ -78,10 +93,14 @@ public class AssignmentTemplateContainer
                 _context.AssignmentTemplates.Update(assignmentTemplate);
                 _context.SaveChanges();
             }
+            }
+             catch (Exception ex)
+            {
+            }
         }
     }
 
-    public AssignmentTemplate GetAssignmentTemplate(int id)
+    public AssignmentTemplate GetAssignmentTemplate(int id) // Gewuünschtes Assignment Template wird mit der ID ausgegeben
     {
         if (_context.AssignmentTemplates != null)
         {
@@ -96,18 +115,18 @@ public class AssignmentTemplateContainer
         return null;
     }
 
-    public AssignmentTemplate? GetAssignmentTemplateWithDepartmentsAsync(int id)
+    public AssignmentTemplate? GetAssignmentTemplateWithDepartmentsAsync(int id) // Laden der Daten aus der Datenbank 
     {
         AssignmentTemplate? at = _context
-            .AssignmentTemplates.Include(at => at.ForDepartmentsList) // Include für das Laden der ForDepartmentsList
-            .Include(at => at.ForContractsList) // Include für das Laden der ForContractList
-            .Include(at => at.AssignedRole) // Include für das Laden der AssignedRole
-            .Include(at => at.DueIn) // Include für das Laden der DueIn
+            .AssignmentTemplates.Include(at => at.ForDepartmentsList)
+            .Include(at => at.ForContractsList)
+            .Include(at => at.AssignedRole)
+            .Include(at => at.DueIn) 
             .FirstOrDefault(at => at.Id == id);
         return at;
     }
 
-    public List<AssignmentTemplate> GetAllAssignmentTemplates()
+    public List<AssignmentTemplate> GetAllAssignmentTemplates() // Alle AssignmentTemplates werden ausgegeben
     {
         List<AssignmentTemplate> assignmentTemplateList = new List<AssignmentTemplate>();
         if (_context.AssignmentTemplates != null)
