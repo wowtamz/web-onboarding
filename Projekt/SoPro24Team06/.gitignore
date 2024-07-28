@@ -4,12 +4,8 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # DB
-database.db
 database.db-shm
 database.db-wal
-
-# Migrations Folder
-Migrations/
 
 # User-specific files
 *.rsuser
