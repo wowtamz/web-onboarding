@@ -293,6 +293,11 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
                     <input type='hidden' name='AssignmentTemplates[@j].DueIn.Months' value='@template.DueIn.Months' />
 
                     <input type='hidden' name='AssignmentTemplates[@j].AssigneeType' value='@template.AssigneeType' />
+                    
+                    @if (template.ProcessTemplateId != null)
+                    {
+                        <input type='hidden' name='AssignmentTemplates[@j].ProcessTemplateId' value='@template.ProcessTemplateId' />
+                    }
 
                     @if (template.AssignedRole != null)
                     {
@@ -482,33 +487,12 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
     function onAssignmentTemplateSelected(temp_string) {
 
         var template = JSON.parse(temp_string);
-
-        console.log(template);
-
-        //document.getElementById("assignmentTemplateDropdown").selectedIndex = "0";
-
-        var dueInDict = template.dueIn;
-        var departmentArray = template.forDepartments;
-        var contractArray = template.forContracts;
-        var roleDict = template.assignedRole;
-
-        const assignmentTemplate = {
-            id: template.id,
-            title: template.title,
-            instructions: template.instructions,
-            dueIn: dueInDict,
-            forDepartmentsList: departmentArray,
-            forContractsList: contractArray,
-            assigneeType: template.assigneeType,
-            assignedRole: roleDict
-
-        };
-
+        
         $.ajax({
             url: '@Url.Action("AddAssignmentTemplate", "Process")?index=' + window.assignmentTemplateCount++,
             type: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify(assignmentTemplate),
+            data: JSON.stringify(template),
             success: function(result) {
                 let html = JSON.parse(JSON.stringify(result)).html;
 
@@ -528,6 +512,7 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
                 console.error("Error applying Assignment Template: " + error);
             }
         });
+        
     }
 
     function onContractSelected(contract_string) {

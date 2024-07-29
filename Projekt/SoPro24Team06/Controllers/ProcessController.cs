@@ -442,6 +442,10 @@ namespace SoPro24Team06.Controllers
                 $"<input type='hidden' name='AssignmentTemplates[{index}].DueIn.Months' value='{template.DueIn.Months}' />";
             inputs +=
                 $"<input type='hidden' name='AssignmentTemplates[{index}].AssigneeType' value='{template.AssigneeType}' />";
+            inputs +=
+                $"<input type='hidden' name='AssignmentTemplates[{index}].ProcessTemplateId' value='{template.ProcessTemplateId}' />";
+            
+            
 
             if (template.AssignedRole != null)
             {
@@ -702,6 +706,22 @@ namespace SoPro24Team06.Controllers
             List<ProcessTemplate> processTemplates =
                 await _processTemplateContainer.GetProcessTemplatesAsync();
 
+            processTemplates.ForEach(p => p.AssignmentTemplates.ForEach(a =>
+                {
+                    if (a.ForContractsList != null)
+                    {
+                        a.ForContractsList.ForEach(c => c.Assignments = new List<Assignment>());
+                        a.ForContractsList.ForEach(c => c.AssignmentsTemplates = new List<AssignmentTemplate>());
+                    }
+                    
+                    if (a.ForDepartmentsList != null)
+                    {
+                        a.ForDepartmentsList.ForEach(c => c.Assignments = new List<Assignment>());
+                        a.ForDepartmentsList.ForEach(c => c.AssignmentsTemplates = new List<AssignmentTemplate>());
+                    }
+                })
+            );
+
             // Rollen der aktuellen User bestimmen
             string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             ApplicationUser user = await _userManager.FindByIdAsync(userId);
@@ -724,19 +744,6 @@ namespace SoPro24Team06.Controllers
                 }
             }
 
-            List<AssignmentTemplate> assignmentTemplates =
-                _assignmentTemplateContainer.GetAllAssignmentTemplates();
-            
-            assignmentTemplates.ForEach(a =>
-            {
-                a.ProcessTemplateId = processTemplates.FirstOrDefault()?.Id ?? 0;
-                if (a.AssignedRole != null)
-                {
-                    a.AssignedRole.ProcessTemplates = new List<ProcessTemplate>();
-                }
-            });
-            
-
             // Replace with Containers
             List<Assignment> assignments = _context.Assignments.ToList();
             List<Contract> contracts = _context.Contracts.ToList();
@@ -745,7 +752,6 @@ namespace SoPro24Team06.Controllers
             ViewData["Users"] = users;
             ViewData["ProcessTemplates"] = processTemplates;
             ViewData["Assignments"] = assignments;
-            ViewData["AssignmentTemplates"] = assignmentTemplates;
             ViewData["Contracts"] = contracts;
             ViewData["Departments"] = departments;
         }

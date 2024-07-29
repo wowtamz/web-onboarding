@@ -136,6 +136,13 @@ public class ProcessTemplateContainer
         return _context
             .ProcessTemplates.Include(pt => pt.DepartmentOfRefWorker)
             .Include(pt => pt.AssignmentTemplates)
+            .ThenInclude(a => a.DueIn)
+            .Include(pt => pt.AssignmentTemplates)
+            .ThenInclude(a => a.ForDepartmentsList)
+            .Include(pt => pt.AssignmentTemplates)
+            .ThenInclude(a => a.ForContractsList)
+            .Include(pt => pt.AssignmentTemplates)
+            .ThenInclude(a => a.AssignedRole)
             .Include(pt => pt.ContractOfRefWorker)
             .Include(pt => pt.RolesWithAccess);
     }
