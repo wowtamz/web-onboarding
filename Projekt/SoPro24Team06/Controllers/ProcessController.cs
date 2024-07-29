@@ -724,10 +724,16 @@ namespace SoPro24Team06.Controllers
 
             List<AssignmentTemplate> assignmentTemplates =
                 _assignmentTemplateContainer.GetAllAssignmentTemplates();
-
+            
             assignmentTemplates.ForEach(a =>
-                a.ProcessTemplateId = processTemplates.FirstOrDefault()?.Id ?? 0
-            );
+            {
+                a.ProcessTemplateId = processTemplates.FirstOrDefault()?.Id ?? 0;
+                if (a.AssignedRole != null)
+                {
+                    a.AssignedRole.ProcessTemplates = new List<ProcessTemplate>();
+                }
+            });
+            
 
             // Replace with Containers
             List<Assignment> assignments = _context.Assignments.ToList();
