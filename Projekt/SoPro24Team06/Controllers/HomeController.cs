@@ -17,7 +17,7 @@ namespace SoPro24Team06.Controllers
 
         public IActionResult Index()
         {
-            return View("~/Views/Index.cshtml");
+            return RedirectToAction("Index", "Assignment");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
