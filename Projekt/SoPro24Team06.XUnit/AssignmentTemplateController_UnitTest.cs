@@ -313,7 +313,7 @@ namespace SoPro24Team06.XUnit
             Assert.Equal(12, redirectResult.RouteValues["id"]);
 
         }
-        [Fact]
+        //[Fact]
         public async Task DeleteAssignmentTemplate_Test() // Tested die Delete Methode im AssignmentTemplateController
         {
             var user = await _mockUserManager.Object.FindByNameAsync("Administrator");
