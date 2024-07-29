@@ -258,10 +258,9 @@ namespace SoPro24Team06.Tests
 
              var assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault();
             
-            var template = new ProcessTemplate { Id = 1, Title = "Test Template", RolesWithAccess = new List<ApplicationRole> {mockRoleWithAccess}, ContractOfRefWorker = contract, DepartmentOfRefWorker = department, AssignmentTemplates = new List<AssignmentTemplate> {assignmentTemplate}, Description = "NONE"};
+            var template = new ProcessTemplate {Title = "Test Template", RolesWithAccess = new List<ApplicationRole> {mockRoleWithAccess}, ContractOfRefWorker = contract, DepartmentOfRefWorker = department, AssignmentTemplates = new List<AssignmentTemplate> {assignmentTemplate}, Description = "NONE"};
             _context.ProcessTemplates.Add(template);
             _context.SaveChanges();
-            
 
             var controller = new ProcessController(_context, _mockUserManager.Object, _mockRoleManager.Object)
             {
@@ -283,7 +282,7 @@ namespace SoPro24Team06.Tests
             Assert.IsType<ViewResult>(result);
             Assert.Equal(startProcessViewModel.Template, template);
             Assert.NotNull(startProcessViewModel.Template);
-            Assert.Equal(startProcessViewModel.Template.Id, 1);
+            Assert.Equal(startProcessViewModel.Template.Id, template.Id);
             Assert.Equal(startProcessViewModel.Template.Title, "Test Template");
             Assert.Equal(startProcessViewModel.Template.Description, "NONE");
             Assert.Equal(startProcessViewModel.Template.AssignmentTemplates.First(), assignmentTemplate);
@@ -312,7 +311,7 @@ namespace SoPro24Team06.Tests
 
              var assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault();
             
-            var template = new ProcessTemplate { Id = 2, Title = "Test Template", RolesWithAccess = new List<ApplicationRole> {}, ContractOfRefWorker = contract, DepartmentOfRefWorker = department, AssignmentTemplates = new List<AssignmentTemplate> {assignmentTemplate}, Description = "NONE"};
+            var template = new ProcessTemplate {Title = "Test Template", RolesWithAccess = new List<ApplicationRole> {}, ContractOfRefWorker = contract, DepartmentOfRefWorker = department, AssignmentTemplates = new List<AssignmentTemplate> {assignmentTemplate}, Description = "NONE"};
             _context.ProcessTemplates.Add(template);
             _context.SaveChanges();
 
@@ -350,7 +349,7 @@ namespace SoPro24Team06.Tests
 
              var assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault();
             
-            var template = new ProcessTemplate { Id = 3, Title = "Test Template", RolesWithAccess = new List<ApplicationRole>(), ContractOfRefWorker = contract, DepartmentOfRefWorker = department, AssignmentTemplates = new List<AssignmentTemplate> {assignmentTemplate}, Description = "NONE"};
+            var template = new ProcessTemplate {Title = "Test Template", RolesWithAccess = new List<ApplicationRole>(), ContractOfRefWorker = contract, DepartmentOfRefWorker = department, AssignmentTemplates = new List<AssignmentTemplate> {assignmentTemplate}, Description = "NONE"};
             _context.ProcessTemplates.Add(template);
             _context.SaveChanges();
             

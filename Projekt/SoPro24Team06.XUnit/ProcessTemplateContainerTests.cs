@@ -35,22 +35,22 @@ public class ProcessTemplateContainerTests
     {
         if (!_context.Contracts.Any())
         {
-            _context.Contracts.Add(new Contract { Id = 1, Label = "Contract 1" });
+            _context.Contracts.Add(new Contract { Label = "Contract 1" });
         }
 
         if (!_context.Departments.Any())
         {
-            _context.Departments.Add(new Department { Id = 1, Name = "Department 1" });
+            _context.Departments.Add(new Department { Name = "Department 1" });
         }
 
         if (!_context.Roles.Any())
         {
-            _context.Roles.Add(new ApplicationRole { Id = "1", Name = "Role 1" });
+            _context.Roles.Add(new ApplicationRole { Name = "Role 1" });
         }
 
         if (!_context.Users.Any())
         {
-            var user = new ApplicationUser { Id = "1", UserName = "testUser" };
+            var user = new ApplicationUser { UserName = "testUser" };
             _context.Users.Add(user);
             _context.UserRoles.Add(new IdentityUserRole<string> { UserId = user.Id, RoleId = "1" });
         }
