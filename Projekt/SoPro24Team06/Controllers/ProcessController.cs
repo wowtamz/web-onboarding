@@ -112,7 +112,9 @@ namespace SoPro24Team06.Controllers
             ApplicationUser defaultSupervisor = await _userManager.FindByIdAsync(userId);
             startProcessViewModel.Supervisor = defaultSupervisor;
 
-            if (templateId > 0)
+            bool processExists = _context.ProcessTemplates.ToList().Any(p => p.Id == templateId);
+
+            if (templateId > 0 && processExists)
             {
                 ProcessTemplate template =
                     await _processTemplateContainer.GetProcessTemplateByIdAsync(templateId);
