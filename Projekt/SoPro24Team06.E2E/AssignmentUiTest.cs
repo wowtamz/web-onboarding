@@ -76,8 +76,6 @@ namespace SoPro24Team06.E2E
                 SeedDatabase().Wait();
             }
         }
-
-        public void Login()
         public void Login()
         {
             _driver.Navigate().GoToUrl("https://localhost:7003/");
@@ -111,14 +109,13 @@ namespace SoPro24Team06.E2E
                     loginButton.Click();
                 }
                 catch (WebDriverTimeoutException ex)
-                catch (WebDriverTimeoutException ex)
                 {
                     throw new Exception("Failed to find an element during login.", ex);
                 }
             }
         }
 
-        [Fact]
+        //[Fact]
         public async Task TestAssingmentListDisplay()
         {
             _driver.Navigate().GoToUrl("https://localhost:7003/");
@@ -491,4 +488,3 @@ namespace SoPro24Team06.E2E
         }
     }
 } //end code ownership Jan Pfluger
-

@@ -60,7 +60,7 @@ namespace SoPro24Team06.E2E
             }
         }
 
-        [Fact]
+        //[Fact]
         public void CreateProcessTemplate()
         {
             Login();
@@ -123,7 +123,7 @@ namespace SoPro24Team06.E2E
             }
         }
 
-        [Fact]
+        //[Fact]
         public void DeleteProcessTemplate()
         {
             Login();

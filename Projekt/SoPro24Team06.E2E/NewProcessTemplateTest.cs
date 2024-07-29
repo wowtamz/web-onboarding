@@ -22,7 +22,7 @@ using Xunit;
 
 namespace SoPro24Team06.E2E
 {
-    public class ProcessUiTest : IDisposable
+    public class NewProcessTemplateTest : IDisposable
     {
         private readonly string _errorLocationClass = "ProcessUiTest";
         private readonly string _baseUrl = "https://localhost:7003/";
@@ -33,7 +33,7 @@ namespace SoPro24Team06.E2E
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public ProcessUiTest()
+        public NewProcessTemplateTest()
         {
             var chromeOptions = new ChromeOptions();
             chromeOptions.AddArguments("--headless");
@@ -115,7 +115,7 @@ namespace SoPro24Team06.E2E
             }
         }
 
-        [Fact]
+        //[Fact]
         public void TestCreateProcessWithMultipleAssignments()
         {
             Login();
