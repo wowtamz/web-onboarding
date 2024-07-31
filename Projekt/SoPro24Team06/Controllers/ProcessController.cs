@@ -121,6 +121,25 @@ namespace SoPro24Team06.Controllers
                 
                 // template von context lösen um Veränderungen zu ignorieren
                 _context.Entry(template).State = EntityState.Detached;
+
+                template.AssignmentTemplates.ForEach(a => _context.Entry(a).State = EntityState.Detached);
+                template.AssignmentTemplates.ForEach(a =>
+                {
+                    if (a.ForContractsList != null)
+                    {
+                        a.ForContractsList.ForEach(c => _context.Entry(c).State = EntityState.Detached);
+                        a.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);;
+                        a.ForContractsList.ForEach(c => c.Assignments = null);;
+                    }
+
+                    if (a.ForDepartmentsList != null)
+                    {
+                        a.ForDepartmentsList.ForEach(d => _context.Entry(d).State = EntityState.Detached);
+                        a.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null);
+                        a.ForDepartmentsList.ForEach(d => d.Assignments = null);
+                    }
+                });
+
                 
                 template.RolesWithAccess.ForEach(r => r.ProcessTemplates = null);
                 
@@ -711,6 +730,8 @@ namespace SoPro24Team06.Controllers
             List<ApplicationUser> users = _userManager.Users.ToList();
             List<ProcessTemplate> processTemplates =
                 await _processTemplateContainer.GetProcessTemplatesAsync();
+            
+            processTemplates.ForEach(p => _context.Entry(p).State = EntityState.Detached);
 
             processTemplates.ForEach(p => p.AssignmentTemplates.ForEach(a =>
                 {
@@ -718,14 +739,14 @@ namespace SoPro24Team06.Controllers
                     
                     if (a.ForContractsList != null)
                     {
-                        a.ForContractsList.ForEach(c => c.Assignments = new List<Assignment>());
-                        a.ForContractsList.ForEach(c => c.AssignmentsTemplates = new List<AssignmentTemplate>());
+                        a.ForContractsList.ForEach(c => c.Assignments = null);
+                        a.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);
                     }
                     
                     if (a.ForDepartmentsList != null)
                     {
-                        a.ForDepartmentsList.ForEach(c => c.Assignments = new List<Assignment>());
-                        a.ForDepartmentsList.ForEach(c => c.AssignmentsTemplates = new List<AssignmentTemplate>());
+                        a.ForDepartmentsList.ForEach(c => c.Assignments = null);
+                        a.ForDepartmentsList.ForEach(c => c.AssignmentsTemplates = null);
                     }
                 })
             );
@@ -737,8 +758,6 @@ namespace SoPro24Team06.Controllers
 
             foreach (ProcessTemplate processTemplate in processTemplates.ToList()) // ToList() damit man im loop aus der Liste löschen kann
             {
-                
-                _context.Entry(processTemplate).State = EntityState.Detached;
                 
                 List<string> rolesWithAccess = new List<string> { };
                 processTemplate.RolesWithAccess.ForEach(r => rolesWithAccess.Add(r.Name));
