@@ -280,14 +280,13 @@ namespace SoPro24Team06.Tests
             
             // Assert
             Assert.IsType<ViewResult>(result);
-            Assert.Equal(startProcessViewModel.Template, template);
             Assert.NotNull(startProcessViewModel.Template);
             Assert.Equal(startProcessViewModel.Template.Id, template.Id);
             Assert.Equal(startProcessViewModel.Template.Title, "Test Template");
             Assert.Equal(startProcessViewModel.Template.Description, "NONE");
-            Assert.Equal(startProcessViewModel.Template.AssignmentTemplates.First(), assignmentTemplate);
-            Assert.Equal(startProcessViewModel.Template.ContractOfRefWorker, contract);
-            Assert.Equal(startProcessViewModel.Template.DepartmentOfRefWorker, department);
+            Assert.Equal(startProcessViewModel.Template.AssignmentTemplates.First().Title, assignmentTemplate.Title);
+            Assert.Equal(startProcessViewModel.Template.ContractOfRefWorker.Label, contract.Label);
+            Assert.Equal(startProcessViewModel.Template.DepartmentOfRefWorker.Name, department.Name);
             
         }
         
