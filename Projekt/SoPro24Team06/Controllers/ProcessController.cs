@@ -118,14 +118,20 @@ namespace SoPro24Team06.Controllers
             {
                 ProcessTemplate template =
                     await _processTemplateContainer.GetProcessTemplateByIdAsync(templateId);
+                
+                // template von context lösen um Veränderungen zu ignorieren
+                _context.Entry(template).State = EntityState.Detached;
+                
+                template.RolesWithAccess.ForEach(r => r.ProcessTemplates = null);
+                
                 startProcessViewModel.Template = template;
 
                 IList<string> userRoles = await _userManager.GetRolesAsync(defaultSupervisor);
-                List<string> rolesWithAcess = new List<string> { };
-                template.RolesWithAccess.ForEach(r => rolesWithAcess.Add(r.Name));
+                List<string> rolesWithAccess = new List<string> { };
+                template.RolesWithAccess.ForEach(r => rolesWithAccess.Add(r.Name));
 
                 bool hasAccess =
-                    rolesWithAcess.Intersect(userRoles.ToList()).Any()
+                    rolesWithAccess.Intersect(userRoles.ToList()).Any()
                     || User.IsInRole("Administrator");
 
                 if (hasAccess)
@@ -708,6 +714,8 @@ namespace SoPro24Team06.Controllers
 
             processTemplates.ForEach(p => p.AssignmentTemplates.ForEach(a =>
                 {
+                    _context.Entry(a).State = EntityState.Detached;
+                    
                     if (a.ForContractsList != null)
                     {
                         a.ForContractsList.ForEach(c => c.Assignments = new List<Assignment>());
@@ -729,14 +737,17 @@ namespace SoPro24Team06.Controllers
 
             foreach (ProcessTemplate processTemplate in processTemplates.ToList()) // ToList() damit man im loop aus der Liste löschen kann
             {
-                List<string> rolesWithAcess = new List<string> { };
-                processTemplate.RolesWithAccess.ForEach(r => rolesWithAcess.Add(r.Name));
+                
+                _context.Entry(processTemplate).State = EntityState.Detached;
+                
+                List<string> rolesWithAccess = new List<string> { };
+                processTemplate.RolesWithAccess.ForEach(r => rolesWithAccess.Add(r.Name));
                 bool hasAccess =
-                    rolesWithAcess.Intersect(userRoles.ToList()).Any()
+                    rolesWithAccess.Intersect(userRoles.ToList()).Any()
                     || User.IsInRole("Administrator");
 
                 // Liste leeren um Json serialization Fehler zu vermeiden
-                processTemplate.RolesWithAccess = new List<ApplicationRole> { };
+                processTemplate.RolesWithAccess.ForEach(r => r.ProcessTemplates = null);
 
                 if (!hasAccess)
                 {
