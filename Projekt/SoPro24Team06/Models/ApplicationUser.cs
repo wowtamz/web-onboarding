@@ -1,3 +1,7 @@
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 

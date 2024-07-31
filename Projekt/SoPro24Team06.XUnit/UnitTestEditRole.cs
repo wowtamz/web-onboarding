@@ -1,3 +1,7 @@
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;

@@ -425,7 +425,7 @@ namespace SoPro24Team06.Controllers
                 {
                     if (!string.IsNullOrEmpty(involvementDetails))
                     {
-                        involvementDetails += " and ";
+                        involvementDetails += " und ";
                     }
                     involvementDetails += $"Aufgabenvorlagen: {assignmentTemplateNames}";
                 }
@@ -434,7 +434,7 @@ namespace SoPro24Team06.Controllers
                 {
                     if (!string.IsNullOrEmpty(involvementDetails))
                     {
-                        involvementDetails += " and ";
+                        involvementDetails += " und ";
                     }
                     involvementDetails += $"Prozesse: {processTemplateNames}";
                 }
