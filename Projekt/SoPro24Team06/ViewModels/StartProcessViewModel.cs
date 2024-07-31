@@ -88,13 +88,13 @@ public class StartProcessViewModel
         List<AssignmentTemplate> assignmentTemplates = new List<AssignmentTemplate>();
         assignmentTemplates = this
             .AssignmentTemplates.Where(temp =>
-                (
-                    temp.ForContractsList == null
-                    || temp.ForContractsList.Contains(this.ContractOfRefWorker)
-                        && (
-                            temp.ForDepartmentsList == null
-                            || temp.ForDepartmentsList.Contains(this.DepartmentOfRefWorker)
-                        )
+                (temp.ForContractsList == null 
+                 || temp.ForContractsList.Contains(this.ContractOfRefWorker)
+                 || !temp.ForContractsList.Any()
+                )
+                && (temp.ForDepartmentsList == null 
+                    || temp.ForDepartmentsList.Contains(this.DepartmentOfRefWorker)
+                    || !temp.ForDepartmentsList.Any()
                 )
             )
             .ToList();
