@@ -560,7 +560,7 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult ChangeTabel(string currentList)
+        public IActionResult ChangeTable(string currentList)
         {
             HttpContext.Session.SetString("currentList", currentList);
             return RedirectToAction("Index");
@@ -632,6 +632,8 @@ namespace SoPro24Team06.Controllers
                     //if roles of current user contains Administrator show all Assignments
                     if (roles.Contains("Administrator"))
                     {
+                        processList = await _processContainer.GetActiveProcessesAsync();
+                        
                         foreach (Process p in processList)
                         {
                             foreach (Assignment a in p.Assignments)
