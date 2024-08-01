@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using SoPro24Team06.Models;
 
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
+
 public class LogoutOnLockoutMiddleware
 {
     private readonly RequestDelegate _next;
