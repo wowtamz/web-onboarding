@@ -162,12 +162,12 @@
                             updateRoleList();
                         } else {
                             var errorMessage = response.error || "An error occurred while creating the role.";
-                            $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                            $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                         }
                     },
                     error: function (response) {
                         var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while creating the role.";
-                        $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                        $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                     }
                 });
             });
@@ -189,13 +189,13 @@
                             updateRoleList();
                         } else {
                             var errorMessage = response.error || "An error occurred while deleting the role.";
-                            $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                            $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                         }
                     },
                     error: function (response) {
                         console.error("Error response:", response); // Log the full response object
                         var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while deleting the role.";
-                        $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
+                        $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                     }
                 });
             });

@@ -380,12 +380,12 @@ namespace SoPro24Team06.Controllers
         {
             if (string.IsNullOrEmpty(model.RoleName))
             {
-                return Json(new { success = false, error = "Role name is required." });
+                return Json(new { success = false, error = "Rollenname ist erforderlich." });
             }
 
             if (model.RoleName == "Administrator")
             {
-                return Json(new { success = false, error = "The Admin role cannot be deleted." });
+                return Json(new { success = false, error = "Die Administrator-Rolle kann nicht gelöscht werden." });
             }
 
             var involvedAssignments = _context.Assignments
@@ -414,35 +414,29 @@ namespace SoPro24Team06.Controllers
                     ? string.Join(", ", involvedProcessTemplates.Select(pt => pt.Title)) 
                     : "";
 
-                var involvementDetails = string.Empty;
+                var involvementDetails = new List<string>();
 
                 if (!string.IsNullOrEmpty(assignmentNames))
                 {
-                    involvementDetails += $"Aufgaben: {assignmentNames}";
+                    involvementDetails.Add($"Aufgaben: {assignmentNames}");
                 }
 
                 if (!string.IsNullOrEmpty(assignmentTemplateNames))
                 {
-                    if (!string.IsNullOrEmpty(involvementDetails))
-                    {
-                        involvementDetails += " und ";
-                    }
-                    involvementDetails += $"Aufgabenvorlagen: {assignmentTemplateNames}";
+                    involvementDetails.Add($"Aufgabenvorlagen: {assignmentTemplateNames}");
                 }
 
                 if (!string.IsNullOrEmpty(processTemplateNames))
                 {
-                    if (!string.IsNullOrEmpty(involvementDetails))
-                    {
-                        involvementDetails += " und ";
-                    }
-                    involvementDetails += $"Prozesse: {processTemplateNames}";
+                    involvementDetails.Add($"Prozesse: {processTemplateNames}");
                 }
 
-                TempData["RoleDeleteMessage"] = $"Role {model.RoleName} wird nicht gelöscht, da sie in folgendem involviert ist {involvementDetails}.";
-                return Json(new { success = false, error = TempData["RoleDeleteMessage"] });
-            }
+                var involvementMessage = string.Join("<br>", involvementDetails);
+                var errorMessage = $"Die Rolle '{model.RoleName}' kann nicht gelöscht werden, da sie in den folgenden Elementen involviert ist:<br>{involvementMessage}.";
 
+                TempData["RoleDeleteMessage"] = errorMessage;
+                return Json(new { success = false, error = errorMessage });
+            }
 
             var role = await _roleManager.FindByNameAsync(model.RoleName);
             if (role != null)
@@ -459,8 +453,9 @@ namespace SoPro24Team06.Controllers
                 }
             }
 
-            return Json(new { success = false, error = "Role not found." });
+            return Json(new { success = false, error = "Rolle nicht gefunden." });
         }
+
 
         /// <summary>
         /// Changes the role name
