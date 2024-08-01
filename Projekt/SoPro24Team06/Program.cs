@@ -1,11 +1,5 @@
-using System.Data.Common;
-using System.IO;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Sqlite;
-using Microsoft.Extensions.DependencyInjection;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
 
@@ -17,34 +11,38 @@ if (!Directory.Exists(dataDirectory))
     Directory.CreateDirectory(dataDirectory);
 }
 
+/* Alte DbContext
+var connectionString = builder.Configuration.GetConnectionString("UserConnection");
+builder.Services.AddDbContext<UserDbContext>(options =>
+    options.UseSqlite(connectionString + ";Pooling=False")
+); // Disable pooling
+*/
+
 // Beginn: Neue DbContext
-if (builder.Environment.IsEnvironment("Testing") == false)
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-    );
-}
-else
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseInMemoryDatabase("TestDatabase")
-    );
-}
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder
     .Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-    {
-        options.Password.RequireDigit = false;
-        options.Password.RequiredLength = 6;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
-        options.Password.RequiredUniqueChars = 1;
-
-        options.SignIn.RequireConfirmedAccount = false;
-    })
+        options.SignIn.RequireConfirmedAccount = false
+    )
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+// Ende: Neu DbContext
+
+
+/*
+builder
+    .Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false; // email confirmation!
+    })
+    .AddEntityFrameworkStores<UserDbContext>()
+    .AddDefaultTokenProviders();
+*/
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -55,7 +53,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(60); // Session-Timeout
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -64,11 +62,13 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 });
 
-builder
-    .Services.AddDataProtection()
-    .SetApplicationName("SoPro24Team06")
-    .PersistKeysToFileSystem(new DirectoryInfo(@"./keys/"))
-    .SetDefaultKeyLifetime(TimeSpan.FromDays(14)); // Change this to invalidate old sessions
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Adjust based on your environment
+});
 
 var app = builder.Build();
 
@@ -79,24 +79,9 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
     var context = services.GetRequiredService<ApplicationDbContext>();
-    if (app.Environment.IsEnvironment("Testing"))
-    {
-        await context.Database.EnsureCreatedAsync();
-    }
-    else
-    {
-        await context.Database.MigrateAsync();
-        //await context.Database.MigrateAsync();
-        await SeedData.Initialize(userManager, roleManager, context);
-        var keyRingPath = Path.Combine(Directory.GetCurrentDirectory(), "keys");
-
-        // Einmalige Invalidierung der Sessions beim Start der Anwendung
-        if (Directory.Exists(keyRingPath))
-        {
-            Directory.Delete(keyRingPath, true); // Lösche alle vorhandenen Schlüssel
-        }
-        Directory.CreateDirectory(keyRingPath); // Erstelle den Schlüsselordner neu
-    }
+    await context.Database.EnsureCreatedAsync();
+    //await context.Database.MigrateAsync();
+    await SeedData.Initialize(userManager, roleManager, context);
 }
 
 if (!app.Environment.IsDevelopment())
@@ -105,16 +90,20 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+/*
+else
+{
+    app.UseDeveloperExceptionPage();
+}
+*/
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseWebSockets();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseMiddleware<LogoutOnLockoutMiddleware>();
 
 app.UseSession();
 
