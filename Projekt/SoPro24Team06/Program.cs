@@ -104,9 +104,10 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseSession();
-
+app.UseMiddleware<InvalidateSessionsMiddleware>();
 app.UseMiddleware<LogoutOnLockoutMiddleware>();
+
+app.UseSession();
 
 app.UseEndpoints(endpoints =>
 {
