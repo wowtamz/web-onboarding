@@ -25,6 +25,11 @@
                 <button class="btn btn-primary btn-lg me-2" role="button" data-bs-target="#modal-1"
                     data-bs-toggle="modal" style="background: rgb(204, 212, 217);border-style: none;">Rollenverwaltung
                 </button>
+                <form asp-action="ImportJson" method="post" enctype="multipart/form-data" class="d-inline-block">
+                    <label for="jsonFileInput" class="btn btn-primary btn-lg me-2" style="background: rgb(204, 212, 217);border-style: none;">
+                        JSON importieren
+                    </label>
+                </form>
             </div>
         </div>
     </div>
