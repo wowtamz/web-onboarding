@@ -52,31 +52,29 @@
                     <span>@string.Join(", ", user.Roles)</span>
                 </td>
                 <td>
-                    @if (user.Email != "admin@example.com")
+                    <a class="btn btn-sm" style="background-color: var(--silver); color: black;"
+                    href="@Url.Action("EditUserDetails", "Administration", new { email = user.Email })">Bearbeiten</a>
+                    <a class="btn btn-sm" style="background-color: var(--lemming); color: white;"
+                    href="@Url.Action("ChangeUserPassword", "Administration", new { email = user.Email })">Passwort ändern</a>
+                    @if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
                     {
-                        <a class="btn btn-sm" style="background-color: var(--silver); color: black;"
-                            href="@Url.Action("EditUserDetails", "Administration", new { email = user.Email })">Bearbeiten</a>
-                        <a class="btn btn-sm" style="background-color: var(--lemming); color: white;"
-                            href="@Url.Action("ChangeUserPassword", "Administration", new { email = user.Email })">Passwort
-                            ändern</a>
-                        @if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
-                        {
-                            <form asp-action="UnlockUser" method="post" style="display:inline">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="userId" value="@user.UserId" />
-                                <button type="submit" class="btn btn-sm"
-                                    style="background-color: var(--amaranth); color: white;">Entsperren</button>
-                            </form>
-                        }
-                        else
-                        {
-                            <form asp-action="LockUser" method="post" style="display:inline">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="userId" value="@user.UserId" />
-                                <button type="submit" class="btn btn-sm"
-                                    style="background-color: var(--amaranth); color: white;">Sperren</button>
-                            </form>
-                        }
+                        <form asp-action="UnlockUser" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.UserId" />
+                            <button type="submit" class="btn btn-sm"
+                                style="background-color: var(--amaranth); color: white;"
+                                @(User.Identity.Name == user.Email ? "disabled" : "")>Entsperren</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="LockUser" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.UserId" />
+                            <button type="submit" class="btn btn-sm"
+                                style="background-color: var(--amaranth); color: white;"
+                                @(User.Identity.Name == user.Email ? "disabled" : "")>Sperren</button>
+                        </form>
                     }
                 </td>
             </tr>
