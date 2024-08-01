@@ -10,7 +10,7 @@
 </div>
 }
 
-<!-- Start: Banner Heading -->
+ <!-- Start: Banner Heading -->
 <section class="py-4 py-xl-5" style="padding: 32px 0;">
     <div class="container">
         <div class="text-white bg-dark border rounded border-0 p-4 p-md-5"
@@ -26,7 +26,7 @@
                     data-bs-toggle="modal" style="background: rgb(204, 212, 217);border-style: none;">Rollenverwaltung
                 </button>
                 <form asp-action="ImportJson" method="post" enctype="multipart/form-data" class="d-inline-block">
-                    <input type="file" name="jsonFile" class="d-none" id="jsonFileInput">
+                    <input type="file" name="jsonFile" class="d-none" id="jsonFileInput" accept="application/json">
                     <label for="jsonFileInput" class="btn btn-primary btn-lg me-2" style="background: rgb(204, 212, 217);border-style: none;">
                         JSON importieren
                     </label>
@@ -36,6 +36,8 @@
     </div>
 </section>
 <!-- End: Banner Heading -->
+
+
 
 <!-- List of Users -->
 <h3>Alle Nutzer</h3>
