@@ -10,7 +10,7 @@
 </div>
 }
 
- <!-- Start: Banner Heading -->
+<!-- Start: Banner Heading -->
 <section class="py-4 py-xl-5" style="padding: 32px 0;">
     <div class="container">
         <div class="text-white bg-dark border rounded border-0 p-4 p-md-5"
@@ -26,7 +26,6 @@
                     data-bs-toggle="modal" style="background: rgb(204, 212, 217);border-style: none;">Rollenverwaltung
                 </button>
                 <form asp-action="ImportJson" method="post" enctype="multipart/form-data" class="d-inline-block">
-                    <input type="file" name="jsonFile" class="d-none" id="jsonFileInput" accept="application/json">
                     <label for="jsonFileInput" class="btn btn-primary btn-lg me-2" style="background: rgb(204, 212, 217);border-style: none;">
                         JSON importieren
                     </label>
@@ -36,8 +35,6 @@
     </div>
 </section>
 <!-- End: Banner Heading -->
-
-
 
 <!-- List of Users -->
 <h3>Alle Nutzer</h3>
@@ -57,41 +54,39 @@
                 <td>@user.Email</td>
                 <td>@user.FullName</td>
                 <td>
-                    @foreach (var role in user.Roles)
-                    {
-                        <span class="badge bg-secondary">@role</span>
-                    }
+                    <span>@string.Join(", ", user.Roles)</span>
                 </td>
                 <td>
-                    <a class="btn btn-sm" style="background-color: var(--silver); color: black;"
-                    href="@Url.Action("EditUserDetails", "Administration", new { email = user.Email })">Bearbeiten</a>
-                    <a class="btn btn-sm" style="background-color: var(--lemming); color: white;"
-                    href="@Url.Action("ChangeUserPassword", "Administration", new { email = user.Email })">Passwort ändern</a>
-                    @if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
+                    @if (user.Email != "admin@example.com")
                     {
-                        <form asp-action="UnlockUser" method="post" style="display:inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="userId" value="@user.UserId" />
-                            <button type="submit" class="btn btn-sm"
-                                style="background-color: var(--amaranth); color: white;"
-                                @(User.Identity.Name == user.Email ? "disabled" : "")>Entsperren</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <form asp-action="LockUser" method="post" style="display:inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="userId" value="@user.UserId" />
-                            <button type="submit" class="btn btn-sm"
-                                style="background-color: var(--amaranth); color: white;"
-                                @(User.Identity.Name == user.Email ? "disabled" : "")>Sperren</button>
-                        </form>
+                        <a class="btn btn-sm" style="background-color: var(--silver); color: black;"
+                            href="@Url.Action("EditUserDetails", "Administration", new { email = user.Email })">Bearbeiten</a>
+                        <a class="btn btn-sm" style="background-color: var(--lemming); color: white;"
+                            href="@Url.Action("ChangeUserPassword", "Administration", new { email = user.Email })">Passwort
+                            ändern</a>
+                        @if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow)
+                        {
+                            <form asp-action="UnlockUser" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@user.UserId" />
+                                <button type="submit" class="btn btn-sm"
+                                    style="background-color: var(--amaranth); color: white;">Entsperren</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="LockUser" method="post" style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@user.UserId" />
+                                <button type="submit" class="btn btn-sm"
+                                    style="background-color: var(--amaranth); color: white;">Sperren</button>
+                            </form>
+                        }
                     }
                 </td>
             </tr>
         }
     </tbody>
-
 </table>
 
 
@@ -172,12 +167,12 @@
                             updateRoleList();
                         } else {
                             var errorMessage = response.error || "An error occurred while creating the role.";
-                            $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
+                            $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                         }
                     },
                     error: function (response) {
                         var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while creating the role.";
-                        $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
+                        $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                     }
                 });
             });
@@ -199,13 +194,13 @@
                             updateRoleList();
                         } else {
                             var errorMessage = response.error || "An error occurred while deleting the role.";
-                            $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
+                            $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                         }
                     },
                     error: function (response) {
                         console.error("Error response:", response); // Log the full response object
                         var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while deleting the role.";
-                        $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
+                        $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                     }
                 });
             });
@@ -224,7 +219,6 @@
                 var roleNameElement = $(this).closest('li').find('.role-name');
                 var newRoleName = roleNameElement.find('.edit-role-input').val().trim();
                 var originalRoleName = $(this).data('original-role');
-                var saveButton = $(this);
 
                 if (newRoleName && newRoleName !== originalRoleName) {
                     $.ajax({
@@ -246,25 +240,18 @@
                                 var errorMessage = response.error || "An error occurred while updating the role.";
                                 $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                                 roleNameElement.text(originalRoleName);
-                                resetSaveButtonToEdit(saveButton, originalRoleName);
                             }
                         },
                         error: function (response) {
                             var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while updating the role.";
                             $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                             roleNameElement.text(originalRoleName);
-                            resetSaveButtonToEdit(saveButton, originalRoleName);
                         }
                     });
                 } else {
                     roleNameElement.text(originalRoleName);
-                    resetSaveButtonToEdit(saveButton, originalRoleName);
                 }
             });
-
-            function resetSaveButtonToEdit(saveButton, roleName) {
-                saveButton.replaceWith('<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)" data-role="' + roleName + '">Bearbeiten</button>');
-            }
 
             function cancelEditMode() {
                 $('.edit-role-input').each(function () {
@@ -275,7 +262,7 @@
                 $('.save-role').each(function () {
                     var saveButton = $(this);
                     var originalRoleName = saveButton.data('original-role');
-                    saveButton.replaceWith('<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)" data-role="' + originalRoleName + '">Bearbeiten</button>');
+                    saveButton.replaceWith('<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)" data-role="' + originalRoleName + '">Edit</button>');
                 });
             }
 
@@ -286,7 +273,7 @@
                     data.forEach(function (role) {
                         var deleteButton = role !== "Administrator" ?
                             '<div class="role-actions">' +
-                            '<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)" data-role="' + role + '">Bearbeiten</button>' +
+                            '<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)"  data-role="' + role + '">Edit</button>' +
                             '<form asp-action="DeleteRole" method="post" class="delete-role-form" style="display:inline">' +
                             '<input type="hidden" name="roleName" value="' + role + '" />' +
                             '@Html.AntiForgeryToken()' +
