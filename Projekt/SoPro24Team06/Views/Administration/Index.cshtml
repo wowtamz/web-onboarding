@@ -10,7 +10,7 @@
 </div>
 }
 
- <!-- Start: Banner Heading -->
+<!-- Start: Banner Heading -->
 <section class="py-4 py-xl-5" style="padding: 32px 0;">
     <div class="container">
         <div class="text-white bg-dark border rounded border-0 p-4 p-md-5"
@@ -26,18 +26,15 @@
                     data-bs-toggle="modal" style="background: rgb(204, 212, 217);border-style: none;">Rollenverwaltung
                 </button>
                 <form asp-action="ImportJson" method="post" enctype="multipart/form-data" class="d-inline-block">
-                    <input type="File" name="jsonFile" class="d-none" id="jsonFileInput" accept="application/json" onchange="this.form.submit()">
-                    <button type="button" class="btn btn-primary btn-lg me-2" onclick="document.getElementById('jsonFileInput').click();" style="background: rgb(204, 212, 217);border-style: none;">
+                    <label for="jsonFileInput" class="btn btn-primary btn-lg me-2" style="background: rgb(204, 212, 217);border-style: none;">
                         JSON importieren
-                    </button>
+                    </label>
                 </form>
             </div>
         </div>
     </div>
 </section>
 <!-- End: Banner Heading -->
-
-
 
 <!-- List of Users -->
 <h3>Alle Nutzer</h3>
@@ -165,18 +162,18 @@
                     data: form.serialize(),
                     success: function (response) {
                         if (response.success) {
-                            $('#role-message').removeClass('text-danger').addClass('text-success').text('Rolle erfolgreich erstellt');
+                            $('#role-message').removeClass('text-danger').addClass('text-success').text('Role created successfully!');
                             setTimeout(function () {
                                 $('#role-message').text('');
                             }, 3000);
                             updateRoleList();
                         } else {
-                            var errorMessage = response.error || "Es gab einen Fehler beim erstellen der Rolle";
+                            var errorMessage = response.error || "An error occurred while creating the role.";
                             $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                         }
                     },
                     error: function (response) {
-                        var errorMessage = response.responseJSON ? response.responseJSON.error : "Es gab einen Fehler beim erstellen der Rolle";
+                        var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while creating the role.";
                         $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                     }
                 });
@@ -192,19 +189,19 @@
                     data: form.serialize(),
                     success: function (response) {
                         if (response.success) {
-                            $('#role-message').removeClass('text-danger').addClass('text-success').text('Rolle erfolgreich gelöscht');
+                            $('#role-message').removeClass('text-danger').addClass('text-success').text('Role deleted successfully!');
                             setTimeout(function () {
                                 $('#role-message').text('');
                             }, 3000);
                             updateRoleList();
                         } else {
-                            var errorMessage = response.error || "Es gab einen Fehler beim löschen der Rolle";
+                            var errorMessage = response.error || "An error occurred while deleting the role.";
                             $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                         }
                     },
                     error: function (response) {
                         console.error("Error response:", response); // Log the full response object
-                        var errorMessage = response.responseJSON ? response.responseJSON.error : "Es gab einen Fehler beim löschen der Rolle";
+                        var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while deleting the role.";
                         $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                     }
                 });
@@ -237,20 +234,20 @@
                         },
                         success: function (response) {
                             if (response.success) {
-                                $('#role-message').removeClass('text-danger').addClass('text-success').text('Rolle erfolgreich bearbeitet');
+                                $('#role-message').removeClass('text-danger').addClass('text-success').text('Role updated successfully!');
                                 setTimeout(function () {
                                     $('#role-message').text('');
                                 }, 3000);
                                 updateRoleList();
                             } else {
-                                var errorMessage = response.error || "Es gab einen Fehler beim bearbeiten der Rolle";
+                                var errorMessage = response.error || "An error occurred while updating the role.";
                                 $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                                 roleNameElement.text(originalRoleName);
                                 resetSaveButtonToEdit(saveButton, originalRoleName);
                             }
                         },
                         error: function (response) {
-                            var errorMessage = response.responseJSON ? response.responseJSON.error : "Es gab einen Fehler beim bearbeiten der Rolle";
+                            var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while updating the role.";
                             $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                             roleNameElement.text(originalRoleName);
                             resetSaveButtonToEdit(saveButton, originalRoleName);
