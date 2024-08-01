@@ -1,8 +1,5 @@
-using System.Data.Common;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Sqlite;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
 
@@ -22,19 +19,10 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 */
 
 // Beginn: Neue DbContext
-if (builder.Environment.IsEnvironment("Testing") == false)
-{
-    throw new Exception("Enviroment is not testing");
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-    );
-}
-else
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseInMemoryDatabase("TestDatabase")
-    );
-}
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder
     .Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -44,6 +32,7 @@ builder
     .AddDefaultTokenProviders();
 
 // Ende: Neu DbContext
+
 
 /*
 builder
@@ -59,6 +48,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60); // Session-Timeout
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -83,16 +79,9 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
     var context = services.GetRequiredService<ApplicationDbContext>();
-    if (app.Environment.IsEnvironment("Testing"))
-    {
-        await context.Database.EnsureCreatedAsync();
-    }
-    else
-    {
-        await context.Database.MigrateAsync();
-        //await context.Database.MigrateAsync();
-        await SeedData.Initialize(userManager, roleManager, context);
-    }
+    await context.Database.EnsureCreatedAsync();
+    //await context.Database.MigrateAsync();
+    await SeedData.Initialize(userManager, roleManager, context);
 }
 
 if (!app.Environment.IsDevelopment())
@@ -112,7 +101,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseWebSockets();
 
 app.UseAuthentication();
 app.UseAuthorization();
