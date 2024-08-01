@@ -1,6 +1,7 @@
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
 
 //-------------------------
 // Author: Michael Adolf
@@ -19,8 +20,10 @@ public class InvalidateSessionsMiddleware
     {
         if (context.User.Identity.IsAuthenticated)
         {
-            await context.SignOutAsync();
+            await context.SignOutAsync(IdentityConstants.ApplicationScheme);
         }
+
         await _next(context);
     }
 }
+
