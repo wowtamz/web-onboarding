@@ -84,35 +84,36 @@ namespace SoPro24Team06.Areas.Identity.Pages.Account
         /// <param name="returnUrl"> Redirection Url after Login </param>
         /// <returns></returns>
     
-    public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
-    {
-        returnUrl ??= Url.Content("~/");
-
-        if (ModelState.IsValid)
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
-            var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-            if (result.Succeeded)
+            returnUrl ??= Url.Content("~/");
+
+            if (ModelState.IsValid)
             {
-                _logger.LogInformation("Benutzer Eingeloggt.");
-                return LocalRedirect(returnUrl);
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Benutzer Eingeloggt.");
+                    return LocalRedirect(returnUrl);
+                }
+                if (result.RequiresTwoFactor)
+                {
+                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+                }
+                if (result.IsLockedOut)
+                {
+                    _logger.LogWarning("Benutzerkonto gesperrt.");
+                    ModelState.AddModelError(string.Empty, "Ihr Konto wurde gesperrt.");
+                    return Page();
+                }
+                else
+                {
+                    _logger.LogWarning("Login fehlgeschlagen.");
+                    ModelState.AddModelError(string.Empty, "Login fehlgeschlagen.");
+                    return Page();
+                }
             }
-            if (result.RequiresTwoFactor)
-            {
-                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-            }
-            if (result.IsLockedOut)
-            {
-                _logger.LogWarning("Benutzerkonto gesperrt.");
-                ModelState.AddModelError(string.Empty, "Ihr Konto wurde gesperrt.");
-                return Page();
-            }
-            else
-            {
-                _logger.LogWarning("Login fehlgeschlagen.");
-                ModelState.AddModelError(string.Empty, "Login fehlgeschlagen.");
-                return Page();
-            }
+            return Page();
         }
-        return Page();
     }
 }
