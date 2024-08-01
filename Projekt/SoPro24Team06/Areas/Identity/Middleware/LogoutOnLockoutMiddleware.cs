@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
+using SoPro24Team06.Models;
 
 public class LogoutOnLockoutMiddleware
 {
