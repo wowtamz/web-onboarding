@@ -106,6 +106,8 @@ app.UseAuthorization();
 
 app.UseSession();
 
+app.UseMiddleware<LogoutOnLockoutMiddleware>();
+
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
