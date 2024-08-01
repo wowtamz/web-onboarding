@@ -103,8 +103,7 @@ namespace SoPro24Team06.Areas.Identity.Pages.Account
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("Benutzerkonto gesperrt.");
-                    ModelState.AddModelError(string.Empty, "Ihr Konto wurde gesperrt.");
-                    return Page();
+                    return RedirectToPage("./Lockout");
                 }
                 else
                 {
@@ -113,7 +112,9 @@ namespace SoPro24Team06.Areas.Identity.Pages.Account
                     return Page();
                 }
             }
+
             return Page();
         }
+
     }
 }
