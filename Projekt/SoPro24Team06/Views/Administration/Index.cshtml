@@ -214,6 +214,7 @@
                 var roleNameElement = $(this).closest('li').find('.role-name');
                 var newRoleName = roleNameElement.find('.edit-role-input').val().trim();
                 var originalRoleName = $(this).data('original-role');
+                var saveButton = $(this);
 
                 if (newRoleName && newRoleName !== originalRoleName) {
                     $.ajax({
@@ -235,18 +236,25 @@
                                 var errorMessage = response.error || "An error occurred while updating the role.";
                                 $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                                 roleNameElement.text(originalRoleName);
+                                resetSaveButtonToEdit(saveButton, originalRoleName);
                             }
                         },
                         error: function (response) {
                             var errorMessage = response.responseJSON ? response.responseJSON.error : "An error occurred while updating the role.";
                             $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                             roleNameElement.text(originalRoleName);
+                            resetSaveButtonToEdit(saveButton, originalRoleName);
                         }
                     });
                 } else {
                     roleNameElement.text(originalRoleName);
+                    resetSaveButtonToEdit(saveButton, originalRoleName);
                 }
             });
+
+            function resetSaveButtonToEdit(saveButton, roleName) {
+                saveButton.replaceWith('<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)" data-role="' + roleName + '">Bearbeiten</button>');
+            }
 
             function cancelEditMode() {
                 $('.edit-role-input').each(function () {
@@ -257,7 +265,7 @@
                 $('.save-role').each(function () {
                     var saveButton = $(this);
                     var originalRoleName = saveButton.data('original-role');
-                    saveButton.replaceWith('<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)" data-role="' + originalRoleName + '">Edit</button>');
+                    saveButton.replaceWith('<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)" data-role="' + originalRoleName + '">Bearbeiten</button>');
                 });
             }
 
@@ -268,7 +276,7 @@
                     data.forEach(function (role) {
                         var deleteButton = role !== "Administrator" ?
                             '<div class="role-actions">' +
-                            '<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)"  data-role="' + role + '">Edit</button>' +
+                            '<button class="btn btn-sm edit-role mx-2" style="background-color: var(--silver)" data-role="' + role + '">Bearbeiten</button>' +
                             '<form asp-action="DeleteRole" method="post" class="delete-role-form" style="display:inline">' +
                             '<input type="hidden" name="roleName" value="' + role + '" />' +
                             '@Html.AntiForgeryToken()' +
