@@ -441,3 +441,16 @@ namespace SoPro24Team06.E2E
 It is absolut important to dispose of the driver and factory
 Auch muss man darauf achten das man RoleManager, UserManager und Context nur auf die Art und weise verwendet wie im Beispiel und auf keinen Fall außerhalb des Using bereches!
 Sonst funktioneirt es einfach nicht !
+
+
+
+
+
+# Quellen:
+
+https://stackoverflow.com/questions/71541576/using-webapplicationfactory-to-do-e2e-testing-with-net-6-minimal-api
+
+https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-8.0
+
+
+
