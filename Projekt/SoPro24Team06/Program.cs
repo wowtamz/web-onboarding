@@ -37,21 +37,6 @@ else
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseInMemoryDatabase("TestDatabase")
     );
-    // builder.Services.AddSingleton<DbConnection>(container =>
-    // {
-    //     var connection = new SqliteConnection("DataSource=:memory:");
-    //     connection.Open();
-
-    //     return connection;
-    // });
-
-    // builder.Services.AddDbContext<ApplicationDbContext>(
-    //     (container, options) =>
-    //     {
-    //         var connection = container.GetRequiredService<DbConnection>();
-    //         options.UseSqlite(connection);
-    //     }
-    // );
 }
 
 builder
