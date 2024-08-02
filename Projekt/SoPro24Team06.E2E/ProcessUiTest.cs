@@ -1,11 +1,11 @@
-using SoPro24Team06.Controllers;
-using SoPro24Team06.Models;
-using SoPro24Team06.ViewModels;
 using System;
 using System.IO;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using SoPro24Team06.Controllers;
+using SoPro24Team06.Models;
+using SoPro24Team06.ViewModels;
 using Xunit;
 
 namespace SoPro24Team06.E2E;
@@ -36,17 +36,18 @@ public class ProcessUiTest : IDisposable
         _driver = new ChromeDriver(service, options);
         _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(60));
     }
-    public void Dispose() 
+
+    public void Dispose()
     {
-        _driver.Quit(); 
-        _driver.Dispose(); 
+        _driver.Quit();
+        _driver.Dispose();
     }
-    
-    //[Fact] 
+
+    //[Fact]
     public void StartProcessFromProcessTemplate()
     {
         _driver.Navigate().GoToUrl(baseurl);
-        
+
         // Login
         if (_driver.Url.Contains("Identity/Account/Login"))
         {
@@ -75,14 +76,12 @@ public class ProcessUiTest : IDisposable
             }
             catch (WebDriverTimeoutException exception)
             {
-                throw new Exception(
-                    "WedDriver timedout during loginAttempt" + exception.Message
-                );
+                throw new Exception("WedDriver timedout during loginAttempt" + exception.Message);
             }
         }
-        
+
         // Go to ProcessTemplates
-        _driver.Navigate().GoToUrl(baseurl+"ProcessTemplate/");
+        _driver.Navigate().GoToUrl(baseurl + "ProcessTemplate/");
         if (_driver.Title.Contains("Prozesse"))
         {
             try
@@ -91,9 +90,8 @@ public class ProcessUiTest : IDisposable
                 {
                     return driver.FindElement(By.XPath("//a[contains(@href, '/Process/Start/')]"));
                 });
-                
+
                 linkElement.Click();
-                
             }
             catch (WebDriverTimeoutException exception)
             {
@@ -104,7 +102,7 @@ public class ProcessUiTest : IDisposable
         }
 
         string processTitle = "";
-        
+
         // Check if at Process Start
         if (_driver.Title.Contains("Vorgang starten"))
         {
@@ -121,33 +119,46 @@ public class ProcessUiTest : IDisposable
                 {
                     processTitle = inputTitle.GetAttribute("value");
                 }
-                
+
                 // Select WorkerOfReference
-                IWebElement dropdownWorkerOfRef = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("workerOfRefDropdown")));
+                IWebElement dropdownWorkerOfRef = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                        By.Id("workerOfRefDropdown")
+                    )
+                );
                 SelectElement selectWorkerOfRef = new SelectElement(dropdownWorkerOfRef);
                 selectWorkerOfRef.SelectByIndex(1);
-                
+
                 // Select ContractOfRefWorker
-                IWebElement dropdownContract = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("contractDropdown")));
+                IWebElement dropdownContract = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                        By.Id("contractDropdown")
+                    )
+                );
                 SelectElement selectContract = new SelectElement(dropdownContract);
                 selectContract.SelectByIndex(1);
-                
+
                 // Select DepartmentOfRefWorker
-                IWebElement dropdownDepartment = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("departmentDropdown")));
+                IWebElement dropdownDepartment = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                        By.Id("departmentDropdown")
+                    )
+                );
                 SelectElement selectDepartment = new SelectElement(dropdownDepartment);
                 selectDepartment.SelectByIndex(1);
-                
+
                 // Click Start Button
                 IWebElement startButton = _wait.Until(driver =>
                 {
                     var buttons = driver.FindElements(By.TagName("button"));
-                    IWebElement button = buttons.FirstOrDefault(b => b.Text.Equals("Starten", StringComparison.OrdinalIgnoreCase));
-                
+                    IWebElement button = buttons.FirstOrDefault(b =>
+                        b.Text.Equals("Starten", StringComparison.OrdinalIgnoreCase)
+                    );
+
                     return button;
                 });
-                
+
                 startButton.Click();
-                
             }
             catch (NoSuchElementException)
             {
@@ -160,19 +171,20 @@ public class ProcessUiTest : IDisposable
                 );
             }
         }
-        
-        _driver.Navigate().GoToUrl(baseurl+"Process");
+
+        _driver.Navigate().GoToUrl(baseurl + "Process");
         if (_driver.Title.Contains("Vorgänge"))
         {
-
             try
             {
                 IWebElement tdElement = _wait.Until(driver =>
                 {
-                    IWebElement element = driver.FindElement(By.XPath($"//td[text()='{processTitle}']"));
+                    IWebElement element = driver.FindElement(
+                        By.XPath($"//td[text()='{processTitle}']")
+                    );
                     return element.Displayed ? element : null;
                 });
-                
+
                 Assert.NotNull(tdElement);
             }
             catch (NoSuchElementException)
@@ -181,20 +193,16 @@ public class ProcessUiTest : IDisposable
             }
             catch (WebDriverTimeoutException exception)
             {
-                throw new Exception(
-                    "WedDriver timedout during Process View" + exception.Message
-                );
+                throw new Exception("WedDriver timedout during Process View" + exception.Message);
             }
         }
-        
-        
     }
-    
+
     //[Fact]
     public void StartProcessFromTemplateAddCustomAssignment()
     {
         _driver.Navigate().GoToUrl(baseurl);
-        
+
         // Login
         if (_driver.Url.Contains("Identity/Account/Login"))
         {
@@ -223,14 +231,12 @@ public class ProcessUiTest : IDisposable
             }
             catch (WebDriverTimeoutException exception)
             {
-                throw new Exception(
-                    "WedDriver timedout during loginAttempt" + exception.Message
-                );
+                throw new Exception("WedDriver timedout during loginAttempt" + exception.Message);
             }
         }
-        
+
         // Go to ProcessTemplates
-        _driver.Navigate().GoToUrl(baseurl+"ProcessTemplate/");
+        _driver.Navigate().GoToUrl(baseurl + "ProcessTemplate/");
         if (_driver.Title.Contains("Prozesse"))
         {
             try
@@ -239,9 +245,8 @@ public class ProcessUiTest : IDisposable
                 {
                     return driver.FindElement(By.XPath("//a[contains(@href, '/Process/Start/')]"));
                 });
-                
+
                 linkElement.Click();
-                
             }
             catch (WebDriverTimeoutException exception)
             {
@@ -252,46 +257,59 @@ public class ProcessUiTest : IDisposable
         }
 
         string processTitle = "";
-        
+
         // Check if at Process Start
         if (_driver.Title.Contains("Vorgang starten"))
         {
             try
             {
-                
                 IWebElement inputTitle = _wait.Until(driver =>
                 {
                     IWebElement element = driver.FindElement(By.Id("Title"));
 
                     return element.Displayed ? element : null;
                 });
-                
+
                 if (inputTitle != null)
                 {
                     processTitle = inputTitle.GetAttribute("value");
                 }
-                
+
                 // Select WorkerOfReference
-                IWebElement dropdownWorkerOfRef = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("workerOfRefDropdown")));
+                IWebElement dropdownWorkerOfRef = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                        By.Id("workerOfRefDropdown")
+                    )
+                );
                 SelectElement selectWorkerOfRef = new SelectElement(dropdownWorkerOfRef);
                 selectWorkerOfRef.SelectByIndex(1);
-                
+
                 // Select ContractOfRefWorker
-                IWebElement dropdownContract = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("contractDropdown")));
+                IWebElement dropdownContract = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                        By.Id("contractDropdown")
+                    )
+                );
                 SelectElement selectContract = new SelectElement(dropdownContract);
                 selectContract.SelectByIndex(1);
-                
+
                 // Select DepartmentOfRefWorker
-                IWebElement dropdownDepartment = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("departmentDropdown")));
+                IWebElement dropdownDepartment = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                        By.Id("departmentDropdown")
+                    )
+                );
                 SelectElement selectDepartment = new SelectElement(dropdownDepartment);
                 selectDepartment.SelectByIndex(1);
-                
+
                 // Add new Assignment
                 IWebElement addAssignmentButton = _wait.Until(driver =>
                 {
                     var buttons = driver.FindElements(By.TagName("button"));
-                    IWebElement button = buttons.FirstOrDefault(b => b.Text.Equals("Aufgabe hinzufügen", StringComparison.OrdinalIgnoreCase));
-                
+                    IWebElement button = buttons.FirstOrDefault(b =>
+                        b.Text.Equals("Aufgabe hinzufügen", StringComparison.OrdinalIgnoreCase)
+                    );
+
                     return button;
                 });
 
@@ -305,7 +323,7 @@ public class ProcessUiTest : IDisposable
 
                             return element.Displayed ? element : null;
                         });
-                        
+
                         if (inputTitle != null)
                         {
                             inputTitle.Clear();
@@ -313,17 +331,19 @@ public class ProcessUiTest : IDisposable
                         }
                         else
                         {
-                            _driver.Navigate().GoToUrl(baseurl+"/Process/Start");
+                            _driver.Navigate().GoToUrl(baseurl + "/Process/Start");
                         }
-                        
+
                         IWebElement createButton = _wait.Until(driver =>
                         {
                             var buttons = driver.FindElements(By.TagName("button"));
-                            IWebElement button = buttons.FirstOrDefault(b => b.Text.Equals("Erstellen", StringComparison.OrdinalIgnoreCase));
-                
+                            IWebElement button = buttons.FirstOrDefault(b =>
+                                b.Text.Equals("Erstellen", StringComparison.OrdinalIgnoreCase)
+                            );
+
                             return button;
                         });
-                        
+
                         createButton.Click();
                     }
                     catch (NoSuchElementException)
@@ -337,19 +357,19 @@ public class ProcessUiTest : IDisposable
                         );
                     }
                 }
-                
-                
+
                 // Click Start Button
                 IWebElement startButton = _wait.Until(driver =>
                 {
                     var buttons = driver.FindElements(By.TagName("button"));
-                    IWebElement button = buttons.FirstOrDefault(b => b.Text.Equals("Starten", StringComparison.OrdinalIgnoreCase));
-                
+                    IWebElement button = buttons.FirstOrDefault(b =>
+                        b.Text.Equals("Starten", StringComparison.OrdinalIgnoreCase)
+                    );
+
                     return button;
                 });
-                
+
                 startButton.Click();
-                
             }
             catch (NoSuchElementException)
             {
@@ -361,18 +381,20 @@ public class ProcessUiTest : IDisposable
                     "WedDriver timedout during ProcessTemplate View" + exception.Message
                 );
             }
-            
-            _driver.Navigate().GoToUrl(baseurl+"Process");
+
+            _driver.Navigate().GoToUrl(baseurl + "Process");
             if (_driver.Title.Contains("Vorgänge"))
             {
                 try
                 {
                     IWebElement tdElement = _wait.Until(driver =>
                     {
-                        IWebElement element = driver.FindElement(By.XPath($"//td[text()='{processTitle}']"));
+                        IWebElement element = driver.FindElement(
+                            By.XPath($"//td[text()='{processTitle}']")
+                        );
                         return element.Displayed ? element : null;
                     });
-                
+
                     Assert.NotNull(tdElement);
                 }
                 catch (NoSuchElementException)

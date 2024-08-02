@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
@@ -24,29 +25,33 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 */
 
 // Beginn: Neue DbContext
-if (!builder.Environment.IsEnvironment("Testing"))
+if (builder.Environment.IsEnvironment("Testing") == false)
 {
+    throw new Exception("Enviroment is not testing");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
     );
 }
 else
 {
-    builder.Services.AddSingleton<DbConnection>(container =>
-    {
-        var connection = new SqliteConnection("DataSource=:memory:");
-        connection.Open();
-
-        return connection;
-    });
-
-    builder.Services.AddDbContext<ApplicationDbContext>(
-        (container, options) =>
-        {
-            var connection = container.GetRequiredService<DbConnection>();
-            options.UseSqlite(connection);
-        }
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseInMemoryDatabase("TestDatabase")
     );
+    // builder.Services.AddSingleton<DbConnection>(container =>
+    // {
+    //     var connection = new SqliteConnection("DataSource=:memory:");
+    //     connection.Open();
+
+    //     return connection;
+    // });
+
+    // builder.Services.AddDbContext<ApplicationDbContext>(
+    //     (container, options) =>
+    //     {
+    //         var connection = container.GetRequiredService<DbConnection>();
+    //         options.UseSqlite(connection);
+    //     }
+    // );
 }
 
 builder
@@ -97,10 +102,16 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
     var context = services.GetRequiredService<ApplicationDbContext>();
-    await context.Database.EnsureCreatedAsync();
-    //await context.Database.MigrateAsync();
-    await SeedData.Initialize(userManager, roleManager, context);
-
+    if (app.Environment.IsEnvironment("Testing"))
+    {
+        await context.Database.EnsureCreatedAsync();
+    }
+    else
+    {
+        await context.Database.MigrateAsync();
+        //await context.Database.MigrateAsync();
+        await SeedData.Initialize(userManager, roleManager, context);
+    }
     // Einmalige Invalidierung der Sessions beim Start der Anwendung
     var keyRingPath = Path.Combine(Directory.GetCurrentDirectory(), "keys");
     if (Directory.Exists(keyRingPath))
