@@ -12,9 +12,14 @@ using SoPro24Team06.Models;
 
 namespace SoPro24Team06.E2E
 {
-    public class AssignmentE2ETest
+    public class AssignmentE2ETest : IClassFixture<CustomWebApplicationFactory<Program>>
     {
-        public AssignmentE2ETest() { }
+        private readonly CustomWebApplicationFactory<Program> _factory;
+
+        public AssignmentE2ETest(CustomWebApplicationFactory<Program> factory)
+        {
+            _factory = factory;
+        }
 
         [Fact]
         public async Task TestIfIsRunning()
