@@ -1,4 +1,6 @@
+using System.Data.Common;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
@@ -19,10 +21,30 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 */
 
 // Beginn: Neue DbContext
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+    );
+}
+else
+{
+    builder.Services.AddSingleton<DbConnection>(container =>
+    {
+        var connection = new SqliteConnection("DataSource=:memory:");
+        connection.Open();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+        return connection;
+    });
+
+    builder.Services.AddDbContext<ApplicationDbContext>(
+        (container, options) =>
+        {
+            var connection = container.GetRequiredService<DbConnection>();
+            options.UseSqlite(connection);
+        }
+    );
+}
 
 builder
     .Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
