@@ -27,7 +27,6 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 // Beginn: Neue DbContext
 if (builder.Environment.IsEnvironment("Testing") == false)
 {
-    throw new Exception("Enviroment is not testing");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
     );
@@ -63,7 +62,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(60); // Session-Timeout
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 builder.Services.ConfigureApplicationCookie(options =>
