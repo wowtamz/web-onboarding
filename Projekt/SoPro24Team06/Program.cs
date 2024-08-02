@@ -17,16 +17,10 @@ if (!Directory.Exists(dataDirectory))
     Directory.CreateDirectory(dataDirectory);
 }
 
-/* Alte DbContext
-var connectionString = builder.Configuration.GetConnectionString("UserConnection");
-builder.Services.AddDbContext<UserDbContext>(options =>
-    options.UseSqlite(connectionString + ";Pooling=False")
-); // Disable pooling
-*/
-
 // Beginn: Neue DbContext
 if (builder.Environment.IsEnvironment("Testing") == false)
 {
+    throw new Exception("Enviroment is not testing");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
     );
