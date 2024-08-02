@@ -1,10 +1,12 @@
+using System.Data.Common;
+using System.IO;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.DependencyInjection;
-using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,24 +16,53 @@ if (!Directory.Exists(dataDirectory))
     Directory.CreateDirectory(dataDirectory);
 }
 
-// Neue DbContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+/* Alte DbContext
+var connectionString = builder.Configuration.GetConnectionString("UserConnection");
+builder.Services.AddDbContext<UserDbContext>(options =>
+    options.UseSqlite(connectionString + ";Pooling=False")
+); // Disable pooling
+*/
 
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+// Beginn: Neue DbContext
+if (!builder.Environment.IsEnvironment("Testing"))
 {
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequiredUniqueChars = 1;
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+    );
+}
+else
+{
+    builder.Services.AddSingleton<DbConnection>(container =>
+    {
+        var connection = new SqliteConnection("DataSource=:memory:");
+        connection.Open();
 
-    options.SignIn.RequireConfirmedAccount = false;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+        return connection;
+    });
+
+    builder.Services.AddDbContext<ApplicationDbContext>(
+        (container, options) =>
+        {
+            var connection = container.GetRequiredService<DbConnection>();
+            options.UseSqlite(connection);
+        }
+    );
+}
+
+builder
+    .Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequiredUniqueChars = 1;
+
+        options.SignIn.RequireConfirmedAccount = false;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -51,7 +82,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 });
 
-builder.Services.AddDataProtection()
+builder
+    .Services.AddDataProtection()
     .SetApplicationName("SoPro24Team06")
     .PersistKeysToFileSystem(new DirectoryInfo(@"./keys/"))
     .SetDefaultKeyLifetime(TimeSpan.FromDays(14)); // Change this to invalidate old sessions
