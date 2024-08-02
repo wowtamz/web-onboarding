@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using SoPro24Team06.Enums;
 
 //-------------------------
@@ -20,24 +19,24 @@ namespace SoPro24Team06.ViewModels
     /// </summary>
     public class CreateUserViewModel
     {
-        [Required]
+        [Required(ErrorMessage = "Voller Name ist erforderlich")]
         [Display(Name = "Voller Name")]
         public string FullName { get; set; }
 
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Email Adresse ist erforderlich")]
+        [EmailAddress(ErrorMessage = "Ungültige Email Adresse")]
         [Display(Name = "Email Adresse")]
         public string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Passwort ist erforderlich")]
         [DataType(DataType.Password)]
         [Display(Name = "Passwort")]
-        public string Password { get; set; } = String.Empty;
+        public string Password { get; set; } = string.Empty;
 
         [Required]
         public UserStatus Status { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Mindestens eine Rolle muss ausgewählt werden")]
         [Display(Name = "Ausgewählte Rollen")]
         public List<string> SelectedRoles { get; set; } = new List<string>();
 
