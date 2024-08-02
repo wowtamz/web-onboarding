@@ -596,20 +596,6 @@ namespace SoPro24Team06.Controllers
             List<Assignment> assignmentList = new List<Assignment>();
             //changes contents of Lists depending on which list was selected in Index ViewModel
 
-            processList = processList
-                .Where(p =>
-                    p.Assignments.Any(a =>
-                        (
-                            a.AssignedRole != null
-                            && a.AssigneeType == AssigneeType.ROLES
-                            && roles.Contains(a.AssignedRole.ToString())
-                        )
-                        || (p.Supervisor == user)
-                        || (a.Assignee != null && a.Assignee.Id == user.Id)
-                    )
-                )
-                .ToList();
-
             switch (HttpContext.Session.GetString("currentList"))
             {
                 case "RoleAssignment":
@@ -632,14 +618,11 @@ namespace SoPro24Team06.Controllers
                     //if roles of current user contains Administrator show all Assignments
                     if (roles.Contains("Administrator"))
                     {
-                        processList = await _processContainer.GetActiveProcessesAsync();
-                        
                         foreach (Process p in processList)
                         {
                             foreach (Assignment a in p.Assignments)
                             {
                                 assignmentList.Add(a);
-                                _logger.LogInformation(a.Title);
                             }
                         }
                     }

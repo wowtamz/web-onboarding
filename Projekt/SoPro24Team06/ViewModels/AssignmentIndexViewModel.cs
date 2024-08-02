@@ -67,20 +67,11 @@ public class AssignmentIndexViewModel
         switch (sortingProperty)
         {
             case "dueDate":
-                AssignmentList.Sort((x, y) => DateTime.Compare(x.DueDate, y.DueDate));
-                List<Assignment> tempAssignmentList = new List<Assignment>();
-                foreach (Assignment a in AssignmentList)
-                {
-                    if (a.Status == AssignmentStatus.DONE)
-                    {
-                        tempAssignmentList.Add(a);
-                    }
-                    else
-                    {
-                        tempAssignmentList.Insert(0, a);
-                    }
-                }
-                AssignmentList = tempAssignmentList;
+                List<Assignment> sortedAssignmentList = AssignmentList
+                    .OrderBy(a => a.Status == Enums.AssignmentStatus.DONE)
+                    .ThenBy(a => a.DueDate)
+                    .ToList();
+                AssignmentList = sortedAssignmentList;
                 break;
             case "name":
                 this.AssignmentList.Sort((x, y) => String.Compare(x.Title, y.Title));
