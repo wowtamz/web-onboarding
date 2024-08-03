@@ -512,21 +512,7 @@ namespace SoPro24Team06.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            try
-            {
-                using (var stream = new StreamReader(jsonFile.OpenReadStream()))
-                {
-                    var jsonString = await stream.ReadToEndAsync();
-                    await AddData.Initialize(_userManager, _roleManager, _context, jsonString);
-                    TempData["Message"] = "Daten erfolgreich importiert.";
-                }
-            }
-            catch (Exception ex)
-            {
-                TempData["Message"] = $"Fehler beim Importieren der Daten: {ex.Message}";
-            }
-
-            return Redirect("/Identity/Account/Login");
+            return RedirectToAction(nameof(Index));
         }
     }
 }
