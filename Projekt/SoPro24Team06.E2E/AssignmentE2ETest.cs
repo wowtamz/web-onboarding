@@ -19,6 +19,7 @@ namespace SoPro24Team06.E2E
         private readonly WebDriverWait _wait;
         private readonly string _errorLocationClass = "AssignmentE2ETest: ";
         private readonly Uri baseUrl = new Uri("https://localhost:/7003/");
+        private readonly string baseurl = "https://localhost:7003/";
 
         public AssignmentE2ETest()
         {
@@ -812,6 +813,167 @@ namespace SoPro24Team06.E2E
             };
             await context.Processes.AddRangeAsync(processes);
             await context.SaveChangesAsync();
+        }
+
+        [Fact]
+        public void StartProcessFromProcessTemplate()
+        {
+            _driver.Navigate().GoToUrl(baseurl);
+
+            // Login
+            if (_driver.Url.Contains("Identity/Account/Login"))
+            {
+                try
+                {
+                    var emailElement = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("Input_Email")
+                        )
+                    );
+                    emailElement.SendKeys("user@example.com");
+
+                    var passwordElement = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("Input_Password")
+                        )
+                    );
+                    passwordElement.SendKeys("User@123");
+
+                    var loginButton = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                            By.CssSelector("[aria-label='login-submit']")
+                        )
+                    );
+                    loginButton.Click();
+                }
+                catch (WebDriverTimeoutException exception)
+                {
+                    throw new Exception(
+                        "WedDriver timedout during loginAttempt" + exception.Message
+                    );
+                }
+            }
+
+            // Go to ProcessTemplates
+            _driver.Navigate().GoToUrl(baseurl + "ProcessTemplate/");
+            if (_driver.Title.Contains("Prozesse"))
+            {
+                try
+                {
+                    IWebElement linkElement = _wait.Until(driver =>
+                    {
+                        return driver.FindElement(
+                            By.XPath("//a[contains(@href, '/Process/Start/')]")
+                        );
+                    });
+
+                    linkElement.Click();
+                }
+                catch (WebDriverTimeoutException exception)
+                {
+                    throw new Exception(
+                        "WedDriver timedout during ProcessTemplate View" + exception.Message
+                    );
+                }
+            }
+
+            string processTitle = "";
+
+            // Check if at Process Start
+            if (_driver.Title.Contains("Vorgang starten"))
+            {
+                try
+                {
+                    IWebElement inputTitle = _wait.Until(driver =>
+                    {
+                        IWebElement element = driver.FindElement(By.Id("Title"));
+
+                        return element.Displayed ? element : null;
+                    });
+
+                    if (inputTitle != null)
+                    {
+                        processTitle = inputTitle.GetAttribute("value");
+                    }
+
+                    // Select WorkerOfReference
+                    IWebElement dropdownWorkerOfRef = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("workerOfRefDropdown")
+                        )
+                    );
+                    SelectElement selectWorkerOfRef = new SelectElement(dropdownWorkerOfRef);
+                    selectWorkerOfRef.SelectByIndex(1);
+
+                    // Select ContractOfRefWorker
+                    IWebElement dropdownContract = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("contractDropdown")
+                        )
+                    );
+                    SelectElement selectContract = new SelectElement(dropdownContract);
+                    selectContract.SelectByIndex(1);
+
+                    // Select DepartmentOfRefWorker
+                    IWebElement dropdownDepartment = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("departmentDropdown")
+                        )
+                    );
+                    SelectElement selectDepartment = new SelectElement(dropdownDepartment);
+                    selectDepartment.SelectByIndex(1);
+
+                    // Click Start Button
+                    IWebElement startButton = _wait.Until(driver =>
+                    {
+                        var buttons = driver.FindElements(By.TagName("button"));
+                        IWebElement button = buttons.FirstOrDefault(b =>
+                            b.Text.Equals("Starten", StringComparison.OrdinalIgnoreCase)
+                        );
+
+                        return button;
+                    });
+
+                    startButton.Click();
+                }
+                catch (NoSuchElementException)
+                {
+                    Console.WriteLine("Element not found.");
+                }
+                catch (WebDriverTimeoutException exception)
+                {
+                    throw new Exception(
+                        "WedDriver timedout during Process Start View" + exception.Message
+                    );
+                }
+            }
+
+            _driver.Navigate().GoToUrl(baseurl + "Process");
+            if (_driver.Title.Contains("Vorgänge"))
+            {
+                try
+                {
+                    IWebElement tdElement = _wait.Until(driver =>
+                    {
+                        IWebElement element = driver.FindElement(
+                            By.XPath($"//td[text()='{processTitle}']")
+                        );
+                        return element.Displayed ? element : null;
+                    });
+
+                    Assert.NotNull(tdElement);
+                }
+                catch (NoSuchElementException)
+                {
+                    Console.WriteLine("Element not found.");
+                }
+                catch (WebDriverTimeoutException exception)
+                {
+                    throw new Exception(
+                        "WedDriver timedout during Process View" + exception.Message
+                    );
+                }
+            }
         }
 
         public void Dispose()
