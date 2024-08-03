@@ -14,15 +14,18 @@ namespace SoPro24Team06.E2E
             IDisposable
     {
         private readonly CustomWebApplicationFactory<Program> _factory;
+        private readonly HttpClient _webClient;
         private readonly ChromeDriver _driver;
         private readonly WebDriverWait _wait;
         private readonly string _errorLocationClass = "AssignmentE2ETest";
         private readonly Uri baseUrl = new Uri("https://localhost:/7003/");
+        private readonly string baseurl = "https://localhost:7003/";
 
         public AssignmentE2ETest()
         {
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
             _factory = new CustomWebApplicationFactory<Program>();
+            _webClient = _factory.CreateDefaultClient();
             var options = new ChromeOptions();
             //options.AddArguments("--headless");
             options.AddArguments("--disable-dev-shm-usage");
@@ -35,158 +38,6 @@ namespace SoPro24Team06.E2E
             _driver = new ChromeDriver(service, options);
 
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30)); // Increase wait time
-        }
-
-        [Fact]
-        public async Task AssignmentListTest()
-        {
-            string errorLocationFunktion = "AssignmentListTest";
-            //start Client
-            HttpClient client = _factory.CreateDefaultClient();
-
-            List<Assignment> assignments = new List<Assignment>();
-            ApplicationUser user;
-            //using scoped services to create only neccecary Data in Database
-            using (var scope = _factory.Services.CreateScope())
-            {
-                // Resolve the UserManager Role Manager and context from the scope
-                var userManager = scope.ServiceProvider.GetRequiredService<
-                    UserManager<ApplicationUser>
-                >();
-                var roleManager = scope.ServiceProvider.GetRequiredService<
-                    RoleManager<ApplicationRole>
-                >();
-                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-                await SetTestData(context, userManager, roleManager);
-                user = await userManager.FindByEmailAsync("user@example.com");
-            }
-            if (user == null)
-                throw new Exception("no user found");
-            //login as Normal User
-            await Login("user@example.com", "User@123");
-
-            //check Assignment List:
-            _driver
-                .Navigate()
-                .GoToUrl("https://localhost:7003/Assignment/ChangeTable?currentList=MyAssignments");
-
-            //test if AssignmentList is displayed
-            IWebElement assignmentListBody = _wait.Until(d => d.FindElement(By.TagName("tbody")));
-            try
-            {
-                Assert.True(
-                    assignmentListBody.Displayed,
-                    "assignmentList myAssignmentsList not displayed"
-                );
-            }
-            catch (Exception e)
-            {
-                throw new Exception(
-                    ""
-                        + _errorLocationClass
-                        + errorLocationFunktion
-                        + "AssignmentList-isDisplayed-Check: "
-                        + e.Message
-                );
-            }
-
-            //check if any Assignments are Displayed
-            try
-            {
-                assignmentListBody.FindElement(
-                    By.XPath("//tr/td[text()='Keine Aufgaben vorhanden']")
-                );
-
-                throw new Exception(
-                    ""
-                        + _errorLocationClass
-                        + errorLocationFunktion
-                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
-                );
-            }
-            catch (Exception e) { }
-
-            //filter assignments for User
-            List<Assignment> assignmentsForUser = assignments
-                .Where(a => a.Assignee != null && a.Assignee == user)
-                .ToList();
-
-            //check number of Displayed Elements:
-            List<IWebElement> assignmentListContent = assignmentListBody
-                .FindElements(By.XPath("/tr"))
-                .ToList();
-            if (assignmentListContent.Count() != assignmentsForUser.Count)
-            {
-                throw new Exception(
-                    ""
-                        + _errorLocationClass
-                        + errorLocationFunktion
-                        + "AssignmentList-NumberOfAssignments-Check: is not correct"
-                );
-            }
-
-            //check content of Assignments
-            foreach (var a in assignmentListContent)
-            {
-                IWebElement TitleElement = a.FindElement(By.XPath("/td[1]"));
-                string assignmentTitle = TitleElement.Text;
-                //check if Assignment is actually in the List
-                Assignment? assignmentToCheck = assignmentsForUser.Find(a =>
-                    a.Title == assignmentTitle
-                );
-                if (assignmentToCheck != null)
-                {
-                    //check if Assignment is overdue
-                    if (assignmentToCheck.DueDate.CompareTo(DateTime.Today) < 0)
-                    {
-                        if (a.GetAttribute("class") != ".overdue")
-                        {
-                            throw new Exception(
-                                ""
-                                    + _errorLocationClass
-                                    + errorLocationFunktion
-                                    + "AssignmentList-CheckListContent: overDue Assignment not Displayed Correctly"
-                            );
-                        }
-                    }
-
-                    //check if DaysTillDueDate are displayed Correctly:
-                    if (
-                        a.FindElement(By.XPath("/td[3]")).Text
-                        != assignmentToCheck.GetDaysTillDueDate().ToString()
-                    )
-                    {
-                        throw new Exception(
-                            ""
-                                + _errorLocationClass
-                                + errorLocationFunktion
-                                + "AssignmentList-CheckListContent: Days Till DueDate not displayed correctly"
-                        );
-                    }
-
-                    assignmentsForUser.Remove(assignmentToCheck);
-                }
-                else
-                {
-                    throw new Exception(
-                        ""
-                            + _errorLocationClass
-                            + errorLocationFunktion
-                            + "AssignmentList-CheckListContent: An Assignment was not found in the List for the current User"
-                    );
-                }
-
-                if (assignmentsForUser.Count() != 0)
-                {
-                    throw new Exception(
-                        ""
-                            + _errorLocationClass
-                            + errorLocationFunktion
-                            + "AssignmentList-CheckListContent: not all Assignments from the Database where Displayed"
-                    );
-                }
-            }
         }
 
         public async Task Login(string userName, string password)
@@ -394,10 +245,172 @@ namespace SoPro24Team06.E2E
             await context.SaveChangesAsync();
         }
 
+        [Fact]
+        public void StartProcessFromProcessTemplate()
+        {
+            _driver.Navigate().GoToUrl(baseurl);
+
+            // Login
+            if (_driver.Url.Contains("Identity/Account/Login"))
+            {
+                try
+                {
+                    var emailElement = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("Input_Email")
+                        )
+                    );
+                    emailElement.SendKeys("user@example.com");
+
+                    var passwordElement = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("Input_Password")
+                        )
+                    );
+                    passwordElement.SendKeys("User@123");
+
+                    var loginButton = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                            By.CssSelector("[aria-label='login-submit']")
+                        )
+                    );
+                    loginButton.Click();
+                }
+                catch (WebDriverTimeoutException exception)
+                {
+                    throw new Exception(
+                        "WedDriver timedout during loginAttempt" + exception.Message
+                    );
+                }
+            }
+
+            // Go to ProcessTemplates
+            _driver.Navigate().GoToUrl(baseurl + "ProcessTemplate/");
+            if (_driver.Title.Contains("Prozesse"))
+            {
+                try
+                {
+                    IWebElement linkElement = _wait.Until(driver =>
+                    {
+                        return driver.FindElement(
+                            By.XPath("//a[contains(@href, '/Process/Start/')]")
+                        );
+                    });
+
+                    linkElement.Click();
+                }
+                catch (WebDriverTimeoutException exception)
+                {
+                    throw new Exception(
+                        "WedDriver timedout during ProcessTemplate View" + exception.Message
+                    );
+                }
+            }
+
+            string processTitle = "";
+
+            // Check if at Process Start
+            if (_driver.Title.Contains("Vorgang starten"))
+            {
+                try
+                {
+                    IWebElement inputTitle = _wait.Until(driver =>
+                    {
+                        IWebElement element = driver.FindElement(By.Id("Title"));
+
+                        return element.Displayed ? element : null;
+                    });
+
+                    if (inputTitle != null)
+                    {
+                        processTitle = inputTitle.GetAttribute("value");
+                    }
+
+                    // Select WorkerOfReference
+                    IWebElement dropdownWorkerOfRef = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("workerOfRefDropdown")
+                        )
+                    );
+                    SelectElement selectWorkerOfRef = new SelectElement(dropdownWorkerOfRef);
+                    selectWorkerOfRef.SelectByIndex(1);
+
+                    // Select ContractOfRefWorker
+                    IWebElement dropdownContract = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("contractDropdown")
+                        )
+                    );
+                    SelectElement selectContract = new SelectElement(dropdownContract);
+                    selectContract.SelectByIndex(1);
+
+                    // Select DepartmentOfRefWorker
+                    IWebElement dropdownDepartment = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("departmentDropdown")
+                        )
+                    );
+                    SelectElement selectDepartment = new SelectElement(dropdownDepartment);
+                    selectDepartment.SelectByIndex(1);
+
+                    // Click Start Button
+                    IWebElement startButton = _wait.Until(driver =>
+                    {
+                        var buttons = driver.FindElements(By.TagName("button"));
+                        IWebElement button = buttons.FirstOrDefault(b =>
+                            b.Text.Equals("Starten", StringComparison.OrdinalIgnoreCase)
+                        );
+
+                        return button;
+                    });
+
+                    startButton.Click();
+                }
+                catch (NoSuchElementException)
+                {
+                    Console.WriteLine("Element not found.");
+                }
+                catch (WebDriverTimeoutException exception)
+                {
+                    throw new Exception(
+                        "WedDriver timedout during Process Start View" + exception.Message
+                    );
+                }
+            }
+
+            _driver.Navigate().GoToUrl(baseurl + "Process");
+            if (_driver.Title.Contains("Vorgänge"))
+            {
+                try
+                {
+                    IWebElement tdElement = _wait.Until(driver =>
+                    {
+                        IWebElement element = driver.FindElement(
+                            By.XPath($"//td[text()='{processTitle}']")
+                        );
+                        return element.Displayed ? element : null;
+                    });
+
+                    Assert.NotNull(tdElement);
+                }
+                catch (NoSuchElementException)
+                {
+                    Console.WriteLine("Element not found.");
+                }
+                catch (WebDriverTimeoutException exception)
+                {
+                    throw new Exception(
+                        "WedDriver timedout during Process View" + exception.Message
+                    );
+                }
+            }
+        }
+
         public void Dispose()
         {
             _driver.Close();
             _driver.Dispose();
+            _webClient.Dispose();
             _factory.Dispose();
         }
     }

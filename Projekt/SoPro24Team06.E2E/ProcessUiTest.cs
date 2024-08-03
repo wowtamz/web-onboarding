@@ -10,14 +10,20 @@ using Xunit;
 
 namespace SoPro24Team06.E2E;
 
-public class ProcessUiTest : IDisposable
+public class ProcessUiTest : IClassFixture<CustomWebApplicationFactory<Program>>, IDisposable
 {
     private readonly string baseurl = "https://localhost:7003/";
     private readonly IWebDriver _driver;
     private readonly WebDriverWait _wait;
+    private readonly CustomWebApplicationFactory<Program> _factory;
+    private readonly HttpClient _webClient;
 
     public ProcessUiTest()
     {
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+        _factory = new CustomWebApplicationFactory<Program>();
+        _webClient = _factory.CreateDefaultClient();
+
         Environment.SetEnvironmentVariable("DISPLAY", ":99");
 
         var options = new ChromeOptions();
@@ -41,6 +47,8 @@ public class ProcessUiTest : IDisposable
     {
         _driver.Quit();
         _driver.Dispose();
+        _webClient.Dispose();
+        _factory.Dispose();
     }
 
     //[Fact]
