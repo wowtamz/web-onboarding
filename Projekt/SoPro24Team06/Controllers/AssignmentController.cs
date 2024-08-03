@@ -637,7 +637,6 @@ namespace SoPro24Team06.Controllers
                                 {
                                     assignmentList.Add(a);
                                 }
-                                assignmentList = _context.Assignments.ToList();
                             }
                             else
                             {
@@ -650,7 +649,8 @@ namespace SoPro24Team06.Controllers
                                             && roles.Contains(a.AssignedRole.ToString())
                                         )
                                     )
-                                        assignmentList.Add(a);
+                                        if (!assignmentList.Contains(a))
+                                            assignmentList.Add(a);
                                 }
                             }
                         }
@@ -670,7 +670,6 @@ namespace SoPro24Team06.Controllers
                                     assignmentList.Add(a);
                             }
                         }
-                        HttpContext.Session.SetString("currentList", "MyAssignments");
                     }
                     break;
                 default:
