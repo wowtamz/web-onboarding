@@ -166,16 +166,6 @@ namespace SoPro24Team06.Controllers
             // if Model State is InValid, reinitialize all properties of model where necessary and return to view
             if (!ModelState.IsValid)
             {
-                // foreach (var modelStateEntry in ModelState.Values)
-                // {
-                //     foreach (var error in modelStateEntry.Errors)
-                //     {
-                //         var errorMessage = error.ErrorMessage;
-                //         var exception = error.Exception;
-                //     }
-                // }
-                // return BadRequest(ModelState);
-
                 //checks if Model Stat is Invalid because of missing assignment, if yes show NotFoundError
                 if (model.Assignment == null)
                     return NotFound("Error: Assignment not found");
@@ -185,12 +175,13 @@ namespace SoPro24Team06.Controllers
                     p.Assignments.Contains(model.Assignment)
                 );
                 //get List of all Users which are not locked
-                List<ApplicationUser> userList = _userManager.Users.ToList();
+                List<ApplicationUser> userList = new List<ApplicationUser>();
+                List<ApplicationUser> tempUserList = _userManager.Users.ToList();
 
-                foreach (ApplicationUser u in userList)
+                foreach (ApplicationUser u in tempUserList)
                 {
-                    if (await _userManager.IsLockedOutAsync(u))
-                        userList.Remove(u);
+                    if (!await _userManager.IsLockedOutAsync(u))
+                        userList.Add(u);
                 }
                 //get List of all Roles
                 List<ApplicationRole> roleList = _roleManager.Roles.ToList();
@@ -331,12 +322,13 @@ namespace SoPro24Team06.Controllers
                     p.Assignments.Contains(model.Assignment)
                 );
                 //get List of all Users which are not LockedOut
-                List<ApplicationUser> userList = _userManager.Users.ToList();
+                List<ApplicationUser> userList = new List<ApplicationUser>();
+                List<ApplicationUser> tempUserList = _userManager.Users.ToList();
 
-                foreach (ApplicationUser u in userList)
+                foreach (ApplicationUser u in tempUserList)
                 {
-                    if (await _userManager.IsLockedOutAsync(u))
-                        userList.Remove(u);
+                    if (!await _userManager.IsLockedOutAsync(u))
+                        userList.Add(u);
                 }
                 //get list of all Roles
                 List<ApplicationRole> roleList = _roleManager.Roles.ToList();
@@ -437,12 +429,13 @@ namespace SoPro24Team06.Controllers
                 }
 
                 Process process = await _processContainer.GetProcessByIdAsync(processId);
+                List<ApplicationUser> userList = new List<ApplicationUser>();
+                List<ApplicationUser> tempUserList = _userManager.Users.ToList();
 
-                List<ApplicationUser> userList = _userManager.Users.ToList();
-                foreach (ApplicationUser u in userList)
+                foreach (ApplicationUser u in tempUserList)
                 {
-                    if (await _userManager.IsLockedOutAsync(u))
-                        userList.Remove(u);
+                    if (!await _userManager.IsLockedOutAsync(u))
+                        userList.Add(u);
                 }
                 List<ApplicationRole> roleList = _roleManager.Roles.ToList();
                 ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
@@ -495,11 +488,13 @@ namespace SoPro24Team06.Controllers
             Process? process = processList.FirstOrDefault(p =>
                 p.Assignments != null && p.Assignments.Contains(assignment)
             );
-            List<ApplicationUser> userList = _userManager.Users.ToList();
-            foreach (ApplicationUser u in userList)
+            List<ApplicationUser> userList = new List<ApplicationUser>();
+            List<ApplicationUser> tempUserList = _userManager.Users.ToList();
+
+            foreach (ApplicationUser u in tempUserList)
             {
-                if (await _userManager.IsLockedOutAsync(u))
-                    userList.Remove(u);
+                if (!await _userManager.IsLockedOutAsync(u))
+                    userList.Add(u);
             }
             List<ApplicationRole> roleList = _roleManager.Roles.ToList();
             ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
