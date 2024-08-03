@@ -517,7 +517,7 @@ namespace SoPro24Team06.Controllers
                 using (var stream = new StreamReader(jsonFile.OpenReadStream()))
                 {
                     var jsonString = await stream.ReadToEndAsync();
-                    await SeedData.Initialize(_userManager, _roleManager, _context, jsonString);
+                    await AddData.Initialize(_userManager, _roleManager, _context, jsonString);
                     TempData["Message"] = "Daten erfolgreich importiert.";
                 }
             }

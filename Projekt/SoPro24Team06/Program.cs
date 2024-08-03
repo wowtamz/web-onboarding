@@ -1,8 +1,11 @@
 using System.Data.Common;
+using System.IO;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
 
@@ -13,13 +16,6 @@ if (!Directory.Exists(dataDirectory))
 {
     Directory.CreateDirectory(dataDirectory);
 }
-
-/* Alte DbContext
-var connectionString = builder.Configuration.GetConnectionString("UserConnection");
-builder.Services.AddDbContext<UserDbContext>(options =>
-    options.UseSqlite(connectionString + ";Pooling=False")
-); // Disable pooling
-*/
 
 // Beginn: Neue DbContext
 if (builder.Environment.IsEnvironment("Testing") == false)
@@ -37,22 +33,18 @@ else
 
 builder
     .Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-        options.SignIn.RequireConfirmedAccount = false
-    )
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequiredUniqueChars = 1;
+
+        options.SignIn.RequireConfirmedAccount = false;
+    })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-
-// Ende: Neu DbContext
-
-/*
-builder
-    .Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-    {
-        options.SignIn.RequireConfirmedAccount = false; // email confirmation!
-    })
-    .AddEntityFrameworkStores<UserDbContext>()
-    .AddDefaultTokenProviders();
-*/
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -72,13 +64,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 });
 
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(60);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Adjust based on your environment
-});
+builder
+    .Services.AddDataProtection()
+    .SetApplicationName("SoPro24Team06")
+    .PersistKeysToFileSystem(new DirectoryInfo(@"./keys/"))
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(14));
 
 var app = builder.Build();
 
@@ -115,13 +105,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-/*
-else
-{
-    app.UseDeveloperExceptionPage();
-}
-*/
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -130,6 +113,8 @@ app.UseWebSockets();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<LogoutOnLockoutMiddleware>();
 
 app.UseSession();
 
