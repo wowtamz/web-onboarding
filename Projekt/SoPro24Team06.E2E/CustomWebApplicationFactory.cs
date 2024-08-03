@@ -13,42 +13,59 @@ using Microsoft.Extensions.Logging;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
 
-public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup>
-    where TStartup : class
+namespace SoPro24Team06.E2E
 {
-    private readonly string _baseAddress = "https://localhost:7003";
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram>
+        where TProgram : class
     {
-        builder.UseUrls("https://localhost:7003");
-        builder.ConfigureServices(services =>
+        private readonly string _baseAddress = "https://localhost:7003";
+        private IHost _webHost;
+
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            // get old Database Connection
-            var descriptor = services.SingleOrDefault(d =>
-                d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>)
-            );
-            // if foun remove old Database Connection
-            if (descriptor != null)
+            builder.UseUrls(_baseAddress);
+            builder.ConfigureServices(services =>
             {
-                services.Remove(descriptor);
+                // get old Database Connection
+                var descriptor = services.SingleOrDefault(d =>
+                    d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>)
+                );
+                // if foun remove old Database Connection
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
+
+                //add new Db Discriptor
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseInMemoryDatabase("TestDatabase")
+                );
+            });
+        }
+
+        protected override IHost CreateHost(IHostBuilder builder)
+        {
+            var dummyHost = builder.Build();
+            //builder.ConfigureWebHost();
+            builder.ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseKestrel();
+            });
+            _webHost = builder.Build();
+            _webHost.Start();
+
+            return dummyHost;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _webHost?.StopAsync().GetAwaiter().GetResult();
+                _webHost?.Dispose();
             }
 
-            //add new Db Discriptor
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("TestDatabase")
-            );
-        });
-    }
-
-    protected override IHost CreateHost(IHostBuilder builder)
-    {
-        var dummyHost = builder.Build();
-
-        builder.ConfigureWebHost(webHostBuilder => webHostBuilder.UseKestrel());
-
-        var host = builder.Build();
-        host.Start();
-
-        return dummyHost;
+            base.Dispose(disposing);
+        }
     }
 }
