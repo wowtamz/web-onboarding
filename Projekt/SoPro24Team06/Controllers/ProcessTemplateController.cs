@@ -40,6 +40,8 @@ namespace SoPro24Team06.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewData["isUserAdmin"] = User.IsInRole("Administrator");
+
             List<ProcessTemplate> processTemplates =
                 await _processTemplateContainer.GetProcessListByAccessRights(User.Identity.Name);
 
@@ -50,6 +52,7 @@ namespace SoPro24Team06.Controllers
         [HttpGet("ProcessTemplate/Detail/{id}")]
         public async Task<IActionResult> Detail(int id)
         {
+            ViewData["isUserAdmin"] = User.IsInRole("Administrator");
             try
             {
                 ProcessTemplate processTemplate =

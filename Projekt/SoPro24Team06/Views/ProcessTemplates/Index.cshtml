@@ -6,6 +6,7 @@
   //-------------------------
 
   ViewData["Title"] = "Prozesse";
+  Boolean isUserAdmin = (Boolean)ViewData["isUserAdmin"];
 }
 
 <!-- Start: Banner Heading -->
@@ -29,10 +30,13 @@
         erstellten Prozess als Blaupause aus, um einen Vorgang zu kreieren.
       </p>
       <div class="my-3">
-        <a class="btn btn-primary btn-lg me-2" role="button" asp-controller="ProcessTemplate" asp-action="Create"
-          style="background: rgb(204, 212, 217); border-style: none">
-          Prozess erstellen
-        </a>
+        @if (isUserAdmin)
+        {
+          <a class="btn btn-primary btn-lg me-2" role="button" asp-controller="ProcessTemplate" asp-action="Create"
+            style="background: rgb(204, 212, 217); border-style: none">
+            Prozess erstellen
+          </a>
+        }
       </div>
     </div>
   </div>
@@ -51,7 +55,7 @@
       </tr>
     </thead>
     <tbody>
-      @if (Model.ProcessTemplateList.Count == 0)
+      @if (Model.ProcessTemplateList == null || Model.ProcessTemplateList.Count == 0)
       {
         <tr>
           <td colspan="7">Keine Prozesse vorhanden</td>
@@ -64,8 +68,8 @@
           <tr onclick="window.location='/ProcessTemplate/Detail/@processTemplate.Id'" class="hoverTableRow">
             <td>@processTemplate.Title</td>
             <td>@processTemplate.Description</td>
-            <td>@processTemplate.ContractOfRefWorker.Label</td>
-            <td>@processTemplate.DepartmentOfRefWorker.Name</td>
+            <td>@processTemplate.ContractOfRefWorker?.Label</td>
+            <td>@processTemplate.DepartmentOfRefWorker?.Name</td>
             <td>
               @foreach (var role in processTemplate.RolesWithAccess)
               {
@@ -86,7 +90,10 @@
               </a>
               <a href="/ProcessTemplate/Edit/@processTemplate.Id"><i class="far fa-edit"
                   style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
-              <a href="/ProcessTemplate/Delete/@processTemplate.Id" class="btn-close" type="button" aria-label="Close"></a>
+              @if (isUserAdmin)
+              {
+                <a href="/ProcessTemplate/Delete/@processTemplate.Id" class="btn-close" type="button" aria-label="Close"></a>
+              }
             </td>
           </tr>
         }
