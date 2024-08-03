@@ -26,10 +26,10 @@
                     data-bs-toggle="modal" style="background: rgb(204, 212, 217);border-style: none;">Rollenverwaltung
                 </button>
                 <form asp-action="ImportJson" method="post" enctype="multipart/form-data" class="d-inline-block">
-                    <input type="file" name="jsonFile" class="d-none" id="jsonFileInput" accept="application/json">
-                    <label for="jsonFileInput" class="btn btn-primary btn-lg me-2" style="background: rgb(204, 212, 217);border-style: none;">
+                    <input type="File" name="jsonFile" class="d-none" id="jsonFileInput" accept="application/json" onchange="this.form.submit()">
+                    <button type="button" class="btn btn-primary btn-lg me-2" onclick="document.getElementById('jsonFileInput').click();" style="background: rgb(204, 212, 217);border-style: none;">
                         JSON importieren
-                    </label>
+                    </button>
                 </form>
             </div>
         </div>
