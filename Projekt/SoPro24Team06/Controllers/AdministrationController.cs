@@ -502,5 +502,17 @@ namespace SoPro24Team06.Controllers
             var roles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
             return Json(roles);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ImportJson(IFormFile jsonFile)
+        {
+            if (jsonFile == null || jsonFile.Length == 0)
+            {
+                TempData["Message"] = "Keine Datei hochgeladen.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
