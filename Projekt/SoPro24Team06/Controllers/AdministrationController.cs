@@ -512,22 +512,17 @@ namespace SoPro24Team06.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            _logger.LogInformation("ImportJson action called.");
-
             try
             {
                 using (var stream = new StreamReader(jsonFile.OpenReadStream()))
                 {
                     var jsonString = await stream.ReadToEndAsync();
-                    _logger.LogInformation("JSON content read: {JsonString}", jsonString);
-
                     await AddData.Initialize(_userManager, _roleManager, _context, jsonString);
                     TempData["Message"] = "Daten erfolgreich importiert.";
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fehler beim Importieren der Daten");
                 TempData["Message"] = $"Fehler beim Importieren der Daten: {ex.Message}";
             }
 
