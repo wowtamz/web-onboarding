@@ -1,9 +1,13 @@
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using SoPro24Team06.Controllers;
+using SoPro24Team06.Data;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
 using Xunit;
@@ -23,6 +27,21 @@ public class ProcessUiTest : IClassFixture<CustomWebApplicationFactory<Program>>
         Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
         _factory = new CustomWebApplicationFactory<Program>();
         _webClient = _factory.CreateDefaultClient();
+        using (var scope = _factory.Services.CreateScope())
+        {
+            // Resolve the UserManager Role Manager and context from the scope
+            var userManager = scope.ServiceProvider.GetRequiredService<
+                UserManager<ApplicationUser>
+            >();
+            var roleManager = scope.ServiceProvider.GetRequiredService<
+                RoleManager<ApplicationRole>
+            >();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
+
+            SeedData.Initialize(userManager, roleManager, context).Wait();
+        }
 
         Environment.SetEnvironmentVariable("DISPLAY", ":99");
 
@@ -34,6 +53,7 @@ public class ProcessUiTest : IClassFixture<CustomWebApplicationFactory<Program>>
         options.AddArguments("--disable-extensions");
         options.AddArguments("--disable-infobars");
         options.AddArguments("--remote-debugging-port=9222");
+        options.AddArguments("--window-size=1920,1080");
 
         var service = ChromeDriverService.CreateDefaultService();
         service.LogPath = "chromedriver.log";
@@ -51,7 +71,7 @@ public class ProcessUiTest : IClassFixture<CustomWebApplicationFactory<Program>>
         _factory.Dispose();
     }
 
-    //[Fact]
+    [Fact]
     public void StartProcessFromProcessTemplate()
     {
         _driver.Navigate().GoToUrl(baseurl);
@@ -206,7 +226,7 @@ public class ProcessUiTest : IClassFixture<CustomWebApplicationFactory<Program>>
         }
     }
 
-    //[Fact]
+    [Fact]
     public void StartProcessFromTemplateAddCustomAssignment()
     {
         _driver.Navigate().GoToUrl(baseurl);
