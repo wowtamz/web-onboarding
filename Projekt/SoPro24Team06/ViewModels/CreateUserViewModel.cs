@@ -24,6 +24,7 @@ namespace SoPro24Team06.ViewModels
         public string FullName { get; set; }
 
         [Required(ErrorMessage = "Email Adresse ist erforderlich")]
+        [DataType(DataType.EmailAddress)]
         [EmailAddress(ErrorMessage = "Ungültige Email Adresse")]
         [Display(Name = "Email Adresse")]
         public string Email { get; set; }
