@@ -1,3 +1,5 @@
+//beginn codeownership Jan Pfluger
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -11,6 +13,10 @@ namespace SoPro24Team06.XUnit;
 
 public class AssignmentUnitTest
 {
+    /// <summary>
+    /// Test if the FilterAssignments method from the AssignmentIndexViewModel works as intended
+    /// </summary>
+    /// <exception cref="Exception"></exception>
     [Fact]
     public void TestFilterAssignment()
     {
@@ -101,6 +107,11 @@ public class AssignmentUnitTest
         }
     }
 
+    /// <summary>
+    /// Test if the ToAssignment Funktionalitiy from the AssignmentTemplate, creates a correct DueDate for the Assignemnt
+    /// Does not thest if other Attributes of the Assignment are set correktly
+    /// </summary>
+    /// <exception cref="Exception"></exception>
     [Fact]
     public void DaysTillDueDateCalculation()
     {
@@ -286,3 +297,5 @@ public class AssignmentUnitTest
         }
     }
 }
+
+//end codeownership Jan Pfluger
