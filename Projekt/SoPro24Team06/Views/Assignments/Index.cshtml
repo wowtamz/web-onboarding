@@ -111,7 +111,7 @@
 					<th>Aktionen</th>
 				</tr>
 			</thead>
-			<tbody id="myAssignmentsBody">
+			<tbody id="MyAssignments">
 				@if (Model.AssignmentList == null || Model.AssignmentList.Count == 0)
 				{
 					<tr>
@@ -137,7 +137,7 @@
 							}
 							<td>@Model.GetAssignmentStatus(assignment)</td>
 							<td class="d-flex flex-row justify-content-evenly gap-3">
-								<a id="Details-@assignment.Id.-Button" href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
+								<a href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
@@ -148,7 +148,7 @@
 										</path>
 									</svg>
 								</a>
-								<a id="Edit-@assignment.Id.-Button" href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
+								<a href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
 										class="far fa-edit" style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
 							</td>
 							<form id="Edit-@assignment.Id" asp-action="Edit" method="post" style="display:none;">
@@ -181,7 +181,7 @@
 					<th>Aktionen</th>
 				</tr>
 			</thead>
-			<tbody id="roleAssignmentBody">
+			<tbody id="RoleAssignment">
 				@if (Model.AssignmentList == null || Model.AssignmentList.Count == 0)
 				{
 					<tr>
@@ -216,7 +216,7 @@
 							}
 							<td>@Model.GetAssignmentStatus(assignment)</td>
 							<td class="d-flex flex-row justify-content-evenly gap-3">
-								<a id="Details-@assignment.Id.-Button" href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
+								<a href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
@@ -227,7 +227,7 @@
 										</path>
 									</svg>
 								</a>
-								<a id="Edit-@assignment.Id.-Button" href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
+								<a href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
 										class="far fa-edit" style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
 							</td>
 							<form id="Edit-@assignment.Id" asp-action="Edit" method="post" style="display:none;">
@@ -261,7 +261,7 @@
 					<th>Aktionen</th>
 				</tr>
 			</thead>
-			<tbody id="allAssignmentsBody">
+			<tbody id="AllAssignments">
 				@if (Model.AssignmentList == null || Model.AssignmentList.Count == 0)
 				{
 					<tr>
@@ -313,7 +313,7 @@
 							}
 							<td>@Model.GetAssignmentStatus(assignment)</td>
 							<td class="d-flex flex-row justify-content-evenly gap-3">
-								<a id="Details-@assignment.Id.-Button" href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
+								<a href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
@@ -324,7 +324,7 @@
 										</path>
 									</svg>
 								</a>
-								<a id="Edit-@assignment.Id.-Button" href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
+								<a href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
 										class="far fa-edit" style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
 							</td>
 							<form id="Edit-@assignment.Id" asp-action="Edit" method="post" style="display:none;">

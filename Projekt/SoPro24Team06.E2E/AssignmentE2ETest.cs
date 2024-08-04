@@ -41,7 +41,7 @@ namespace SoPro24Team06.E2E
             var service = ChromeDriverService.CreateDefaultService();
             _driver = new ChromeDriver(service, options);
 
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30)); // Increase wait time
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(60)); // Increase wait time
         }
 
         [Fact]
@@ -79,7 +79,9 @@ namespace SoPro24Team06.E2E
                 .GoToUrl("https://localhost:7003/Assignment/ChangeTable?currentList=MyAssignments");
 
             //test if AssignmentList is displayed
-            IWebElement assignmentListBody = _wait.Until(d => d.FindElement(By.TagName("tbody")));
+            IWebElement assignmentListBody = _wait.Until(d =>
+                d.FindElement(By.Id("MyAssignments"))
+            );
             try
             {
                 Assert.True(
