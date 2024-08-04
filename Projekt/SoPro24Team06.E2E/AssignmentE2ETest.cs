@@ -74,9 +74,7 @@ namespace SoPro24Team06.E2E
             await Login("user@example.com", "User@123");
 
             //check Assignment List:
-            _driver
-                .Navigate()
-                .GoToUrl("https://localhost:7003/Assignment/ChangeTable?currentList=MyAssignments");
+            _driver.Navigate().GoToUrl("https://localhost:7003/Assignment/");
 
             //test if AssignmentList is displayed
             IWebElement assignmentListBody = _wait.Until(d =>
