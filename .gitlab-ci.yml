@@ -47,6 +47,7 @@ e2e_test_project:
     - dotnet build
     - dotnet dev-certs https --clean
     - dotnet dev-certs https --trust
+    - dotnet test
     - xvfb-run -a dotnet test --logger "trx;LogFileName=test_results.trx"
 
 
