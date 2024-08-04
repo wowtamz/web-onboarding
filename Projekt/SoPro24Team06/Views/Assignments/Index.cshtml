@@ -113,7 +113,7 @@
 					<th>Aktionen</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="MyAssignments">
 				@if (Model.AssignmentList == null || Model.AssignmentList.Count == 0)
 				{
 					<tr>
@@ -183,7 +183,7 @@
 					<th>Aktionen</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="RoleAssignment">
 				@if (Model.AssignmentList == null || Model.AssignmentList.Count == 0)
 				{
 					<tr>
@@ -263,7 +263,7 @@
 					<th>Aktionen</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="AllAssignments">
 				@if (Model.AssignmentList == null || Model.AssignmentList.Count == 0)
 				{
 					<tr>
