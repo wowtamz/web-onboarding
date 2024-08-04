@@ -208,7 +208,6 @@ public class AssignmentUnitTest
         };
 
         DateTime refDate = new DateTime(2024, 8, 1, 0, 0, 0);
-
         foreach (AssignmentTemplate t in testAssignments)
         {
             Assignment a1 = t.ToAssignment(null, refDate);
