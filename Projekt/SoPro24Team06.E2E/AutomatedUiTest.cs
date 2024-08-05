@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using SoPro24Team06.Data;
+using SoPro24Team06.Models;
 using Xunit;
 
 namespace SoPro24Team06.E2E
@@ -10,8 +14,29 @@ namespace SoPro24Team06.E2E
         private readonly IWebDriver _driver;
         private readonly WebDriverWait _wait;
 
+        private readonly CustomWebApplicationFactory<Program> _factory;
+        private readonly HttpClient _webClient;
+
         public AutomatedUiTest()
         {
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+            _factory = new CustomWebApplicationFactory<Program>();
+            _webClient = _factory.CreateDefaultClient();
+            using (var scope = _factory.Services.CreateScope())
+            {
+                // Resolve the UserManager Role Manager and context from the scope
+                var userManager = scope.ServiceProvider.GetRequiredService<
+                    UserManager<ApplicationUser>
+                >();
+                var roleManager = scope.ServiceProvider.GetRequiredService<
+                    RoleManager<ApplicationRole>
+                >();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+
+                SeedData.Initialize(userManager, roleManager, context).Wait();
+            }
             var options = new ChromeOptions();
             options.AddArguments("--headless");
             options.AddArguments("--disable-dev-shm-usage");
@@ -37,14 +62,14 @@ namespace SoPro24Team06.E2E
                             By.Id("Input_Email")
                         )
                     );
-                    emailElement.SendKeys("admin@example.com");
+                    emailElement.SendKeys("admin@gmx.de");
 
                     var passwordElement = _wait.Until(
                         SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
                             By.Id("Input_Password")
                         )
                     );
-                    passwordElement.SendKeys("Admin@123");
+                    passwordElement.SendKeys("Admin1!");
 
                     var loginButton = _wait.Until(
                         SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
@@ -60,7 +85,7 @@ namespace SoPro24Team06.E2E
             }
         }
 
-        //[Fact]
+        [Fact]
         public void CreateProcessTemplate()
         {
             Login();
@@ -162,6 +187,8 @@ namespace SoPro24Team06.E2E
 
         public void Dispose()
         {
+            _webClient.Dispose();
+            _factory.Dispose();
             _driver.Quit();
             _driver.Dispose();
         }

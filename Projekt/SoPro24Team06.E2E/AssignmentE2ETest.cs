@@ -17,9 +17,8 @@ namespace SoPro24Team06.E2E
         private readonly HttpClient _webClient;
         private readonly ChromeDriver _driver;
         private readonly WebDriverWait _wait;
-        private readonly string _errorLocationClass = "AssignmentE2ETest";
+        private readonly string _errorLocationClass = "AssignmentE2ETest: ";
         private readonly Uri baseUrl = new Uri("https://localhost:/7003/");
-        private readonly string baseurl = "https://localhost:7003/";
 
         public AssignmentE2ETest()
         {
@@ -45,6 +44,74 @@ namespace SoPro24Team06.E2E
         }
 
         [Fact]
+        public async Task HRWorkerDelegateAssignmentToUser()
+        {
+            string errorLocationFunktion = "HRWorkerDelegateAssignmentToUser: ";
+            //start CLient
+            HttpClient client = _factory.CreateDefaultClient();
+            ApplicationUser personal;
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<
+                    UserManager<ApplicationUser>
+                >();
+                var roleManager = scope.ServiceProvider.GetRequiredService<
+                    RoleManager<ApplicationRole>
+                >();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                await SetTestData(context, userManager, roleManager);
+                personal = await userManager.FindByEmailAsync("personal@example.com");
+            }
+
+            //check if personal has been found for this test
+            if (personal == null)
+            {
+                throw new Exception(
+                    "" + _errorLocationClass + errorLocationFunktion + "no user found"
+                );
+            }
+            //login as Normal User
+            await Login(personal.Email, "User@123");
+
+            _driver
+                .Navigate()
+                .GoToUrl(
+                    "https://localhost:7003/Assignment/ChangeTabel?currentList=AllAssignments"
+                );
+            if (!_driver.Url.Contains("Assignment"))
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "could not change to Assignments"
+                );
+            }
+
+            IWebElement assignmentListBody = _wait.Until(d =>
+                d.FindElement(By.Id("AllAssignmentsBody"))
+            );
+            try
+            {
+                Assert.True(
+                    assignmentListBody.Displayed,
+                    "assignmentList myAssignmentsList not displayed"
+                );
+            }
+            catch (Exception e)
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-isDisplayed-Check: "
+                        + e.Message
+                );
+            }
+        }
+
+        [Fact]
         public async Task AssignmentListTest()
         {
             string errorLocationFunktion = "AssignmentListTest";
@@ -67,18 +134,35 @@ namespace SoPro24Team06.E2E
 
                 await SetTestData(context, userManager, roleManager);
                 user = await userManager.FindByEmailAsync("user@example.com");
+                assignments = context.Assignments.ToList();
             }
+            //check if user has been found for this test
             if (user == null)
-                throw new Exception("no user found");
+            {
+                throw new Exception(
+                    "" + _errorLocationClass + errorLocationFunktion + "no user found"
+                );
+            }
             //login as Normal User
-            await Login("user@example.com", "User@123");
+            await Login(user.Email, "User@123");
 
             //check Assignment List:
-            _driver.Navigate().GoToUrl("https://localhost:7003/Assignment/");
+            _driver
+                .Navigate()
+                .GoToUrl("https://localhost:7003/Assignment/ChangeTabel?currentList=MyAssignments");
+            if (!_driver.Url.Contains("Assignment"))
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "could not change to Assignments"
+                );
+            }
 
             //test if AssignmentList is displayed
             IWebElement assignmentListBody = _wait.Until(d =>
-                d.FindElement(By.Id("MyAssignments"))
+                d.FindElement(By.Id("myAssignmentsBody"))
             );
             try
             {
@@ -114,7 +198,6 @@ namespace SoPro24Team06.E2E
             }
             catch (Exception e) { }
 
-            //filter assignments for User
             List<Assignment> assignmentsForUser = assignments
                 .Where(a => a.Assignee != null && a.Assignee == user)
                 .ToList();
@@ -198,6 +281,7 @@ namespace SoPro24Team06.E2E
 
         public async Task Login(string userName, string password)
         {
+            string errorLocationFunktion = "Login";
             _driver.Navigate().GoToUrl("https://localhost:7003/");
 
             if (_driver.Url.Contains("Identity/Account/Login"))
@@ -215,7 +299,12 @@ namespace SoPro24Team06.E2E
                     }
                     catch
                     {
-                        throw new Exception("Failed to find userName Field");
+                        throw new Exception(
+                            ""
+                                + _errorLocationClass
+                                + errorLocationFunktion
+                                + "Failed to find Username Field"
+                        );
                     }
 
                     try
@@ -229,7 +318,12 @@ namespace SoPro24Team06.E2E
                     }
                     catch
                     {
-                        throw new Exception("Failed to find Password Field");
+                        throw new Exception(
+                            ""
+                                + _errorLocationClass
+                                + errorLocationFunktion
+                                + "Failed to find password field"
+                        );
                     }
 
                     IWebElement loginButton;
@@ -243,7 +337,12 @@ namespace SoPro24Team06.E2E
                     }
                     catch
                     {
-                        throw new Exception("Failed to find Login Button Field");
+                        throw new Exception(
+                            ""
+                                + _errorLocationClass
+                                + errorLocationFunktion
+                                + "Failed to find login Button"
+                        );
                     }
 
                     bool isElementObscured = (bool)
@@ -254,7 +353,12 @@ namespace SoPro24Team06.E2E
 
                     if (isElementObscured)
                     {
-                        throw new Exception("Login button is obscured by another element.");
+                        throw new Exception(
+                            ""
+                                + _errorLocationClass
+                                + errorLocationFunktion
+                                + "Login button is obscured by another element."
+                        );
                     }
 
                     try
@@ -263,18 +367,40 @@ namespace SoPro24Team06.E2E
                     }
                     catch (Exception e)
                     {
-                        throw new Exception("Failed to click login button" + e.Message);
+                        throw new Exception(
+                            ""
+                                + _errorLocationClass
+                                + errorLocationFunktion
+                                + "Failed to click login button"
+                                + e.Message
+                        );
                     }
+                    //wait for page to load
+                    await Task.Delay(10000);
 
                     if (_driver.Url.Contains("Identity/Account/Login"))
                     {
-                        throw new Exception("not redirected to Assignment Screen");
+                        throw new Exception(
+                            "" + _errorLocationClass + errorLocationFunktion + "Login Unsucessfull"
+                        );
                     }
                 }
                 catch (WebDriverTimeoutException ex)
                 {
-                    throw new Exception("Failed to find an element during login.", ex);
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "Failed to find an element during login."
+                            + ex.Message
+                    );
                 }
+            }
+            if (_driver.Url.Contains("Identity/Account/Login"))
+            {
+                throw new Exception(
+                    "" + _errorLocationClass + errorLocationFunktion + "Login unsucessfull"
+                );
             }
         }
 
