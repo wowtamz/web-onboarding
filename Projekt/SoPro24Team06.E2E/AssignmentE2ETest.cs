@@ -88,9 +88,41 @@ namespace SoPro24Team06.E2E
                 );
             }
             //find the assignmentListBody
-            IWebElement assignmentListBody = _wait.Until(d =>
-                d.FindElement(By.Id("allAssignmentsBody"))
-            );
+            // IWebElement assignmentListBody = _wait.Until(d =>
+            //     d.FindElement(By.Id("allAssignmentsBody"))
+            // );
+
+            IWebElement assignmentListBody;
+            try
+            {
+                assignmentListBody = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
+                        By.XPath(".//div[@class='table-responsive']/table/tbody")
+                    )
+                );
+            }
+            catch
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentListBody is not Found (befor changes)"
+                );
+            }
+            if (
+                assignmentListBody == null
+                || assignmentListBody.GetAttribute("id") != "allAssignmentsBody"
+            )
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList is not allAssignmentsBody (befor changes)"
+                );
+            }
+
             try
             {
                 Assert.True(
@@ -239,23 +271,54 @@ namespace SoPro24Team06.E2E
                 );
             }
 
-            //check if changes are visable at the main View:
-            assignmentListBody = _wait.Until(d => d.FindElement(By.Id("allAssignmentsBody")));
-            try
-            {
-                Assert.True(
-                    assignmentListBody.Displayed,
-                    "assignmentList myAssignmentsList not displayed"
+            _driver
+                .Navigate()
+                .GoToUrl(
+                    "https://localhost:7003/Assignment/ChangeTable?currentList=AllAssignments"
                 );
-            }
-            catch (Exception e)
+            if (!_driver.Url.Contains("Assignment"))
             {
                 throw new Exception(
                     ""
                         + _errorLocationClass
                         + errorLocationFunktion
-                        + "AssignmentList-isDisplayed-Check: "
-                        + e.Message
+                        + "Not on the Assignment Page after Changes"
+                );
+            }
+            if (_driver.Url.Contains("Identity/Account/Login"))
+            {
+                throw new Exception(
+                    "" + _errorLocationClass + errorLocationFunktion + "redirected To Login Page"
+                );
+            }
+            //check if changes are visable at the main View
+            try
+            {
+                assignmentListBody = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
+                        By.XPath(".//div[@class='table-responsive']/table/tbody")
+                    )
+                );
+            }
+            catch
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentListBody is not Found (after changes)"
+                );
+            }
+            if (
+                assignmentListBody == null
+                || assignmentListBody.GetAttribute("id") != "allAssignmentsBody"
+            )
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList is not allAssignmentsBody (befor changes)"
                 );
             }
 
