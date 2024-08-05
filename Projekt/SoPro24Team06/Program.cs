@@ -1,13 +1,7 @@
-using System.Data.Common;
 using System.IO;
-using System.IO;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Sqlite;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
@@ -20,19 +14,10 @@ if (!Directory.Exists(dataDirectory))
     Directory.CreateDirectory(dataDirectory);
 }
 
-// Beginn: Neue DbContext
-if (builder.Environment.IsEnvironment("Testing") == false)
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-    );
-}
-else
-{
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseInMemoryDatabase("TestDatabase")
-    );
-}
+// Neue DbContext
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 builder
     .Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -82,24 +67,16 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
     var context = services.GetRequiredService<ApplicationDbContext>();
-    if (app.Environment.IsEnvironment("Testing"))
-    {
-        await context.Database.EnsureCreatedAsync();
-    }
-    else
-    {
-        await context.Database.MigrateAsync();
-        //await context.Database.MigrateAsync();
-        await SeedData.Initialize(userManager, roleManager, context);
-        var keyRingPath = Path.Combine(Directory.GetCurrentDirectory(), "keys");
+    await context.Database.MigrateAsync();
+    await AddData.FirstDatabaseIntialisation(context, userManager, roleManager);
 
-        // Einmalige Invalidierung der Sessions beim Start der Anwendung
-        if (Directory.Exists(keyRingPath))
-        {
-            Directory.Delete(keyRingPath, true); // Lösche alle vorhandenen Schlüssel
-        }
-        Directory.CreateDirectory(keyRingPath); // Erstelle den Schlüsselordner neu
+    // Einmalige Invalidierung der Sessions beim Start der Anwendung
+    var keyRingPath = Path.Combine(Directory.GetCurrentDirectory(), "keys");
+    if (Directory.Exists(keyRingPath))
+    {
+        Directory.Delete(keyRingPath, true); // Lösche alle vorhandenen Schlüssel
     }
+    Directory.CreateDirectory(keyRingPath); // Erstelle den Schlüsselordner neu
 }
 
 if (!app.Environment.IsDevelopment())
@@ -112,7 +89,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseWebSockets();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -132,5 +108,3 @@ app.UseEndpoints(endpoints =>
 app.MapRazorPages();
 
 app.Run();
-
-public partial class Program { }
