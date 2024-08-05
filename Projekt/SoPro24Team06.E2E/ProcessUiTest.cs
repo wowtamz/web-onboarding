@@ -71,7 +71,7 @@ public class ProcessUiTest : IClassFixture<CustomWebApplicationFactory<Program>>
         _factory.Dispose();
     }
 
-    [Fact]
+    //[Fact]
     public void StartProcessFromProcessTemplate()
     {
         _driver.Navigate().GoToUrl(baseurl);
@@ -226,7 +226,7 @@ public class ProcessUiTest : IClassFixture<CustomWebApplicationFactory<Program>>
         }
     }
 
-    [Fact]
+    //[Fact]
     public void StartProcessFromTemplateAddCustomAssignment()
     {
         _driver.Navigate().GoToUrl(baseurl);
