@@ -1,3 +1,4 @@
+@using SoPro24Team06.Helpers
 @model SoPro24Team06.ViewModels.DetailProcessTemplateViewModel
 @{
     //-------------------------
@@ -67,8 +68,8 @@
                             <tr class="hoverTableRow"
                                 onclick="window.location='/AssignmentTemplate/Edit/@at.Id?processId=@Model.Id'">
                                 <td>@at.Title</td>
-                                <td>@Html.Raw(at.Instructions.Replace("\n", "<br />"))</td>
-                                <td>@at.AssigneeType</td>
+                                <td>@at.Instructions</td>
+                                <td>@EnumHelper.GetDisplayName(@at.AssigneeType)</td>
                                 <td>@at.AssignedRole</td>
                                 @if (at.DueIn != null)
                                 {
