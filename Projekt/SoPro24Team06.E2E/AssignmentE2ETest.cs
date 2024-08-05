@@ -178,8 +178,10 @@ namespace SoPro24Team06.E2E
             }
 
             //change assingeeType to user if neccessary
-            IWebElement assigneeTypeDropdown = _wait.Until(d =>
-                d.FindElement(By.Id("assignmentTypeDropdown"))
+            IWebElement assigneeTypeDropdown = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("assignmentTypeDropdown")
+                )
             );
             SelectElement selectAssigneeType = new SelectElement(assigneeTypeDropdown);
 
@@ -188,8 +190,16 @@ namespace SoPro24Team06.E2E
                 selectAssigneeType.SelectByText("Benutzer");
             }
 
-            IWebElement assigneeGroup = _wait.Until(d => d.FindElement(By.Id("assigneeGroup")));
-            IWebElement userDropdown = assigneeGroup.FindElement(By.Id("assignedUserDropdown"));
+            IWebElement assigneeGroup = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("assigneeGroup")
+                )
+            );
+            IWebElement userDropdown = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("assignedUserDropdown")
+                )
+            );
             SelectElement selectUser = new SelectElement(userDropdown);
 
             // Change the user to 'Administrator' if available
@@ -218,20 +228,24 @@ namespace SoPro24Team06.E2E
             //check if changes arrive at the databse
             using (var scope = _factory.Services.CreateScope())
             {
-                var userManager = scope.ServiceProvider.GetRequiredService<
-                    UserManager<ApplicationUser>
-                >();
-                var roleManager = scope.ServiceProvider.GetRequiredService<
-                    RoleManager<ApplicationRole>
-                >();
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
                 Assignment assignment = context.Assignments.First(a => a.Title == assignmentTitle);
+                if (assignment == null)
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "Assignemnt with Title"
+                            + assignmentTitle
+                            + " not found in Database"
+                    );
+                }
                 if (
-                    assignment == null
-                    || assignment.AssigneeType != Enums.AssigneeType.USER
+                    assignment.AssigneeType != Enums.AssigneeType.USER
                     || assignment.Assignee == null
-                    || assignment.Assignee.FullName == "Admin User"
+                    || assignment.Assignee.FullName != "Admin User"
                 )
                 {
                     throw new Exception(
