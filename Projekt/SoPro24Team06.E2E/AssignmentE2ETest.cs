@@ -25,14 +25,18 @@ namespace SoPro24Team06.E2E
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
             _factory = new CustomWebApplicationFactory<Program>();
             _webClient = _factory.CreateDefaultClient();
+
             Environment.SetEnvironmentVariable("DISPLAY", ":99");
 
             var options = new ChromeOptions();
+            options.AddArguments("--no-sandbox");
+            options.AddArguments("--headless");
+            options.AddArguments("--disable-gpu");
+            options.AddArguments("--disable-dev-shm-usage");
+            options.AddArguments("--disable-extensions");
+            options.AddArguments("--disable-infobars");
             options.AddArguments("--remote-debugging-port=9222");
             options.AddArguments("--window-size=1920,1080");
-            options.AddArguments("--headless");
-            options.AddArguments("--disable-dev-shm-usage");
-            options.AddArguments("--no-sandbox");
 
             var service = ChromeDriverService.CreateDefaultService();
             _driver = new ChromeDriver(service, options);
