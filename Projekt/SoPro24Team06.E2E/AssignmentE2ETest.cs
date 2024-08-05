@@ -19,7 +19,6 @@ namespace SoPro24Team06.E2E
         private readonly WebDriverWait _wait;
         private readonly string _errorLocationClass = "AssignmentE2ETest: ";
         private readonly Uri baseUrl = new Uri("https://localhost:/7003/");
-        private readonly string baseurl = "https://localhost:7003/";
 
         public AssignmentE2ETest()
         {
@@ -665,6 +664,8 @@ namespace SoPro24Team06.E2E
                                 + e.Message
                         );
                     }
+                    //wait for page to load
+                    await Task.Delay(10000);
 
                     if (_driver.Url.Contains("Identity/Account/Login"))
                     {
