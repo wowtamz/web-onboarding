@@ -169,7 +169,7 @@ public class AssignmentUiTestChangeAssignmentStatus
             var statusElement = _wait.Until(
                 SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("status"))
             );
-            Assert.Equal("In Bearbeitung1", statusElement.Text);
+            Assert.Equal("In Bearbeitung", statusElement.Text);
             using (var scope = _factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
