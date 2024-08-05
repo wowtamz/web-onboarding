@@ -67,15 +67,12 @@ namespace SoPro24Team06.Controllers
                     {
                         ViewData["processRoles"] = processTemplate.RolesWithAccess;
                         return View("~/Views/Assignments/Create.cshtml", assignmentTemplateVM);
-                        break;
                     }
                 }
                 return NotFound();
             }
-            else
-            {
-                ViewData["processRoles"] = _roleManager.Roles.ToList();
-            }
+            
+            ViewData["processRoles"] = _roleManager.Roles.ToList();
             return View("~/Views/Assignments/Create.cshtml", assignmentTemplateVM);
         }
 
@@ -238,9 +235,13 @@ namespace SoPro24Team06.Controllers
                     }
                 }
             }
-
+            
+            if (model.processId == null || model.processId == 0)
+            {
+                return RedirectToAction("Index", "Process");
+            }
             // End
-
+            
             return RedirectToAction("Edit", "ProcessTemplate", new { id = model.processId });
         }
 
@@ -253,7 +254,7 @@ namespace SoPro24Team06.Controllers
 
             AssignmentTemplate assignmentTemplate = await
                 _assignmentTemplateContainer.GetAssignmentTemplate(id);
-
+            
             if (assignmentTemplate == null)
             {
                 return NotFound();
@@ -284,18 +285,18 @@ namespace SoPro24Team06.Controllers
                     }
                 }
             }
-            else
+
+            ViewData["processRoles"] = _roleManager.Roles.ToList();
+            if (await UserHasAccess(null))
             {
-                ViewData["processRoles"] = _roleManager.Roles.ToList();
-                if (User.IsInRole("Administrator"))
-                {
-                    CreateEditAssignmentTemplateViewModel createEditAssignmentTemplateVM =
-                        new CreateEditAssignmentTemplateViewModel(
-                            assignmentTemplate,
-                            assignmentTemplate.ProcessTemplateId
-                        );
-                    return View("~/Views/Assignments/Edit.cshtml", createEditAssignmentTemplateVM);
-                }
+                var temp = TempData["startProcessViewModel"];
+                TempData["startProcessViewModel"] = temp;
+                CreateEditAssignmentTemplateViewModel createEditAssignmentTemplateVM =
+                    new CreateEditAssignmentTemplateViewModel(
+                        assignmentTemplate,
+                        assignmentTemplate.ProcessTemplateId
+                    );
+                return View("~/Views/Assignments/Edit.cshtml", createEditAssignmentTemplateVM);
             }
 
             return NotFound();
@@ -415,10 +416,16 @@ namespace SoPro24Team06.Controllers
                         return RedirectToAction("Start", "Process");
                     }
                 }
+                return RedirectToAction("Edit", "ProcessTemplate", new { id = model.processId });
             }
-            // End
 
-            return RedirectToAction("Edit", "ProcessTemplate", new { id = model.processId });
+            if (TempData["startProcessViewModel"] != null)
+            {
+                return RedirectToAction("Index", "Process");
+            }
+            
+            return RedirectToAction("Index", "ProcessTemplate");
+            
         }
 
         [HttpPost]
@@ -457,6 +464,7 @@ namespace SoPro24Team06.Controllers
 
             if (redirectFromProcessController || processTemplateId == 0 ||processTemplateId == null)
             {
+                
                 if (TempData["startProcessViewModel"] != null)
                 {
                     string jsonViewModel = TempData["startProcessViewModel"] as string;
@@ -475,7 +483,27 @@ namespace SoPro24Team06.Controllers
                     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                     return editProcessViewModel.Supervisor.Id == userId || User.IsInRole("Administrator");
                 }
+                
+                if (processTemplateId == 0 || processTemplateId == null)
+                {
+                    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    var user = await _userManager.FindByIdAsync(userId);
+                    List<string> roles = (List<string>) await _userManager.GetRolesAsync(user);
+                    List<ProcessTemplate> processTemplates = await _processTemplateContainer.GetProcessTemplatesAsync();
+
+                    bool hasAccessToProcessTemplate = false;
+                    processTemplates.ForEach(p =>
+                    {
+                        if (p.RolesWithAccess.Select(r => r.Name).ToList().Intersect(roles).Any())
+                        {
+                            hasAccessToProcessTemplate = true;
+                        }
+                    });
+                    
+                    return hasAccessToProcessTemplate;
+                }
             }
+            
             ProcessTemplate processTemplate =
                 await _processTemplateContainer.GetProcessTemplateByIdAsync((int)processTemplateId);
 

@@ -359,7 +359,7 @@ namespace SoPro24Team06.Controllers
 
         public async Task<IActionResult> StartRedirectToNewAssignment(
             [Bind(
-                "Title, Description, DueDate, Template, AssignmentTemplates, Supervisor, WorkerOfReference, ContractOfRefWorker, DepartmentOfRefWorker"
+                "Title, Template, Description, DueDate, Template, AssignmentTemplates, Supervisor, WorkerOfReference, ContractOfRefWorker, DepartmentOfRefWorker"
             )]
             [FromForm]
                 StartProcessViewModel startProcessViewModel
@@ -375,7 +375,7 @@ namespace SoPro24Team06.Controllers
         public async Task<IActionResult> StartRedirectEditAssignment(
             int assignmentTemplateId,
             [Bind(
-                "Title, Description, DueDate, Template, AssignmentTemplates, Supervisor, WorkerOfReference, ContractOfRefWorker, DepartmentOfRefWorker"
+                "Title, Template, Description, DueDate, Template, AssignmentTemplates, Supervisor, WorkerOfReference, ContractOfRefWorker, DepartmentOfRefWorker"
             )]
             [FromForm]
                 StartProcessViewModel startProcessViewModel
@@ -384,7 +384,6 @@ namespace SoPro24Team06.Controllers
             string jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
             TempData["startProcessViewModel"] = jsonViewModel;
 
-            // Auf Create mit processId = 0 redirecten, da wir noch kein process haben
             return Redirect($"/AssignmentTemplate/Edit/{assignmentTemplateId}");
         }
 
