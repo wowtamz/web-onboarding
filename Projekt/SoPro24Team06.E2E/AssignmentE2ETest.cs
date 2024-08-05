@@ -28,7 +28,7 @@ namespace SoPro24Team06.E2E
 
             var options = new ChromeOptions();
             options.AddArguments("--no-sandbox");
-            options.AddArguments("--headless");
+            //options.AddArguments("--headless");
             options.AddArguments("--disable-gpu");
             options.AddArguments("--disable-dev-shm-usage");
             options.AddArguments("--disable-extensions");
@@ -103,9 +103,14 @@ namespace SoPro24Team06.E2E
             IWebElement assignmentListBody;
             try
             {
+                // assignmentListBody = _wait.Until(
+                //     SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
+                //         By.XPath(".//div[@class='table-responsive']/table/tbody")
+                //     )
+                // );
                 assignmentListBody = _wait.Until(
                     SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
-                        By.XPath(".//div[@class='table-responsive']/table/tbody")
+                        By.Id("allAssignmentsBody")
                     )
                 );
             }
