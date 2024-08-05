@@ -57,7 +57,8 @@ namespace SoPro24Team06.E2E
                     RoleManager<ApplicationRole>
                 >();
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
                 await SetTestData(context, userManager, roleManager);
                 personal = await userManager.FindByEmailAsync("personal@example.com");
             }
@@ -88,9 +89,41 @@ namespace SoPro24Team06.E2E
                 );
             }
             //find the assignmentListBody
-            IWebElement assignmentListBody = _wait.Until(d =>
-                d.FindElement(By.Id("allAssignmentsBody"))
-            );
+            // IWebElement assignmentListBody = _wait.Until(d =>
+            //     d.FindElement(By.Id("allAssignmentsBody"))
+            // );
+
+            IWebElement assignmentListBody;
+            try
+            {
+                assignmentListBody = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
+                        By.XPath(".//div[@class='table-responsive']/table/tbody")
+                    )
+                );
+            }
+            catch
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentListBody is not Found (befor changes)"
+                );
+            }
+            if (
+                assignmentListBody == null
+                || assignmentListBody.GetAttribute("id") != "allAssignmentsBody"
+            )
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList is not allAssignmentsBody (befor changes)"
+                );
+            }
+
             try
             {
                 Assert.True(
@@ -224,7 +257,7 @@ namespace SoPro24Team06.E2E
             //submit changes
             IWebElement submitButton = _wait.Until(
                 SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
-                    By.CssSelector("button[type='submit']")
+                    By.Id("submitChanges")
                 )
             );
             submitButton.Click();
@@ -239,88 +272,166 @@ namespace SoPro24Team06.E2E
                 );
             }
 
-            //check if changes are visable at the main View:
-            assignmentListBody = _wait.Until(d => d.FindElement(By.Id("allAssignmentsBody")));
-            try
-            {
-                Assert.True(
-                    assignmentListBody.Displayed,
-                    "assignmentList myAssignmentsList not displayed"
+            _driver
+                .Navigate()
+                .GoToUrl(
+                    "https://localhost:7003/Assignment/ChangeTable?currentList=AllAssignments"
                 );
-            }
-            catch (Exception e)
+            if (!_driver.Url.Contains("Assignment"))
             {
                 throw new Exception(
                     ""
                         + _errorLocationClass
                         + errorLocationFunktion
-                        + "AssignmentList-isDisplayed-Check: "
-                        + e.Message
+                        + "Not on the Assignment Page after Changes"
                 );
             }
-
-            //check if Assignments are Present
-            try
+            using (var scope = _factory.Services.CreateScope())
             {
-                assignmentListBody.FindElement(
-                    By.XPath(".//tr/td[text()='Keine Aufgaben vorhanden']")
-                );
-                throw new Exception(
-                    ""
-                        + _errorLocationClass
-                        + errorLocationFunktion
-                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
-                );
-            }
-            catch (Exception e)
-            {
-                if (
-                    e.Message
-                    == (
-                        ""
-                        + _errorLocationClass
-                        + errorLocationFunktion
-                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
-                    )
-                )
-                    throw new Exception(e.Message);
-            }
+                var userManager = scope.ServiceProvider.GetRequiredService<
+                    UserManager<ApplicationUser>
+                >();
 
-            //get list of All Assignments in List
-            assignmentListContent = assignmentListBody.FindElements(By.XPath(".//tr")).ToList();
+                ApplicationUser admin = await userManager.FindByEmailAsync("admin@example.com");
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            if (assignmentListContent.Count == 0)
-            {
-                throw new Exception(
-                    ""
-                        + _errorLocationClass
-                        + errorLocationFunktion
-                        + "AssignmentList-does not contain any elements"
-                );
-            }
-
-            //get the assignment wich should be tested
-            foreach (var e in assignmentListContent)
-            {
-                var title = e.FindElement(By.XPath(".//td[1]"));
-                if (title.Text == assignmentTitle)
+                List<Assignment> assignments = context.Assignments.ToList();
+                Assignment? assignment = assignments.Find(a => a.Title == assignmentTitle);
+                if (assignment == null)
                 {
-                    assignmentToTest = e;
-                    break;
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "Assignment from Db was empty or null"
+                    );
+                }
+                else if (assignment.AssigneeType != Enums.AssigneeType.USER)
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "AssigneeType not set correctly"
+                    );
+                }
+                else if (assignment.Assignee == null)
+                {
+                    throw new Exception(
+                        "" + _errorLocationClass + errorLocationFunktion + "Assignee is null"
+                    );
+                }
+                else if (assignment.Assignee != admin)
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "Assignee not set correctly but not null"
+                    );
                 }
             }
 
-            IWebElement aufgabenverantwortlich = assignmentToTest.FindElement(By.XPath("./td[3]"));
+            //     if (_driver.Url.Contains("Identity/Account/Login"))
+            //     {
+            //         throw new Exception(
+            //             "" + _errorLocationClass + errorLocationFunktion + "redirected To Login Page"
+            //         );
+            //     }
+            //     check if changes are visable at the main View
+            //     try
+            //     {
+            //         assignmentListBody = _wait.Until(
+            //             SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
+            //                 By.XPath(".//div[@class='table-responsive']/table/tbody")
+            //             )
+            //         );
+            //     }
+            //     catch
+            //     {
+            //         throw new Exception(
+            //             ""
+            //                 + _errorLocationClass
+            //                 + errorLocationFunktion
+            //                 + "AssignmentListBody is not Found (after changes)"
+            //         );
+            //     }
+            //     if (
+            //         assignmentListBody == null
+            //         || assignmentListBody.GetAttribute("id") != "allAssignmentsBody"
+            //     )
+            //     {
+            //         throw new Exception(
+            //             ""
+            //                 + _errorLocationClass
+            //                 + errorLocationFunktion
+            //                 + "AssignmentList is not allAssignmentsBody (befor changes)"
+            //         );
+            //     }
 
-            if (aufgabenverantwortlich.Text != "Benutzer : Admin User")
-            {
-                throw new Exception(
-                    ""
-                        + _errorLocationClass
-                        + errorLocationFunktion
-                        + "Assignment Responsibility not set correctly"
-                );
-            }
+            //     check if Assignments are Present
+            //     try
+            //     {
+            //         assignmentListBody.FindElement(
+            //             By.XPath(".//tr/td[text()='Keine Aufgaben vorhanden']")
+            //         );
+            //         throw new Exception(
+            //             ""
+            //                 + _errorLocationClass
+            //                 + errorLocationFunktion
+            //                 + "AssignmentList-noAssignments-Check: noAssignmentsFound"
+            //         );
+            //     }
+            //     catch (Exception e)
+            //     {
+            //         if (
+            //             e.Message
+            //             == (
+            //                 ""
+            //                 + _errorLocationClass
+            //                 + errorLocationFunktion
+            //                 + "AssignmentList-noAssignments-Check: noAssignmentsFound"
+            //             )
+            //         )
+            //             throw new Exception(e.Message);
+            //     }
+
+            //     //get list of All Assignments in List
+            //     assignmentListContent = assignmentListBody.FindElements(By.XPath(".//tr")).ToList();
+
+            //     if (assignmentListContent.Count == 0)
+            //     {
+            //         throw new Exception(
+            //             ""
+            //                 + _errorLocationClass
+            //                 + errorLocationFunktion
+            //                 + "AssignmentList-does not contain any elements"
+            //         );
+            //     }
+
+            //     //set the assignment wich should be tested
+            //     foreach (var e in assignmentListContent)
+            //     {
+            //         var title = e.FindElement(By.XPath(".//td[1]"));
+            //         if (title.Text == assignmentTitle)
+            //         {
+            //             assignmentToTest = e;
+            //             break;
+            //         }
+            //     }
+
+            //     IWebElement aufgabenverantwortlich = assignmentToTest.FindElement(By.XPath("./td[3]"));
+
+            //     if (aufgabenverantwortlich.Text != "Benutzer : Admin User")
+            //     {
+            //         throw new Exception(
+            //             ""
+            //                 + _errorLocationClass
+            //                 + errorLocationFunktion
+            //                 + "Assignment Responsibility not set correctly"
+            //         );
+            //     }
+            // }
         }
 
         [Fact]
@@ -343,7 +454,8 @@ namespace SoPro24Team06.E2E
                     RoleManager<ApplicationRole>
                 >();
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
                 await SetTestData(context, userManager, roleManager);
                 user = await userManager.FindByEmailAsync("user@example.com");
                 assignments = context.Assignments.ToList();
