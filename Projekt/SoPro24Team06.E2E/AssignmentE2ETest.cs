@@ -28,23 +28,316 @@ namespace SoPro24Team06.E2E
 
             var options = new ChromeOptions();
             options.AddArguments("--no-sandbox");
-            //options.AddArguments("--headless");
+            options.AddArguments("--headless");
             options.AddArguments("--disable-gpu");
-            options.AddArguments("--disable-dev-shm-usage");
+            //options.AddArguments("--disable-dev-shm-usage");
             options.AddArguments("--disable-extensions");
             options.AddArguments("--disable-infobars");
             options.AddArguments("--remote-debugging-port=9222");
             options.AddArguments("--window-size=1920,1080");
             options.AddArguments("--disable-browser-side-navigation");
-            options.AddArguments("--disable-extensions");
-            options.AddArguments("--start-maximized");
             options.AddArguments("--disable-notifications");
             options.AddArguments("--disable-translate");
 
             var service = ChromeDriverService.CreateDefaultService();
             _driver = new ChromeDriver(service, options);
 
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30)); // Increase wait time
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(60)); // Increase wait time
+        }
+
+        [Fact]
+        public async Task HRWorkerDelegateAssignmentToRole()
+        {
+            string errorLocationFunktion = "HRWorkerDelegateAssignmentToRole: ";
+            //start CLient
+            HttpClient client = _factory.CreateDefaultClient();
+            //seed Database
+            ApplicationUser personal;
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<
+                    UserManager<ApplicationUser>
+                >();
+                var roleManager = scope.ServiceProvider.GetRequiredService<
+                    RoleManager<ApplicationRole>
+                >();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+                await SetTestData(context, userManager, roleManager);
+                personal = await userManager.FindByEmailAsync("personal@example.com");
+            }
+
+            //check if personal has been found for this test
+            if (personal == null)
+            {
+                throw new Exception(
+                    "" + _errorLocationClass + errorLocationFunktion + "no user found"
+                );
+            }
+            //login as Normal User
+            await Login(personal.Email, "Personal@123");
+
+            //go to AssignmentOverview
+            _driver
+                .Navigate()
+                .GoToUrl(
+                    "https://localhost:7003/Assignment/ChangeTable?currentList=AllAssignments"
+                );
+            if (!_driver.Url.Contains("Assignment"))
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "could not change to Assignments"
+                );
+            }
+            //find the assignmentListBody
+            // IWebElement assignmentListBody = _wait.Until(d =>
+            // {
+            //     return d.FindElement(By.Id("allAssignmentsBody"));
+            // });
+            IWebElement assignmentListBody;
+            try
+            {
+                // assignmentListBody = _wait.Until(
+                //     SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
+                //         By.XPath(".//div[@class='table-responsive']/table/tbody")
+                //     )
+                // );
+                assignmentListBody = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
+                        By.Id("allAssignmentsBody")
+                    )
+                );
+            }
+            catch
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentListBody is not Found (befor changes)"
+                );
+            }
+            if (
+                assignmentListBody == null
+                || assignmentListBody.GetAttribute("id") != "allAssignmentsBody"
+            )
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList is not allAssignmentsBody (befor changes)"
+                );
+            }
+
+            try
+            {
+                Assert.True(
+                    assignmentListBody.Displayed,
+                    "assignmentList myAssignmentsList not displayed"
+                );
+            }
+            catch (Exception e)
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-isDisplayed-Check: "
+                        + e.Message
+                );
+            }
+
+            //check if Assignments are Present
+            try
+            {
+                assignmentListBody.FindElement(
+                    By.XPath(".//tr/td[text()='Keine Aufgaben vorhanden']")
+                );
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
+                );
+            }
+            catch (Exception e)
+            {
+                if (
+                    e.Message
+                    == (
+                        ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
+                    )
+                )
+                    throw new Exception(e.Message);
+            }
+
+            //get list of All Assignments in List
+            List<IWebElement> assignmentListContent = assignmentListBody
+                .FindElements(By.XPath(".//tr"))
+                .ToList();
+
+            if (assignmentListContent.Count == 0)
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-does not contain any elements"
+                );
+            }
+
+            //get the assignment wich should be tested
+            IWebElement assignmentToTest = assignmentListContent[2];
+
+            //get title of the assignment
+            string assignmentTitle = assignmentToTest.FindElement(By.XPath(".//td[1]")).Text;
+
+            //go to the Edit view:
+            IWebElement editButton = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                    assignmentToTest
+                        .FindElements(By.XPath(".//a"))
+                        .First(b => b.GetAttribute("id").Contains("Edit"))
+                )
+            );
+            editButton.Click();
+
+            if (!_driver.Url.Contains("Assignment/Edit"))
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "Assignment Edit View was not opened"
+                );
+            }
+
+            //change assingeeType to user if neccessary
+            IWebElement assigneeTypeDropdown = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("assignmentTypeDropdown")
+                )
+            );
+            SelectElement selectAssigneeType = new SelectElement(assigneeTypeDropdown);
+
+            if (selectAssigneeType.SelectedOption.Text != "Rolle")
+            {
+                selectAssigneeType.SelectByText("Rolle");
+            }
+
+            IWebElement assigneeGroup = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("assignedRoleGroup")
+                )
+            );
+            IWebElement userDropdown = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("assignedRoleDropdown")
+                )
+            );
+            SelectElement selectUser = new SelectElement(userDropdown);
+
+            // Change the user to 'Administrator' if available
+            foreach (var option in selectUser.Options)
+            {
+                if (option.Text == "Administrator")
+                {
+                    selectUser.SelectByText("Administrator");
+                    break;
+                }
+                else
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "Could not select Role to be assigned to"
+                    );
+                }
+            }
+
+            //submit changes
+            IWebElement submitButton = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                    By.Id("submitChanges")
+                )
+            );
+            submitButton.Click();
+
+            if (_driver.Url.Contains("Assignment/Edit"))
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "Assignment Edit View was not closed"
+                );
+            }
+
+            _driver
+                .Navigate()
+                .GoToUrl(
+                    "https://localhost:7003/Assignment/ChangeTable?currentList=AllAssignments"
+                );
+            if (!_driver.Url.Contains("Assignment"))
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "Not on the Assignment Page after Changes"
+                );
+            }
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                List<Assignment> assignments = context
+                    .Assignments.Include(a => a.AssignedRole)
+                    .ToList();
+                Assignment? assignment = assignments.Find(a => a.Title == assignmentTitle);
+                if (assignment == null)
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "Assignment from Db was empty or null"
+                    );
+                }
+                else if (assignment.AssigneeType != Enums.AssigneeType.ROLES)
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "AssigneeType not set correctly"
+                    );
+                }
+                else if (assignment.AssignedRole == null)
+                {
+                    throw new Exception(
+                        "" + _errorLocationClass + errorLocationFunktion + "AssignedRole is null"
+                    );
+                }
+                else if (assignment.AssignedRole.Name != "Administrator")
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "AssignedRole not set correctly but not null"
+                    );
+                }
+            }
         }
 
         [Fact]
@@ -307,7 +600,9 @@ namespace SoPro24Team06.E2E
                 ApplicationUser admin = await userManager.FindByEmailAsync("admin@example.com");
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                List<Assignment> assignments = context.Assignments.ToList();
+                List<Assignment> assignments = context
+                    .Assignments.Include(a => a.Assignee)
+                    .ToList();
                 Assignment? assignment = assignments.Find(a => a.Title == assignmentTitle);
                 if (assignment == null)
                 {
