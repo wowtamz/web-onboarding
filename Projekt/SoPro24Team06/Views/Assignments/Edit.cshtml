@@ -3,6 +3,8 @@
 @using SoPro24Team06.Enums
 @using SoPro24Team06.Models
 @using Microsoft.AspNetCore.Identity
+@using SoPro24Team06.Helpers
+@using System.Text.RegularExpressions
 
 @{
     //-------------------------
@@ -26,178 +28,190 @@
     }
 }
 <!-- // End -->
-    
+
 @if (hasRoleOfProcess || User.IsInRole("Administrator")) /* Überprüft ob ein User Zugriff auf die Seite hat */
 {
+
     <body>
-    <form asp-controller="AssignmentTemplate" asp-action="Edit" method="post">
-        <input hidden asp-for="processId" value=@Model.processId/>
-        <input type="hidden" name="Id" value="@Model.Id">
+        <form asp-controller="AssignmentTemplate" asp-action="Edit" method="post">
+            <input hidden asp-for="processId" value=@Model.processId />
+            <input type="hidden" name="Id" value="@Model.Id">
 
-        <fieldset>
-            <legend>Titel</legend>
-            <input class="form-control" value="@Model.Title" type="text" asp-for="Title">
-        </fieldset>
+            <fieldset>
+                <legend>Titel</legend>
+                <input class="form-control" value="@Model.Title" type="text" asp-for="Title">
+            </fieldset>
 
-        <fieldset style="margin-top: 8px;">
-            <legend>Anweisungen</legend>
-            <textarea class="form-control" value="@Model.Instructions" asp-for="Instructions"></textarea>
-        </fieldset>
+            <fieldset style="margin-top: 8px;">
+                <legend>Anweisungen</legend>
+                <textarea class="form-control" value="@Model.Instructions" asp-for="Instructions"></textarea>
+            </fieldset>
 
-        <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
-        <div class="dropdown">
-            <select asp-for="AssigneeType" class="form-select" id="assigneeType" asp-items="Html.GetEnumSelectList<AssigneeType>()">
-                <option value="WORKER_OF_REF" selected="@Model.AssigneeType == AssigneeType.WORKER_OF_REF">Bezugsperson</option>
-                <option value="SUPERVISOR" selected="@Model.AssigneeType == AssigneeType.SUPERVISOR">Vorgangsverantwortlicher</option>
-            </select>
-        </div>
-
-        <div id="roleSelect" style="margin-top: 8px; display: none;">
-            <select asp-for="AssignedRole" class="form-select">
-                @if (Model.AssignedRole == null)
-                {
-                    <option value="" disabled selected>Bitte wähle eine Rolle aus...</option>
-                }
-                @foreach (var r in roleList)
-                {
-                    <option value="@r.Name" selected="@Model.AssignedRole == @r.Name">@r.Name</option>
-                }
-            </select>
-        </div>
-
-        <fieldset style="margin-top: 8px;">
-            <legend style="margin-top: 4px;">Fälligkeit</legend>
-            <div>
-                <select asp-for="DueIn" id="dueIn" class="form-select">
-                    <option value="@Model.DueIn" selected>@Model.DueIn</option>
-                    <option value="ASAP">ASAP</option>
-                    <option value="2 Wochen vor Start">2 Wochen vor Start</option>
-                    <option value="3 Wochen nach Arbeitsbeginn">3 Wochen nach Arbeitsbeginn</option>
-                    <option value="3 Monate nach Arbeitsbeginn">3 Monate nach Arbeitsbeginn</option>
-                    <option value="6 Monate nach Arbeitsbeginn">6 Monate nach Arbeitsbeginn</option>
-                    <option value="Benutzerdefiniert">Benutzerdefiniert</option>
+            <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>            
+            <div class="dropdown">
+                <select class="form-select valid" id="assigneeType" data-val="true" data-val-required="Ein Aufgabenverantwortlicher ist erforderlich" name="AssigneeType" aria-describedby="assigneeType-error" aria-invalid="false">
+                    @foreach(AssigneeType x in Enum.GetValues(typeof(AssigneeType)).Cast<AssigneeType>().Where(t => t != AssigneeType.USER)){
+                        int i = (int)x;
+                        @if(@Model.AssigneeType == x.ToString()){
+                            <option selected value="@i">@EnumHelper.GetDisplayName(x)</option>
+                        }else{
+                            <option value="@i">@EnumHelper.GetDisplayName(x)</option>
+                        }
+                    }
                 </select>
-                <div id="dueInCustom" class="dropdown" style="margin-top: 8px; display: none;">
-                    <legend style="margin-top: 4px;">Tage: | Wochen: | Monate: | Vor/Nach:</legend>
-                    <select id="days" asp-for="Days">
-                        <option value="@Model.Days" selected>@Model.Days</option>
-                        @for (int i = 0; i <= 7; ++i)
-                        {
-                            <option value="@i">@i</option>
+            </div>
+
+            <div id="roleSelect" style="margin-top: 8px; display: none;">
+                <select asp-for="AssignedRole" class="form-select">
+                    @if (Model.AssignedRole == null)
+                    {
+                        <option value="" disabled selected>Bitte wähle eine Rolle aus...</option>
+                    }
+                    @foreach (var r in roleList)
+                    {
+                        @if(Model.AssignedRole == r.Name){
+                            <option selected value="@r.Name">@r.Name</option>
+                        }else{
+                            <option value="@r.Name">@r.Name</option>
                         }
-                    </select>
-                    <select id="weeks" style="margin-left: 37px;" asp-for="Weeks">
-                        <option value="@Model.Weeks" selected>@Model.Weeks</option>
-                        @for (int i = 0; i <= 4; ++i)
-                        {
-                            <option value="@i">@i</option>
+                    }
+                </select>
+            </div>
+
+            <fieldset style="margin-top: 8px;">
+                <legend style="margin-top: 4px;">Fälligkeit</legend>
+                <div>
+                    @if (Regex.IsMatch(@Model.DueIn, @"^\d+ Tage \d+ Wochen \d+ Monate vor Start$") || Regex.IsMatch(@Model.DueIn, @"^\d+ Tage \d+ Wochen \d+ Monate nach Arbeitsbeginn$")){
+                            Model.DueIn = "Benutzerdefiniert";
                         }
+                    <select asp-for="DueIn" id="dueIn" class="form-select">
+                        <option value="ASAP">ASAP</option>
+                        <option value="2 Wochen vor Start">2 Wochen vor Start</option>
+                        <option value="3 Wochen nach Arbeitsbeginn">3 Wochen nach Arbeitsbeginn</option>
+                        <option value="3 Monate nach Arbeitsbeginn">3 Monate nach Arbeitsbeginn</option>
+                        <option value="6 Monate nach Arbeitsbeginn">6 Monate nach Arbeitsbeginn</option>
+                        <option value="Benutzerdefiniert">Benutzerdefiniert</option>
                     </select>
-                    <select id="months" style="margin-left: 70px;" asp-for="Months">
-                        <option value="@Model.Months" selected>@Model.Months</option>
-                        @for (int i = 0; i <= 12; ++i)
-                        {
-                            <option value="@i">@i</option>
-                        }
-                    </select>
-                    <select id="VorNach" style="margin-left: 70px;" asp-for="VorNach">
-                        <option value="@Model.VorNach" selected>@Model.VorNach</option>
-                        <option value="Vor:">vor Start</option>
-                        <option value="Nach:">nach Arbeitsbeginn</option>
-                    </select>
+                    <div id="dueInCustom" class="dropdown" style="margin-top: 8px; display: none;">
+                        <legend style="margin-top: 4px;">Tage: | Wochen: | Monate: | Vor/Nach:</legend>
+                        <select id="days" asp-for="Days">
+                            <option value="@Model.Days" selected>@Model.Days</option>
+                            @for (int i = 0; i <= 7; ++i)
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        </select>
+                        <select id="weeks" style="margin-left: 37px;" asp-for="Weeks">
+                            <option value="@Model.Weeks" selected>@Model.Weeks</option>
+                            @for (int i = 0; i <= 4; ++i)
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        </select>
+                        <select id="months" style="margin-left: 70px;" asp-for="Months">
+                            <option value="@Model.Months" selected>@Model.Months</option>
+                            @for (int i = 0; i <= 12; ++i)
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        </select>
+                        <select id="VorNach" style="margin-left: 70px;" asp-for="VorNach">
+                            <option value="@Model.VorNach" selected>@Model.VorNach</option>
+                            <option value="Vor:">vor Start</option>
+                            <option value="Nach:">nach Arbeitsbeginn</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-        </fieldset>
+            </fieldset>
 
-        <fieldset style="margin-top: 8px;">
-            <legend style="margin-top: 4px;">Vertragstyp</legend>
-            <div class="form-group mt-2">
-                <select asp-for="ForContractsList" class="form-control" multiple="multiple" id="ForContractsLists">
-                    @foreach (var c in contractList)
-                    {
-                        <option value="@c.Label">@c.Label</option>
-                    }
-                </select>
-                <span asp-validation-for="ForContractsList" class="text-danger"></span>
-            </div>
-        </fieldset>
+            <fieldset style="margin-top: 8px;">
+                <legend style="margin-top: 4px;">Vertragstyp</legend>
+                <div class="form-group mt-2">
+                    <select asp-for="ForContractsList" class="form-control" multiple="multiple" id="ForContractsLists">
+                        @foreach (var c in contractList)
+                        {
+                            <option value="@c.Label">@c.Label</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ForContractsList" class="text-danger"></span>
+                </div>
+            </fieldset>
 
-        <fieldset style="margin-top: 8px;">
-            <legend style="margin-top: 4px;">Abteilung</legend>
-            <div class="form-group mt-2">
-                <select asp-for="ForDepartmentsList" class="form-control" multiple="multiple" id="ForDepartmentsLists">
-                    @foreach (var d in departmentList)
-                    {
-                        <option value="@d.Name">@d.Name</option>
-                    }
-                </select>
-                <span asp-validation-for="ForDepartmentsList" class="text-danger"></span>
-            </div>
-        </fieldset>
+            <fieldset style="margin-top: 8px;">
+                <legend style="margin-top: 4px;">Abteilung</legend>
+                <div class="form-group mt-2">
+                    <select asp-for="ForDepartmentsList" class="form-control" multiple="multiple" id="ForDepartmentsLists">
+                        @foreach (var d in departmentList)
+                        {
+                            <option value="@d.Name">@d.Name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="ForDepartmentsList" class="text-danger"></span>
+                </div>
+            </fieldset>
 
-        <button class="btn btn-dark" type="submit" style="margin-top: 12px;">Aufgabenvorlage speichern</button>
-    </form>
+            <button class="btn btn-dark" type="submit" style="margin-top: 12px;">Aufgabenvorlage speichern</button>
+        </form>
     </body>
 }
 
 @section Scripts {
-<!-- Ist Javascript, für die Mehrfachauswahl von Departments und Contracts -->
-<partial name="_ValidationScriptsPartial" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-<script>
-    $(document).ready(function () {
-        $('#ForDepartmentsLists').select2({
-            placeholder: "Wählen Sie Abteilungen aus",
-            allowClear: true
-        });
+    <!-- Ist Javascript, für die Mehrfachauswahl von Departments und Contracts -->
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script>
+        $(document).ready(function () {
+            $('#ForDepartmentsLists').select2({
+                placeholder: "Wählen Sie Abteilungen aus",
+                allowClear: true
+            });
 
-        $('#ForContractsLists').select2({
-            placeholder: "Wählen Sie Verträge aus",
-            allowClear: true
-        });
+            $('#ForContractsLists').select2({
+                placeholder: "Wählen Sie Verträge aus",
+                allowClear: true
+            });
 
-        var popup = $("#usercreate-popup");
-        if (popup.length) {
-            setTimeout(function () {
-                popup.fadeOut("slow", function () {
-                    popup.remove();
-                });
-            }, 3000);
-        }
+            var popup = $("#usercreate-popup");
+            if (popup.length) {
+                setTimeout(function () {
+                    popup.fadeOut("slow", function () {
+                        popup.remove();
+                    });
+                }, 3000);
+            }
 
-        var assigneeTypeSelect = document.getElementById('assigneeType');
-        var roleSelect = document.getElementById('roleSelect');
-        if (assigneeTypeSelect.value === '0') {
-            roleSelect.style.display = 'block';
-        } else {
-            roleSelect.style.display = 'none';
-        }
-
-        assigneeTypeSelect.addEventListener('change', function () {
-            if (this.value === '0') {
+            var assigneeTypeSelect = document.getElementById('assigneeType');
+            var roleSelect = document.getElementById('roleSelect');
+            if (assigneeTypeSelect.value === '0') {
                 roleSelect.style.display = 'block';
             } else {
                 roleSelect.style.display = 'none';
             }
-        });
 
-        var dueInSelect = document.getElementById('dueIn');
-        var dueInCustomDiv = document.getElementById('dueInCustom');
-        if (dueInSelect.value === 'Benutzerdefiniert') {
-            dueInCustomDiv.style.display = 'block';
-        } else {
-            dueInCustomDiv.style.display = 'none';
-        }
+            assigneeTypeSelect.addEventListener('change', function () {
+                if (this.value === '0') {
+                    roleSelect.style.display = 'block';
+                } else {
+                    roleSelect.style.display = 'none';
+                }
+            });
 
-        dueInSelect.addEventListener('change', function () {
-            if (this.value === 'Benutzerdefiniert') {
+            var dueInSelect = document.getElementById('dueIn');
+            var dueInCustomDiv = document.getElementById('dueInCustom');
+            if (dueInSelect.value === 'Benutzerdefiniert') {
                 dueInCustomDiv.style.display = 'block';
             } else {
                 dueInCustomDiv.style.display = 'none';
             }
-        });
-    });
-</script>
-}
 
+            dueInSelect.addEventListener('change', function () {
+                if (this.value === 'Benutzerdefiniert') {
+                    dueInCustomDiv.style.display = 'block';
+                } else {
+                    dueInCustomDiv.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

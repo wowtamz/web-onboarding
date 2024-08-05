@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualBasic.CompilerServices;
 using Newtonsoft.Json;
@@ -83,151 +84,158 @@ namespace SoPro24Team06.Controllers
             [FromForm] CreateEditAssignmentTemplateViewModel model
         )
         {
-            _logger.LogInformation("Starting the creation of a new assignment template.");
-            if (!ModelState.IsValid)
+            if (await UserHasAccess(model.processId))
             {
-                _logger.LogWarning("Create operation failed due to invalid model state.");
-                return RedirectToAction("Create");
-            }
-
-            List<Department> departmentsList = new List<Department>();
-            if (model.ForDepartmentsList != null)
-            {
-                foreach (var d in model.ForDepartmentsList)
+                _logger.LogInformation("Starting the creation of a new assignment template.");
+                if (!ModelState.IsValid)
                 {
-                    Department department = _departmentContainer.GetDepartment(d);
-                    departmentsList.Add(department);
-                }
-            }
-
-            List<Contract> contractsList = new List<Contract>();
-            if (model.ForContractsList != null)
-            {
-                foreach (var c in model.ForContractsList)
-                {
-                    Contract contract = _contractContainer.GetContract(c);
-                    contractsList.Add(contract);
-                }
-            }
-
-            ApplicationRole assignedRole = null;
-            AssigneeType assigneeType;
-            if (Enum.TryParse(model.AssigneeType, out assigneeType))
-            {
-                if (assigneeType == AssigneeType.ROLES)
-                {
-                    assignedRole = await _roleManager.FindByNameAsync(model.AssignedRole);
-                }
-            }
-
-            DueTime dueIn = _dueTimeContainer.GetDueTime(model.DueIn);
-            if (model.DueIn == "Benutzerdefiniert")
-            {
-                string dueTime;
-                if (model.VorNach == "Vor:")
-                {
-                    dueTime =
-                        $"{model.Days} Tage {model.Weeks} Wochen {model.Months} Monate vor Start";
-                    dueIn = new DueTime(
-                        dueTime,
-                        model.Days * -1,
-                        model.Weeks * -1,
-                        model.Months * -1
-                    );
-                    _dueTimeContainer.AddDueTime(dueIn);
-                }
-                else
-                {
-                    dueTime =
-                        $"{model.Days} Tage {model.Weeks} Wochen {model.Months} Monate nach Arbeitsbeginn";
-                    dueIn = new DueTime(dueTime, model.Days, model.Weeks, model.Months);
-                    _dueTimeContainer.AddDueTime(dueIn);
-                }
-            }
-
-            AssignmentTemplate at = _assignmentTemplateContainer.AddAssignmentTemplate(
-                model.Title ?? "",
-                model.Instructions,
-                dueIn,
-                departmentsList,
-                contractsList,
-                assigneeType,
-                assignedRole,
-                TempData["startProcessViewModel"] != null
-                || TempData["editProcessViewModel"] != null
-                    ? 0
-                    : (int)model.processId
-            );
-
-            if (at == null)
-            {
-                _logger.LogError("Error creating assignment template.");
-                return RedirectToAction("Create");
-            }
-
-            _logger.LogInformation(
-                "Successfully created a new assignment template with title: {Title}",
-                model.Title
-            );
-
-            // Author: Tamas Varadi
-            // Begin
-
-            bool redirectFromProcessController =
-                TempData["startProcessViewModel"] != null
-                || TempData["editProcessViewModel"] != null;
-
-            if (redirectFromProcessController)
-            {
-                at.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);
-                at.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null);
-
-                if (TempData["startProcessViewModel"] != null)
-                {
-                    string jsonViewModel = TempData["startProcessViewModel"] as string;
-                    StartProcessViewModel startProcessViewModel =
-                        JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
-
-                    startProcessViewModel.AssignmentTemplates.Add(at);
-
-                    jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
-                    TempData["startProcessViewModel"] = jsonViewModel;
-
-                    return RedirectToAction("Start", "Process");
+                    _logger.LogWarning("Create operation failed due to invalid model state.");
+                    return RedirectToAction("Create");
                 }
 
-                if (TempData["editProcessViewModel"] != null)
+                List<Department> departmentsList = new List<Department>();
+                if (model.ForDepartmentsList != null)
                 {
-                    string jsonViewModel = TempData["editProcessViewModel"] as string;
-                    EditProcessViewModel editProcessViewModel =
-                        JsonConvert.DeserializeObject<EditProcessViewModel>(jsonViewModel);
-
-                    Process activeProcess = await _context.Processes.FindAsync(
-                        editProcessViewModel.Id
-                    );
-                    ApplicationUser? assignee = await _userManager.FindByIdAsync(
-                        editProcessViewModel.Supervisor.Id
-                    );
-
-                    if (at.AssigneeType == AssigneeType.WORKER_OF_REF)
+                    foreach (var d in model.ForDepartmentsList)
                     {
-                        assignee = await _userManager.FindByIdAsync(
-                            editProcessViewModel.WorkerOfReference.Id
+                        Department department = await _departmentContainer.GetDepartment(d);
+                        departmentsList.Add(department);
+                    }
+                }
+
+                List<Contract> contractsList = new List<Contract>();
+                if (model.ForContractsList != null)
+                {
+                    foreach (var c in model.ForContractsList)
+                    {
+                        Contract contract = await _contractContainer.GetContract(c);
+                        contractsList.Add(contract);
+                    }
+                }
+
+                ApplicationRole assignedRole = null;
+                AssigneeType assigneeType;
+                if (Enum.TryParse(model.AssigneeType, out assigneeType))
+                {
+                    if (assigneeType == AssigneeType.ROLES)
+                    {
+                        assignedRole = await _roleManager.FindByNameAsync(model.AssignedRole);
+                    }
+                }
+
+                DueTime dueIn = await _dueTimeContainer.GetDueTime(model.DueIn);
+                if (model.DueIn == "Benutzerdefiniert")
+                {
+                    string dueTime;
+                    if (model.VorNach == "Vor:")
+                    {
+                        dueTime =
+                            $"{model.Days} Tage {model.Weeks} Wochen {model.Months} Monate vor Start";
+                        dueIn = new DueTime(
+                            dueTime,
+                            model.Days * -1,
+                            model.Weeks * -1,
+                            model.Months * -1
                         );
+                        _dueTimeContainer.AddDueTime(dueIn);
+                    }
+                    else
+                    {
+                        dueTime =
+                            $"{model.Days} Tage {model.Weeks} Wochen {model.Months} Monate nach Arbeitsbeginn";
+                        dueIn = new DueTime(dueTime, model.Days, model.Weeks, model.Months);
+                        _dueTimeContainer.AddDueTime(dueIn);
+                    }
+                }
+
+                AssignmentTemplate at = await _assignmentTemplateContainer.AddAssignmentTemplate(
+                    model.Title ?? "",
+                    model.Instructions,
+                    dueIn,
+                    departmentsList,
+                    contractsList,
+                    assigneeType,
+                    assignedRole,
+                    TempData["startProcessViewModel"] != null
+                    || TempData["editProcessViewModel"] != null
+                        ? 0
+                        : (int)model.processId
+                );
+
+                if (at == null)
+                {
+                    _logger.LogError("Error creating assignment template.");
+                    return RedirectToAction("Create");
+                }
+
+                _logger.LogInformation(
+                    "Successfully created a new assignment template with title: {Title}",
+                    model.Title
+                );
+
+                // Author: Tamas Varadi
+                // Begin
+
+                bool redirectFromProcessController =
+                    TempData["startProcessViewModel"] != null
+                    || TempData["editProcessViewModel"] != null;
+
+                if (redirectFromProcessController)
+                {
+                    at.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);
+                    at.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null);
+                    if (at.AssignedRole != null)
+                    {
+                        at.AssignedRole.ProcessTemplates = null;
                     }
 
-                    Assignment newAssignment = at.ToAssignment(assignee, activeProcess.DueDate);
-                    _context.Assignments.Add(newAssignment);
+                    if (TempData["startProcessViewModel"] != null)
+                    {
+                        string jsonViewModel = TempData["startProcessViewModel"] as string;
+                        StartProcessViewModel startProcessViewModel =
+                            JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
 
-                    activeProcess.Assignments.Add(newAssignment);
+                        startProcessViewModel.AssignmentTemplates.Add(at);
 
-                    await _context.SaveChangesAsync();
+                        jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
+                        TempData["startProcessViewModel"] = jsonViewModel;
 
-                    return RedirectToAction(
-                        "Edit",
-                        "Process",
-                        new { id = editProcessViewModel.Id }
-                    );
+                        return RedirectToAction("Start", "Process");
+                    }
+
+                    if (TempData["editProcessViewModel"] != null)
+                    {
+                        string jsonViewModel = TempData["editProcessViewModel"] as string;
+                        EditProcessViewModel editProcessViewModel =
+                            JsonConvert.DeserializeObject<EditProcessViewModel>(jsonViewModel);
+
+                        Process activeProcess = await _context.Processes.FindAsync(
+                            editProcessViewModel.Id
+                        );
+                        ApplicationUser? assignee = await _userManager.FindByIdAsync(
+                            editProcessViewModel.Supervisor.Id
+                        );
+
+                        if (at.AssigneeType == AssigneeType.WORKER_OF_REF)
+                        {
+                            assignee = await _userManager.FindByIdAsync(
+                                editProcessViewModel.WorkerOfReference.Id
+                            );
+                        }
+
+                        Assignment newAssignment = at.ToAssignment(assignee, activeProcess.DueDate);
+                        _context.Assignments.Add(newAssignment);
+
+                        activeProcess.Assignments.Add(newAssignment);
+
+                        await _context.SaveChangesAsync();
+
+                        return RedirectToAction(
+                            "Edit",
+                            "Process",
+                            new { id = editProcessViewModel.Id }
+                        );
+                    }
                 }
             }
 
@@ -243,7 +251,7 @@ namespace SoPro24Team06.Controllers
             ViewData["departments"] = _context.Departments.ToList();
             ViewData["contracts"] = _context.Contracts.ToList();
 
-            AssignmentTemplate assignmentTemplate =
+            AssignmentTemplate assignmentTemplate = await
                 _assignmentTemplateContainer.GetAssignmentTemplate(id);
 
             if (assignmentTemplate == null)
@@ -298,107 +306,116 @@ namespace SoPro24Team06.Controllers
             [FromForm] CreateEditAssignmentTemplateViewModel model
         )
         {
-            _logger.LogInformation("Starting the editing of an assignment template.");
-            if (!ModelState.IsValid)
+            if (await UserHasAccess(model.processId))
             {
-                _logger.LogWarning("Edit operation failed due to invalid model state.");
-                return RedirectToAction("Edit", model.Id);
-            }
-
-            List<Department> departmentsList = new List<Department>();
-            if (model.ForDepartmentsList != null)
-            {
-                foreach (var d in model.ForDepartmentsList)
+                _logger.LogInformation("Starting the editing of an assignment template.");
+                if (!ModelState.IsValid)
                 {
-                    Department department = _departmentContainer.GetDepartment(d);
-                    departmentsList.Add(department);
+                    _logger.LogWarning("Edit operation failed due to invalid model state.");
+                    return RedirectToAction("Edit", model.Id);
                 }
-            }
 
-            List<Contract> contractsList = new List<Contract>();
-            if (model.ForContractsList != null)
-            {
-                foreach (var c in model.ForContractsList)
+                List<Department> departmentsList = new List<Department>();
+                if (model.ForDepartmentsList != null)
                 {
-                    Contract contract = _contractContainer.GetContract(c);
-                    contractsList.Add(contract);
+                    foreach (var d in model.ForDepartmentsList)
+                    {
+                        Department department = await _departmentContainer.GetDepartment(d);
+                        departmentsList.Add(department);
+                    }
                 }
-            }
 
-            ApplicationRole assignedRole = null;
-            AssigneeType assigneeType;
-            if (Enum.TryParse(model.AssigneeType, out assigneeType))
-            {
-                if (assigneeType == AssigneeType.ROLES)
+                List<Contract> contractsList = new List<Contract>();
+                if (model.ForContractsList != null)
                 {
-                    assignedRole = await _roleManager.FindByNameAsync(model.AssignedRole);
+                    foreach (var c in model.ForContractsList)
+                    {
+                        Contract contract = await _contractContainer.GetContract(c);
+                        contractsList.Add(contract);
+                    }
                 }
-            }
 
-            string dueTime;
-            DueTime dueIn = _dueTimeContainer.GetDueTime(model.DueIn);
-            if (model.DueIn == "Benutzerdefiniert")
-            {
-                if (model.VorNach == "Vor:" || model.VorNach == "vor Start")
+                ApplicationRole assignedRole = null;
+                AssigneeType assigneeType;
+                if (Enum.TryParse(model.AssigneeType, out assigneeType))
                 {
-                    dueTime =
-                        $"{model.Days} Tage {model.Weeks} Wochen {model.Months} Monate vor Start";
-                    dueIn = new DueTime(
-                        dueTime,
-                        model.Days * -1,
-                        model.Weeks * -1,
-                        model.Months * -1
-                    );
-                    _dueTimeContainer.AddDueTime(dueIn);
+                    if (assigneeType == AssigneeType.ROLES)
+                    {
+                        assignedRole = await _roleManager.FindByNameAsync(model.AssignedRole);
+                    }
                 }
-                else
+
+                string dueTime;
+                DueTime dueIn = await _dueTimeContainer.GetDueTime(model.DueIn);
+                if (model.DueIn == "Benutzerdefiniert")
                 {
-                    dueTime =
-                        $"{model.Days} Tage {model.Weeks} Wochen {model.Months} Monate nach Arbeitsbeginn";
-                    dueIn = new DueTime(dueTime, model.Days, model.Weeks, model.Months);
-                    _dueTimeContainer.AddDueTime(dueIn);
+                    if (model.VorNach == "Vor:" || model.VorNach == "vor Start")
+                    {
+                        dueTime =
+                            $"{model.Days} Tage {model.Weeks} Wochen {model.Months} Monate vor Start";
+                        dueIn = new DueTime(
+                            dueTime,
+                            model.Days * -1,
+                            model.Weeks * -1,
+                            model.Months * -1
+                        );
+                        _dueTimeContainer.AddDueTime(dueIn);
+                    }
+                    else
+                    {
+                        dueTime =
+                            $"{model.Days} Tage {model.Weeks} Wochen {model.Months} Monate nach Arbeitsbeginn";
+                        dueIn = new DueTime(dueTime, model.Days, model.Weeks, model.Months);
+                        _dueTimeContainer.AddDueTime(dueIn);
+                    }
                 }
-            }
-            _assignmentTemplateContainer.EditAssignmentTemplates(
-                model.Id,
-                model.Title ?? "",
-                model.Instructions,
-                dueIn,
-                departmentsList,
-                contractsList,
-                assigneeType,
-                assignedRole
-            );
-
-            _logger.LogInformation(
-                "Successfully edited the assignment template with title: {Title}",
-                model.Title
-            );
-
-            // Author: Tamas Varadi
-            // Begin
-            if (model.processId == 0 || model.processId == null)
-            {
-                AssignmentTemplate at = _assignmentTemplateContainer.GetAssignmentTemplate(
-                    model.Id
+                _assignmentTemplateContainer.EditAssignmentTemplates(
+                    model.Id,
+                    model.Title ?? "",
+                    model.Instructions,
+                    dueIn,
+                    departmentsList,
+                    contractsList,
+                    assigneeType,
+                    assignedRole
                 );
 
-                if (TempData["startProcessViewModel"] != null)
+                _logger.LogInformation(
+                    "Successfully edited the assignment template with title: {Title}",
+                    model.Title
+                );
+
+                // Author: Tamas Varadi
+                // Begin
+                if (model.processId == 0 || model.processId == null)
                 {
-                    string jsonViewModel = TempData["startProcessViewModel"] as string;
-                    StartProcessViewModel startProcessViewModel =
-                        JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
+                    AssignmentTemplate at = await _assignmentTemplateContainer.GetAssignmentTemplate(
+                        model.Id
+                    );
+                    
+                    at.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);
+                    at.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null);
+                    if (at.AssignedRole != null)
+                    {
+                        at.AssignedRole.ProcessTemplates = null;
+                    }
 
-                    startProcessViewModel.AssignmentTemplates.RemoveAll(a => a.Id == model.Id);
-                    startProcessViewModel.AssignmentTemplates.Add(at);
+                    if (TempData["startProcessViewModel"] != null)
+                    {
+                        string jsonViewModel = TempData["startProcessViewModel"] as string;
+                        StartProcessViewModel startProcessViewModel =
+                            JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
 
-                    jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
-                    TempData["startProcessViewModel"] = jsonViewModel;
+                        startProcessViewModel.AssignmentTemplates.RemoveAll(a => a.Id == model.Id);
+                        startProcessViewModel.AssignmentTemplates.Add(at);
 
-                    return RedirectToAction("Start", "Process");
+                        jsonViewModel = JsonConvert.SerializeObject(startProcessViewModel);
+                        TempData["startProcessViewModel"] = jsonViewModel;
+
+                        return RedirectToAction("Start", "Process");
+                    }
                 }
             }
-
             // End
 
             return RedirectToAction("Edit", "ProcessTemplate", new { id = model.processId });
@@ -407,7 +424,7 @@ namespace SoPro24Team06.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id) // Sucht mit der Id ein Assignment Template aus der DB und löscht dieses dann
         {
-            AssignmentTemplate? assignmentTemplate =
+            AssignmentTemplate? assignmentTemplate = await
                 _assignmentTemplateContainer.GetAssignmentTemplate(id);
             ProcessTemplate processTemplate =
                 await _processTemplateContainer.GetProcessTemplateByIdAsync(
@@ -427,5 +444,53 @@ namespace SoPro24Team06.Controllers
                 new { id = assignmentTemplate.ProcessTemplateId }
             );
         }
+        
+        // Author: Tamas Varadi
+        // Begin
+        public async Task<bool> UserHasAccess(int? processTemplateId)
+        {
+            bool redirectFromProcessController =
+                TempData["startProcessViewModel"] != null
+                || TempData["editProcessViewModel"] != null;
+
+            bool isSupervisor = false;
+
+            if (redirectFromProcessController || processTemplateId == 0 ||processTemplateId == null)
+            {
+                if (TempData["startProcessViewModel"] != null)
+                {
+                    string jsonViewModel = TempData["startProcessViewModel"] as string;
+                    StartProcessViewModel startProcessViewModel =
+                        JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
+
+                    processTemplateId = startProcessViewModel.Template.Id;
+                }
+
+                if (TempData["editProcessViewModel"] != null)
+                {
+                    string jsonViewModel = TempData["editProcessViewModel"] as string;
+                    EditProcessViewModel editProcessViewModel =
+                        JsonConvert.DeserializeObject<EditProcessViewModel>(jsonViewModel);
+
+                    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    return editProcessViewModel.Supervisor.Id == userId || User.IsInRole("Administrator");
+                }
+            }
+            ProcessTemplate processTemplate =
+                await _processTemplateContainer.GetProcessTemplateByIdAsync((int)processTemplateId);
+
+            foreach (var role in
+                     processTemplate
+                         .RolesWithAccess) // Sucht aus dem ProcessTemplate die Rollen raus die Zugriff auf das ProcessTemplate haben. Damit wird im Backend abgesichert wer Zugriff auf die Erstellung der AssignmentTemplates hat
+            {
+                if (User.IsInRole(role.Name) || User.IsInRole("Administrator") || isSupervisor)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        // End
     }
 }

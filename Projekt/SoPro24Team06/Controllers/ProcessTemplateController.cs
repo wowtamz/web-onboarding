@@ -422,7 +422,7 @@ namespace SoPro24Team06.Controllers
             List<ApplicationUser> users = _userManager.Users.ToList();
             List<ProcessTemplate> processTemplates =
                 await _processTemplateContainer.GetProcessTemplatesAsync();
-            List<AssignmentTemplate> assignmentTemplates =
+            List<AssignmentTemplate> assignmentTemplates = await
                 _assignmentTemplateContainer.GetAllAssignmentTemplates();
 
             // Replace with Containers;

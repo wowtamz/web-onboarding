@@ -1,6 +1,7 @@
 @model SoPro24Team06.ViewModels.CreateEditAssignmentTemplateViewModel
 @using SoPro24Team06.Enums
 @using SoPro24Team06.Models
+@using SoPro24Team06.Helpers
 @using Microsoft.AspNetCore.Identity
 
 @{
@@ -33,8 +34,16 @@
                 </fieldset>
                 <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
                 <div>
-                    <select asp-for="AssigneeType" class="form-select" id="assigneeType"
-                        asp-items="Html.GetEnumSelectList<AssigneeType>()"></select>
+                    <select class="form-select valid" id="assigneeType" data-val="true"
+                        data-val-required="Ein Aufgabenverantwortlicher ist erforderlich" name="AssigneeType"
+                        aria-describedby="assigneeType-error" aria-invalid="false">
+                        @foreach (AssigneeType x in Enum.GetValues(typeof(AssigneeType)).Cast<AssigneeType>().Where(t => t !=
+                       AssigneeType.USER))
+                        {
+                            int i = (int)x;
+                            <option value="@i">@EnumHelper.GetDisplayName(x)</option>
+                        }
+                    </select>
                 </div>
                 <div id="roleSelect" style="margin-top: 8px;">
                     <select asp-for="AssignedRole" class="form-select">

@@ -26,12 +26,12 @@
                             <hr />
                             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                             <div class="form-group">
-                                <label asp-for="Input.Email"></label>
+                                <label id="Email" asp-for="Input.Email"></label>
                                 <input asp-for="Input.Email" class="form-control" />
                                 <span asp-validation-for="Input.Email" class="text-danger"></span>
                             </div>
                             <div class="form-group">
-                                <label asp-for="Input.Password"></label>
+                                <label id="Password" asp-for="Input.Password"></label>
                                 <input asp-for="Input.Password" class="form-control" />
                                 <span asp-validation-for="Input.Password" class="text-danger"></span>
                             </div>
@@ -44,7 +44,8 @@
                                 </div>
                             </div>
                             <div class="form-group mt-2">
-                                <button aria-label="login-submit" type="submit" class="btn btn-primary">Log in</button>
+                                <button id="login-submit" aria-label="login-submit" type="submit"
+                                    class="btn btn-primary">Log in</button>
                             </div>
                         </form>
                     </div>

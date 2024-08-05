@@ -14,7 +14,7 @@ public class ContractContainer : IContract
         _context = context;
     }
 
-    public Contract GetContract(string label)
+    public async Task<Contract> GetContract(string label)
     {
         if (_context.DueTimes != null)
         {

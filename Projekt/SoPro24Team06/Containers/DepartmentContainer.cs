@@ -18,7 +18,7 @@ public class DepartmentContainer : IDepartment
         _context = context;
     }
 
-    public Department GetDepartment(string name)
+    public async Task<Department> GetDepartment(string name)
     {
         if (_context.DueTimes != null)
         {

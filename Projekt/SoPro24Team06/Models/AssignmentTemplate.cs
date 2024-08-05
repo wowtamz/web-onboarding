@@ -67,6 +67,28 @@ namespace SoPro24Team06.Models
             this.ProcessTemplateId = processTemplateId > 0 ? processTemplateId : null;
         }
 
+        public AssignmentTemplate(
+            int id,
+            string title,
+            string instructions,
+            DueTime dueIn,
+            List<Department> forDepartmentsList,
+            List<Contract> forContractsList,
+            AssigneeType assigneeType,
+            ApplicationRole assignedRole,
+            int? processTemplateId
+        )
+        {
+            this.Id = id;
+            this.Title = title;
+            this.Instructions = instructions;
+            this.DueIn = dueIn;
+            this.ForDepartmentsList = forDepartmentsList;
+            this.ForContractsList = forContractsList;
+            this.AssigneeType = assigneeType;
+            this.AssignedRole = assignedRole;
+            this.ProcessTemplateId = processTemplateId > 0 ? processTemplateId : null;
+        }
         public Assignment ToAssignment(ApplicationUser? user, DateTime? ProcessDueDate)
         {
             DateTime dueDate = DateTime.Today;

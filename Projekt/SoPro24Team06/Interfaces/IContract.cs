@@ -10,6 +10,6 @@ namespace SoPro24Team06.Interfaces
 {
     public interface IContract
     {
-         public Contract GetContract(string label);
+         public Task<Contract> GetContract(string label);
     }
 }

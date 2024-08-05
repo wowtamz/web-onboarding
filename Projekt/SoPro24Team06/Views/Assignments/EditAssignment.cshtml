@@ -62,7 +62,7 @@
 		@Html.ValidationMessageFor(model => model.Assignment.Status, "", new { @class = "text-danger" })
 	</fieldset>
 	<div style="margin-top: 12px">
-		<button type="submit" class="btn btn-primary">Bestätigen</button>
+		<button type="submit" class="btn btn-primary" id="saveEditAssignment">Bestätigen</button>
 		<a href="/Assignment/OnEditCanceled" type="button" class="btn btn-secondary">Schließen
 			ohne
 			Speicher</a>

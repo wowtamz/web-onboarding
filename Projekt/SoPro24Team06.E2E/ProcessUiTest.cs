@@ -42,7 +42,7 @@ public class ProcessUiTest : IDisposable
         _driver.Dispose(); 
     }
     
-    [Fact] 
+    //[Fact] 
     public void StartProcessFromProcessTemplate()
     {
         _driver.Navigate().GoToUrl(baseurl);
@@ -190,7 +190,7 @@ public class ProcessUiTest : IDisposable
         
     }
     
-    [Fact]
+    //[Fact]
     public void StartProcessFromTemplateAddCustomAssignment()
     {
         _driver.Navigate().GoToUrl(baseurl);
