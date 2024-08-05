@@ -1,7 +1,9 @@
 ﻿<!------------------------- 
 < Author: Tamas Varadi
 <------------------------->
-
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Newtonsoft.Json.Serialization
 @model SoPro24Team06.ViewModels.ProcessListViewModel
 @{
     ViewData["Title"] = "Vorgänge";
@@ -25,6 +27,15 @@
     {
         ArchivedProcesses = ViewData["ArchivedProcesses"] as List<Process>;
     }
+    
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    bool canStartProcesses = false;
+
+    if (ViewData["CanStartProcesses"] != null)
+    {
+        canStartProcesses = (bool) ViewData["CanStartProcesses"];
+    }
 }
 
 <body>
@@ -34,11 +45,21 @@
             <div class="text-white bg-dark border rounded border-0 p-4 p-md-5"
                 style="background: linear-gradient(150deg, var(--bs-danger) 0%, rgb(245,165,182) 60%, white 100%, rgb(230, 29, 71) 100%), rgb(230, 29, 71);">
                 <h2 class="fw-bold text-black mb-3">Vorgänge</h2>
-                <p class="text-black mb-4" style="font-size: 20px;">Wähle einen beliebigen Prozess aus als Blaupause für
+                @if (canStartProcesses)
+                {
+                    <p class="text-black mb-4" style="font-size: 20px;">Wähle einen beliebigen Prozess aus als Blaupause für
                     um einen Vorgang zu kreieren.</p>
-                <div class="my-3"><a class="btn btn-primary btn-lg me-2" role="button" asp-controller="Process"
-                        asp-action="Start" style="background: rgb(204, 212, 217);border-style: none;">Vorgang
-                        starten</a></div>
+                
+                    <div class="my-3">
+                        <a class="btn btn-primary btn-lg me-2" role="button" asp-controller="Process"
+                           asp-action="Start" style="background: rgb(204, 212, 217);border-style: none;">Vorgang starten
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-black mb-4" style="font-size: 20px;">Wähle einen bestehenden Vorgang aus, um Details einzusehen.</p>
+                }
             </div>
         </div>
     </section><!-- End: Banner Heading -->
@@ -96,16 +117,18 @@
                             <td>@process.WorkerOfReference.FullName</td>
                             <td>@process.DueDate.ToString()</td>
                             <td class="d-flex flex-row justify-content-evenly">
-
+                                @if (User.IsInRole("Administrator") || process.Supervisor.Id == userId)
+                                {
                                 <a href="/Process/Edit/@id">
                                     <i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i>
                                 </a>
 
-
-                                <form action="@Url.Action("Stop", "Process", new { id = process.Id})" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <button class="btn-close" type="submit" aria-label="Close"></button>
-                                </form>
+                                
+                                    <form action="@Url.Action("Stop", "Process", new { id = process.Id})" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn-close" type="submit" aria-label="Close"></button>
+                                    </form>
+                                }
                             </td>
                         </tr>
                     }
@@ -154,16 +177,17 @@
                             <td>@process.WorkerOfReference.FullName</td>
                             <td>@process.DueDate.ToString()</td>
                             <td class="d-flex flex-row justify-content-evenly">
-
+                                @if (User.IsInRole("Administrator") || process.Supervisor.Id == userId)
+                                {
                                 <a href="/Process/Edit/@id">
                                     <i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i>
                                 </a>
 
-
-                                <form action="@Url.Action("Stop", "Process", new { id = process.Id })" method="post">
+                                <form action="@Url.Action("Stop", "Process", new { id = process.Id})" method="post">
                                     @Html.AntiForgeryToken()
                                     <button class="btn-close" type="submit" aria-label="Close"></button>
                                 </form>
+                                }
                             </td>
                         </tr>
                     }

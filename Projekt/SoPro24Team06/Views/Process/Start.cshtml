@@ -20,12 +20,65 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
 <div class="form-group mt-2">
     <legend>Prozess</legend>
 
-    @if(@Model.Template != null && @Model.Template.Id > 0) {
+    <div id="processTemplateInputs">
 
+    </div>
+
+    @if(@Model.Template != null && @Model.Template.Id > 0)
+    {
     <input class="form-control" value="@Model.Template.Title" readonly/>
+    <input type="hidden" id="processTemplatePreselected"/>
     <input type="hidden" asp-for="Template.Id" value="@Model.Template.Id" id="TemplateId"/>
     <input type="hidden" asp-for="Template.Title" value="@Model.Template.Title" id="TemplateTitle"/>
     <input type="hidden" asp-for="Template.Description" value="@Model.Template.Description" id="TemplateDescription"/>
+
+    @for (int j = 0; j < Model.Template.AssignmentTemplates.Count(); j++)
+    {
+    AssignmentTemplate template = Model.Template.AssignmentTemplates[j];
+
+    <input type='hidden' name='Template.AssignmentTemplates[@j].Id' value='@template.Id'/>
+    <input type='hidden' name='Template.AssignmentTemplates[@j].Title' value='@template.Title'/>
+    <input type='hidden' name='Template.AssignmentTemplates[@j].Instructions' value='@template.Instructions'/>
+
+    <input type='hidden' name='Template.AssignmentTemplates[@j].DueIn.Id' value='@template.DueIn.Id'/>
+    <input type='hidden' name='Template.AssignmentTemplates[@j].DueIn.Label' value='@template.DueIn.Label'/>
+    <input type='hidden' name='Template.AssignmentTemplates[@j].DueIn.Days' value='@template.DueIn.Days'/>
+    <input type='hidden' name='Template.AssignmentTemplates[@j].DueIn.Weeks' value='@template.DueIn.Weeks'/>
+    <input type='hidden' name='Template.AssignmentTemplates[@j].DueIn.Months' value='@template.DueIn.Months'/>
+
+    <input type='hidden' name='Template.AssignmentTemplates[@j].AssigneeType' value='@template.AssigneeType'/>
+
+    @if (template.ProcessTemplateId != null)
+    {
+    <input type='hidden' name='Template.AssignmentTemplates[@j].ProcessTemplateId' value='@template.ProcessTemplateId'/>
+    }
+
+    @if (template.AssignedRole != null)
+    {
+    <input type='hidden' name='Template.AssignmentTemplates[@j].AssignedRole.Id' value='@template.AssignedRole.Id'/>
+    <input type='hidden' name='Template.AssignmentTemplates[@j].AssignedRole.Name' value='@template.AssignedRole.Name'/>
+    }
+
+    @if (template.ForDepartmentsList != null)
+    {
+    for (int i = 0; i < template.ForDepartmentsList.Count; i++)
+    {
+    var department = template.ForDepartmentsList[i];
+    <input type='hidden' name='Template.AssignmentTemplates[@j].ForDepartmentsList[@i].Id' value='@department.Id'/>
+    <input type='hidden' name='Template.AssignmentTemplates[@j].ForDepartmentsList[@i].Name' value='@department.Name'/>
+    }
+    }
+
+    @if (template.ForContractsList != null)
+    {
+    for (int i = 0; i < template.ForContractsList.Count; i++)
+    {
+    var contract = template.ForContractsList[i];
+    <input type='hidden' name='Template.AssignmentTemplates[@j].ForContractsList[@i].Id' value='@contract.Id'/>
+    <input type='hidden' name='Template.AssignmentTemplates[@j].ForContractsList[@i].Label' value='@contract.Label'/>
+    }
+    }
+    }
 
     var processTemplateDict = @Html.Raw(Json.Serialize(@Model.Template)).ToString();
 
@@ -260,66 +313,87 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
             <tbody id="assignments" name="assignments">
             @if(@Model.AssignmentTemplates != null && @Model.AssignmentTemplates.Count > 0)
             {
-                @for(int j = 0; j < @Model.AssignmentTemplates.Count; j++)
-                {
-                    
-                    var template = @Model.AssignmentTemplates[j];
-                var tr_name = $"templateItem{template.Id}";
+            var assignmentTemplatesDict = @Html.Raw(Json.Serialize(@Model.AssignmentTemplates)).ToString();
 
-                <tr class="hoverTableRow" id="templateItem" name="@tr_name" onclick="onEditAssignmentTemplatePressed(@template.Id)">
-                    <td>@template.Title</td>
-                    <td>@EnumHelper.GetDisplayName(template.AssigneeType)</td>
-                    <td>Vollzeit</td>
-                    <td>Personal</td>
-                    <td>@template.DueIn.Label</td>
-                    <td class="d-flex flex-row justify-content-evenly">
-                        <button class='btn btn-danger' type='button' style='margin-left: 16px;' onclick='removeAssignmentTemplate(this, @template.Id)'>Entfernen</button>
-                    </td>
+            <input type="hidden" id="modelAssignmentTemplates" onclick="storeAssignmentTemplateData('@assignmentTemplatesDict')"/>
+            <input type="hidden" id="modelAssignmentTemplateCount" value="@Model.AssignmentTemplates.Count"/>
+            
+            @for(int j = 0; j < @Model.AssignmentTemplates.Count; j++)
+            {
 
-                    <input type='hidden' name='AssignmentTemplates[@j].Id' value='@template.Id'/>
-                    <input type='hidden' name='AssignmentTemplates[@j].Title' value='@template.Title'/>
-                    <input type='hidden' name='AssignmentTemplates[@j].Instructions' value='@template.Instructions'/>
+            var template = @Model.AssignmentTemplates[j];
+            var tr_name = $"templateItem{template.Id}";
 
-                    <input type='hidden' name='AssignmentTemplates[@j].DueIn.Id' value='@template.DueIn.Id'/>
-                    <input type='hidden' name='AssignmentTemplates[@j].DueIn.Label' value='@template.DueIn.Label'/>
-                    <input type='hidden' name='AssignmentTemplates[@j].DueIn.Days' value='@template.DueIn.Days'/>
-                    <input type='hidden' name='AssignmentTemplates[@j].DueIn.Weeks' value='@template.DueIn.Weeks'/>
-                    <input type='hidden' name='AssignmentTemplates[@j].DueIn.Months' value='@template.DueIn.Months'/>
-
-                    <input type='hidden' name='AssignmentTemplates[@j].AssigneeType' value='@template.AssigneeType'/>
-
-                    @if (template.ProcessTemplateId != null)
-                    {
-                        <input type='hidden' name='AssignmentTemplates[@j].ProcessTemplateId' value='@template.ProcessTemplateId'/>
-                    }
-
-                    @if (template.AssignedRole != null)
-                    {
-                        <input type='hidden' name='AssignmentTemplates[@j].AssignedRole.Id' value='@template.AssignedRole.Id'/>
-                        <input type='hidden' name='AssignmentTemplates[@j].AssignedRole.Name' value='@template.AssignedRole.Name'/>
-                    }
-
-                    @if (template.ForDepartmentsList != null)
-                    {
-                        for (int i = 0; i < template.ForDepartmentsList.Count; i++)
-                        {
-                            var department = template.ForDepartmentsList[i];
-                            <input type='hidden' name='AssignmentTemplates[@j].ForDepartmentsList[@i].Id' value='@department.Id'/>
-                            <input type='hidden' name='AssignmentTemplates[@j].ForDepartmentsList[@i].Name' value='@department.Name'/>
-                        }
-                    }
-
+            <tr class="hoverTableRow" id="templateItem" name="@tr_name" onclick="onEditAssignmentTemplatePressed(@template.Id)">
+                <td>@template.Title</td>
+                <td>@EnumHelper.GetDisplayName(template.AssigneeType)</td>
+                <td>
                     @if (template.ForContractsList != null)
                     {
-                        for (int i = 0; i < template.ForContractsList.Count; i++)
-                        {
-                            var contract = template.ForContractsList[i];
-                            <input type='hidden' name='AssignmentTemplates[@j].ForContractsList[@i].Id' value='@contract.Id'/>
-                            <input type='hidden' name='AssignmentTemplates[@j].ForContractsList[@i].Label' value='@contract.Label'/>
-                        }
+                    @foreach (var contract in template.ForContractsList)
+                    {
+                    <span class="badge bg-secondary">@contract.Label</span>
                     }
-                </tr>
+                    }
+                </td>
+                <td>
+                    @if (template.ForDepartmentsList != null)
+                    {
+                    @foreach (var department in template.ForDepartmentsList)
+                    {
+                    <span class="badge bg-secondary">@department.Name</span>
+                    }
+                    }
+                </td>
+                <td>@template.DueIn.Label</td>
+                <td class="d-flex flex-row justify-content-evenly">
+                    <button class='btn btn-danger' type='button' style='margin-left: 16px;' onclick='removeAssignmentTemplate(this, @template.Id)'>Entfernen</button>
+                </td>
+
+                <input type='hidden' name='AssignmentTemplates[@j].Id' value='@template.Id'/>
+                <input type='hidden' name='AssignmentTemplates[@j].Title' value='@template.Title'/>
+                <input type='hidden' name='AssignmentTemplates[@j].Instructions' value='@template.Instructions'/>
+
+                <input type='hidden' name='AssignmentTemplates[@j].DueIn.Id' value='@template.DueIn.Id'/>
+                <input type='hidden' name='AssignmentTemplates[@j].DueIn.Label' value='@template.DueIn.Label'/>
+                <input type='hidden' name='AssignmentTemplates[@j].DueIn.Days' value='@template.DueIn.Days'/>
+                <input type='hidden' name='AssignmentTemplates[@j].DueIn.Weeks' value='@template.DueIn.Weeks'/>
+                <input type='hidden' name='AssignmentTemplates[@j].DueIn.Months' value='@template.DueIn.Months'/>
+
+                <input type='hidden' name='AssignmentTemplates[@j].AssigneeType' value='@template.AssigneeType'/>
+
+                @if (template.ProcessTemplateId != null)
+                {
+                <input type='hidden' name='AssignmentTemplates[@j].ProcessTemplateId' value='@template.ProcessTemplateId'/>
                 }
+
+                @if (template.AssignedRole != null)
+                {
+                <input type='hidden' name='AssignmentTemplates[@j].AssignedRole.Id' value='@template.AssignedRole.Id'/>
+                <input type='hidden' name='AssignmentTemplates[@j].AssignedRole.Name' value='@template.AssignedRole.Name'/>
+                }
+
+                @if (template.ForDepartmentsList != null)
+                {
+                for (int i = 0; i < template.ForDepartmentsList.Count; i++)
+                {
+                var department = template.ForDepartmentsList[i];
+                <input type='hidden' name='AssignmentTemplates[@j].ForDepartmentsList[@i].Id' value='@department.Id'/>
+                <input type='hidden' name='AssignmentTemplates[@j].ForDepartmentsList[@i].Name' value='@department.Name'/>
+                }
+                }
+
+                @if (template.ForContractsList != null)
+                {
+                for (int i = 0; i < template.ForContractsList.Count; i++)
+                {
+                var contract = template.ForContractsList[i];
+                <input type='hidden' name='AssignmentTemplates[@j].ForContractsList[@i].Id' value='@contract.Id'/>
+                <input type='hidden' name='AssignmentTemplates[@j].ForContractsList[@i].Label' value='@contract.Label'/>
+                }
+                }
+            </tr>
+            }
             }
             else
             {
@@ -352,8 +426,15 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
 
 
 <script>
-    
+
     function onEditAssignmentTemplatePressed(assignmentTemplateId) {
+        
+        if (getAllAssignmentTemplates().some(obj => obj.id === assignmentTemplateId)) {
+            const matchingAssignment = getAllAssignmentTemplates().find(obj => obj.id === assignmentTemplateId);
+            if (matchingAssignment.processTemplateId !== null) {
+                return void 0;
+            }
+        }
 
         var form = document.getElementById("formId")
 
@@ -365,7 +446,7 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
         form.action = "/Process/StartRedirectEditAssignment?assignmentTemplateId="+assignmentTemplateId;
         form.submit();
     }
-    
+
     function onCreateAssignmentTemplatePressed() {
         var form = document.getElementById("formId")
 
@@ -381,10 +462,22 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
     window.onload = function() {
 
         window.assignmentTemplateCount = 0;
+        window.currentProcessTemplate = null;
+        window.assignmentTemplateList = [];
+
+        if($('#modelAssignmentTemplateCount').length) {
+            window.assignmentTemplateCount = parseInt($('#modelAssignmentTemplateCount').val());
+        }
 
         if ($('#preselectedTemplate').length) {
             $('#preselectedTemplate').click();
         }
+
+        if($('#modelAssignmentTemplates').length) {
+            $('#modelAssignmentTemplates').click();
+        }
+
+        updateAssignmentTemplates();
 
         var processTemplateDropdown = document.getElementById("processTemplateDropdown");
 
@@ -424,6 +517,11 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
     function onProcessTemplateSelected(temp_string) {
 
         template = JSON.parse(temp_string);
+        window.currentProcessTemplate = template;
+
+        if (!$('#processTemplatePreselected').length) {
+            addProcessTemplateInputs(template);
+        }
 
         if (typeof $('#Title').val() === "undefined" || $('#Title').val() === "") {
             $('#Title').val(template.title);
@@ -451,40 +549,101 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
 
         var assignmentTemplates = template.assignmentTemplates;
 
-    
         for (var i = 0; i < assignmentTemplates.length; i++) {
-
-            var assignmentTemplate_string = JSON.stringify(assignmentTemplates[i]);
-            addAssignmentTemplate(assignmentTemplates[i], i);
+            if (!assignmentTemplateExists(assignmentTemplates[i].id)) {
+                addAssignmentTemplate(assignmentTemplates[i]);
+            }
         }
+        updateAssignmentTemplates()
     }
-    
-    function addAssignmentTemplate(template, index) {
+
+    function addProcessTemplateInputs(processTemplate) {
+
         let inputs = '';
 
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].id' value='${template.id}' />`;
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].title' value='${template.title}' />`;
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].instructions' value='${template.instructions}' />`;
+        inputs += `<input type='hidden' name='Template.Id' value='${processTemplate.id}' />`;
+        inputs += `<input type='hidden' name='Template.Title' value='${processTemplate.title}' />`;
+        inputs += `<input type='hidden' name='Template.Description' value='${processTemplate.description}' />`;
 
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].dueIn.id' value='${template.dueIn.id}' />`;
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].dueIn.label' value='${template.dueIn.label}' />`;
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].dueIn.days' value='${template.dueIn.days}' />`;
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].dueIn.weeks' value='${template.dueIn.weeks}' />`;
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].dueIn.months' value='${template.dueIn.months}' />`;
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].assigneeType' value='${template.assigneeType}' />`;
-        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].processTemplateId' value='${template.processTemplateId}' />`;
+        for (var index = 0; index < processTemplate.assignmentTemplates.length; index++) {
+
+            var template = processTemplate.assignmentTemplates[index];
+
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].Id' value='${template.id}' />`;
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].Title' value='${template.title}' />`;
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].Instructions' value='${template.instructions}' />`;
+
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].DueIn.Id' value='${template.dueIn.id}' />`;
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].DueIn.Label' value='${template.dueIn.label}' />`;
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].DueIn.Days' value='${template.dueIn.days}' />`;
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].DueIn.Weeks' value='${template.dueIn.weeks}' />`;
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].DueIn.Months' value='${template.dueIn.months}' />`;
+
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].AssigneeType' value='${template.assigneeType}' />`;
+            inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].ProcessTemplateId' value='${template.processTemplateId}' />`;
+
+            if (template.assignedRole != null) {
+                inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].AssignedRole.Id' value='${template.assignedRole.id}' />`;
+                inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].AssignedRole.Name' value='${template.assignedRole.name}' />`;
+            }
+
+            if (template.forDepartmentsList != null) {
+                for (let i = 0; i < template.forDepartmentsList.length; i++) {
+                    let depId = template.forDepartmentsList[i].id;
+                    let depName = template.forDepartmentsList[i].name;
+                    inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].ForDepartmentsList[${i}].Id' value='${depId}' />`;
+                    inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].ForDepartmentsList[${i}].Name' value='${depName}' />`;
+                }
+            }
+
+            if (template.forContractsList != null) {
+                for (let i = 0; i < template.forContractsList.length; i++) {
+                    let conId = template.forContractsList[i].id;
+                    let conLabel = template.forContractsList[i].label;
+                    inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].ForContractsList[${i}].Id' value='${conId}' />`;
+                    inputs += `<input type='hidden' name='Template.AssignmentTemplates[${index}].ForContractsList[${i}].Label' value='${conLabel}' />`;
+
+                }
+            }
+        }
+
+        $('#processTemplateInputs').html(inputs);
+    }
+
+    function addAssignmentTemplate(template) {
+        
+        var index = window.assignmentTemplateCount++;
+
+        let inputs = '';
+        let contractSpan = '';
+        let departmentSpan = '';
+
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].Id' value='${template.id}' />`;
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].Title' value='${template.title}' />`;
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].Instructions' value='${template.instructions}' />`;
+
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].DueIn.Id' value='${template.dueIn.id}' />`;
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].DueIn.Label' value='${template.dueIn.label}' />`;
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].DueIn.Days' value='${template.dueIn.days}' />`;
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].DueIn.Weeks' value='${template.dueIn.weeks}' />`;
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].DueIn.Months' value='${template.dueIn.months}' />`;
+
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].AssigneeType' value='${template.assigneeType}' />`;
+        inputs += `<input type='hidden' name='AssignmentTemplates[${index}].ProcessTemplateId' value='${template.processTemplateId}' />`;
 
         if (template.assignedRole != null) {
-            inputs += `<input type='hidden' name='AssignmentTemplates[${index}].assignedRole.id' value='${template.assignedRole.id}' />`;
-            inputs += `<input type='hidden' name='AssignmentTemplates[${index}].assignedRole.name' value='${template.assignedRole.name}' />`;
+            inputs += `<input type='hidden' name='AssignmentTemplates[${index}].AssignedRole.Id' value='${template.assignedRole.id}' />`;
+            inputs += `<input type='hidden' name='AssignmentTemplates[${index}].AssignedRole.Name' value='${template.assignedRole.name}' />`;
         }
 
         if (template.forDepartmentsList != null) {
             for (let i = 0; i < template.forDepartmentsList.length; i++) {
                 let depId = template.forDepartmentsList[i].id;
                 let depName = template.forDepartmentsList[i].name;
-                inputs += `<input type='hidden' name='AssignmentTemplates[${index}].forDepartmentsList[${i}].id' value='${depId}' />`;
-                inputs += `<input type='hidden' name='AssignmentTemplates[${index}].forDepartmentsList[${i}].name' value='${depName}' />`;
+                inputs += `<input type='hidden' name='AssignmentTemplates[${index}].ForDepartmentsList[${i}].Id' value='${depId}' />`;
+                inputs += `<input type='hidden' name='AssignmentTemplates[${index}].ForDepartmentsList[${i}].Name' value='${depName}' />`;
+
+                departmentSpan += `<span class="badge bg-secondary">${depName}</span>`;
             }
         }
 
@@ -492,8 +651,11 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
             for (let i = 0; i < template.forContractsList.length; i++) {
                 let conId = template.forContractsList[i].id;
                 let conLabel = template.forContractsList[i].label;
-                inputs += `<input type='hidden' name='AssignmentTemplates[${index}].forContractsList[${i}].id' value='${conId}' />`;
-                inputs += `<input type='hidden' name='AssignmentTemplates[${index}].forContractsList[${i}].label' value='${conLabel}' />`;
+                inputs += `<input type='hidden' name='AssignmentTemplates[${index}].ForContractsList[${i}].Id' value='${conId}' />`;
+                inputs += `<input type='hidden' name='AssignmentTemplates[${index}].ForContractsList[${i}].Label' value='${conLabel}' />`;
+
+                contractSpan += `<span class="badge bg-secondary">${conLabel}</span>`;
+
             }
         }
 
@@ -502,8 +664,8 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
         var assignmentHtml = `<tr id='templateItem' name='templateItem${template.id}'>
             <td>${template.title}</td>
             <td>${assignee}</td>
-            <td>Vollzeit</td>
-            <td>Personal</td>
+            <td>${contractSpan}</td>
+            <td>${departmentSpan}</td>
             <td>${template.dueIn.label}</td>
             <td><button class='btn btn-danger' type='button' style='margin-left: 16px;' onclick='removeAssignmentTemplate(this, ${template.id})'>Entfernen</button></td>
             ${inputs}
@@ -522,9 +684,133 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
         }
     }
 
+    function updateAssignmentTemplates()
+    {
+        if (getAllAssignmentTemplates() !== undefined) {
+            filterAssignmentTemplatesForContractAndDepartment(getAllAssignmentTemplates());
+        }
+    }
+
+    function storeAssignmentTemplateData(assignmentDict)
+    {
+        window.assignmentTemplateList = JSON.parse(assignmentDict);
+    }
+
+    function getAllAssignmentTemplates() {
+
+        var list = window.assignmentTemplateList;
+
+        if (window.currentProcessTemplate != null) {
+            var processTemplateAssignments = window.currentProcessTemplate.assignmentTemplates;
+            for (var i = 0; i < processTemplateAssignments.length; i++) {
+                var assignmentTemp = processTemplateAssignments[i];
+                if (!list.some(obj => obj.title === assignmentTemp.title)) {
+                    list.push(assignmentTemp);
+                }
+            }
+        }
+
+        return list;
+    }
+
+    function convertToList(dictionary) {
+        const result = {};
+
+        Object.keys(dictionary).forEach(key => {
+
+            const match = key.match(/(forContractsList|forDepartmentsList)\[(\d+)\]/);
+            if (match) {
+                const listName = match[1];
+                const index = parseInt(match[2], 10);
+
+                if (!result[listName]) {
+                    result[listName] = [];
+                }
+
+                result[listName][index] = dictionary[key];
+            } else {
+
+                result[key] = dictionary[key];
+            }
+        });
+
+        return result;
+    }
+
+    function filterAssignmentTemplatesForContractAndDepartment(assignmentTemplates) {
+
+        var contractId = $('#ContractId').val().trim();
+        var departmentId = $('#DepartmentId').val().trim();
+
+        if ((contractId === '' || contractId === '0') && (departmentId === '' || departmentId === '0')) {
+            for (var i = 0; i < assignmentTemplates.length; i++) {
+                if (!assignmentTemplateExists(assignmentTemplates[i].id)) {
+                    addAssignmentTemplate(assignmentTemplates[i]);
+                }
+            }
+        }
+        else {
+
+            var assignmentTemplatesToAdd = [];
+            var assignmentTemplatesToRemove = [];
+
+            for (var i = 0; i < assignmentTemplates.length; i++) {
+                var assignmentTemp = assignmentTemplates[i];
+                var addToList = false;
+
+                var forContractsIdList = [];
+                var forDepartmentsIdList = [];
+                var containsContract = false;
+                var containsDepartment = false;
+                var noContractSelected = (contractId === '' || contractId === '0');
+                var noDepartmentSelected = (departmentId === '' || departmentId === '0');
+                var contractListEmpty = !assignmentTemp.hasOwnProperty("forContractsList") ||  (assignmentTemp.forContractsList != null && assignmentTemp.forContractsList.length === 0) || assignmentTemp.forContractsList == null
+                var departmentListEmpty = !assignmentTemp.hasOwnProperty("forDepartmentsList") || (assignmentTemp.forDepartmentsList != null && assignmentTemp.forDepartmentsList.length === 0) || assignmentTemp.forDepartmentsList == null
+
+                if (!contractListEmpty) {
+                    forContractsIdList = assignmentTemp.forContractsList.map(item => item.id);
+                    containsContract = forContractsIdList.includes(parseInt(contractId)) || (contractId === '' || contractId === '0');
+                }
+                if (!departmentListEmpty) {
+                    forDepartmentsIdList = assignmentTemp.forDepartmentsList.map(item => item.id);
+                    containsDepartment = forDepartmentsIdList.includes(parseInt(departmentId) || (departmentId === '' || departmentId === '0'));
+                }
+
+                var matchContract = noContractSelected || contractListEmpty || containsContract;
+                var matchDepartment = noDepartmentSelected || departmentListEmpty || containsDepartment;
+
+                if (matchContract && matchDepartment) {
+                    assignmentTemplatesToAdd.push(assignmentTemp);
+                    addToList = true;
+                    continue;
+                }
+
+                if (!addToList ) {
+                    assignmentTemplatesToRemove.push(assignmentTemp);
+                }
+
+            }
+
+            for (var i = 0; i < assignmentTemplatesToAdd.length; i++) {
+                var id = assignmentTemplatesToAdd[i].id;
+                if (!assignmentTemplateExists(id)) {
+                    addAssignmentTemplate(assignmentTemplatesToAdd[i]);
+                }
+            }
+
+            for (var i = 0; i < assignmentTemplatesToRemove.length; i++) {
+                var id = assignmentTemplatesToRemove[i].id;
+                if (assignmentTemplateExists(id)) {
+                    var buttonObj = $(`button[onclick='removeAssignmentTemplate(this, ${id})']`);
+                    removeAssignmentTemplate(buttonObj, id);
+                }
+            }
+        }
+    }
+
     function getDisplayName(assigneeType) {
         const displayNames = {
-        0: 'Rolle',
+            0: 'Rolle',
             1: 'Vorgangsverantwortlicher',
             2: 'Bezugsperson',
             3: 'Benutzer'
@@ -536,12 +822,14 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
         var contract = JSON.parse(contract_string);
         $('#ContractId').val(contract.id);
         $('#ContractLabel').val(contract.label)
+        updateAssignmentTemplates()
     }
 
     function onDepartmentSelected(department_string) {
         var department = JSON.parse(department_string);
         $('#DepartmentId').val(department.id);
         $('#DepartmentName').val(department.name)
+        updateAssignmentTemplates()
     }
 
 
@@ -559,6 +847,15 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
         $('#WorkerOfRefName').val(workerOfRef.fullName)
         //$('#WorkerOfRefStr').val(workerOfRef.name)
 
+    }
+
+    function assignmentTemplateExists(id)
+    {
+        if ($(`[name='templateItem${id}']`).length > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     function removeAssignmentTemplate(obj, assignmentId) {
@@ -580,6 +877,5 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
             }
         }
     }
-
 
 </script>

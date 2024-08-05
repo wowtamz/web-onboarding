@@ -16,6 +16,13 @@ using Xunit;
 
 namespace SoPro24Team06.Tests
 {
+    // Ensure tests are ran sequentially so that they do not interfere with each other using a TestCollection class
+    [CollectionDefinition("Sequential Test Collection", DisableParallelization = true)]
+    public class SequentialTestCollection
+    {
+    }
+    
+    [Collection("Sequential Test Collection")]
     public class ProcessControllerTests
     {
         private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
@@ -52,6 +59,10 @@ namespace SoPro24Team06.Tests
 
             _mockUserManager.Setup(um => um.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((string fullname) => _users.FirstOrDefault(u => u.FullName == fullname));
+            
+            _mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>()))
+                .ReturnsAsync((string userId) => _users.FirstOrDefault(u => u.Id == userId));
+
 
             _mockUserManager.Setup(um => um.AddToRolesAsync(It.IsAny<ApplicationUser>(), It.IsAny<IEnumerable<string>>()))
                 .ReturnsAsync(IdentityResult.Success)
@@ -166,25 +177,121 @@ namespace SoPro24Team06.Tests
 
         }
 
+        public async Task<HttpContext> CreateMockHttpContextForUser(ApplicationUser user)
+        {
+            var usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
+            
+            var mockHttpContext = new Mock<HttpContext>();
+            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+            
+            mockClaimsPrincipal.Setup(cp => cp.FindFirst(It.IsAny<string>()))
+                .Returns<string>(type => type == ClaimTypes.NameIdentifier ? new Claim(ClaimTypes.NameIdentifier, user.Id) : null);
+            
+            mockClaimsPrincipal.Setup(cp => cp.IsInRole(It.IsAny<string>()))
+                .Returns((string role) => usersRoles.Select(r => r).ToList().Contains(role));
+            
+            mockHttpContext.Setup(ctx => ctx.User).Returns(mockClaimsPrincipal.Object);
+            
+            return mockHttpContext.Object;
+        }
+
+        // Creates ProcessController with all mocked resources ready for testing
+        // user = the user which is accessing the methods from the controller
+        public async Task<ProcessController> CreateProcessController(ApplicationUser user)
+        {
+            
+            ProcessController controller = new ProcessController(_context, _mockUserManager.Object, _mockRoleManager.Object)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = await CreateMockHttpContextForUser(user)
+                }
+            };
+
+            return controller;
+        }
+
+        [Fact]
+        public async Task GetCurrentUserTest()
+        {
+            var user = await _mockUserManager.Object.FindByNameAsync("User");
+            
+            Assert.NotNull(user);
+
+            ProcessController controller = await CreateProcessController(user);
+
+            string? userId = controller.GetCurrentUserId();
+            Assert.NotNull(userId);
+            Assert.Equal(user.Id, userId);
+
+            ApplicationUser? result = await controller.GetCurrentUser();
+            Assert.NotNull(result);
+            Assert.Equal(user.Id, result.Id);
+            Assert.Equal(user.FullName, result.FullName);
+
+        }
+
+        [Fact]
+        public async Task UserCanStartProcessesTest()
+        {
+            var user = await _mockUserManager.Object.FindByNameAsync("User");
+            var usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
+            
+            Assert.NotNull(usersRoles);
+            ApplicationRole roleWithAccess = await _mockRoleManager.Object.FindByNameAsync(usersRoles.First());
+            
+            var contract = _context.Contracts.FirstOrDefault();
+            var department = _context.Departments.FirstOrDefault();
+
+            var assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault();
+            
+            var template = new ProcessTemplate {Title = "Test Template", RolesWithAccess = new List<ApplicationRole> {roleWithAccess}, ContractOfRefWorker = contract, DepartmentOfRefWorker = department, AssignmentTemplates = new List<AssignmentTemplate> {assignmentTemplate}, Description = "NONE"};
+            _context.ProcessTemplates.Add(template);
+            _context.SaveChanges();
+            
+            ProcessController controller = await CreateProcessController(user);
+
+            bool result = await controller.UserCanStartProcesses();
+            
+            Assert.Equal(true, result);
+
+        }
+        
+        [Fact]
+        public async Task UserCannotStartProcessesTest()
+        {
+            var user = await _mockUserManager.Object.FindByNameAsync("User");
+            var usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
+            
+            Assert.NotNull(usersRoles);
+            ApplicationRole roleWithAccess = await _mockRoleManager.Object.FindByNameAsync("Administrator");
+            
+            var contract = _context.Contracts.FirstOrDefault();
+            var department = _context.Departments.FirstOrDefault();
+
+            var assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault();
+            
+            var template = new ProcessTemplate {Title = "Test Template", RolesWithAccess = new List<ApplicationRole> {roleWithAccess}, ContractOfRefWorker = contract, DepartmentOfRefWorker = department, AssignmentTemplates = new List<AssignmentTemplate> {assignmentTemplate}, Description = "NONE"};
+            _context.ProcessTemplates.Add(template);
+            _context.SaveChanges();
+            
+            ProcessController controller = await CreateProcessController(user);
+
+            bool result = await controller.UserCanStartProcesses();
+            
+            Assert.Equal(false, result);
+
+        }
+
         [Fact]
         public async Task IndexReturnProcessesNotAdmin()
         {
             var user = await _mockUserManager.Object.FindByNameAsync("User");
 
-            var mockHttpContext = new Mock<HttpContext>();
-            mockHttpContext.Setup(ctx => ctx.User.FindFirst(It.IsAny<string>())).Returns(new Claim(ClaimTypes.NameIdentifier, user.Id));
-
-            var controller = new ProcessController(_context, _mockUserManager.Object, _mockRoleManager.Object)
-            {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = mockHttpContext.Object
-                }
-            };
+            ProcessController controller = await CreateProcessController(user);
             
             var result = await controller.Index();
-
-            // Asserts
+            
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<ProcessListViewModel>(viewResult.Model);
             Assert.NotNull(viewResult.ViewData["MyProcesses"]);
@@ -198,60 +305,26 @@ namespace SoPro24Team06.Tests
         public async Task IndexReturnProcessesAdmin()
         {
             var user = await _mockUserManager.Object.FindByNameAsync("Administrator");
-            var usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
 
-            var mockHttpContext = new Mock<HttpContext>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
-            
-            mockClaimsPrincipal.Setup(cp => cp.IsInRole(It.IsAny<string>()))
-                .Returns((string role) => usersRoles.Select(r => r).ToList().Contains(role));
-            
-            mockHttpContext.Setup(ctx => ctx.User.FindFirst(It.IsAny<string>()))
-                .Returns(new Claim(ClaimTypes.NameIdentifier, user.Id));
-            mockHttpContext.Setup(ctx => ctx.User).Returns(mockClaimsPrincipal.Object);
-
-            var controller = new ProcessController(_context, _mockUserManager.Object, _mockRoleManager.Object)
-            {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = mockHttpContext.Object
-                }
-            };
+            ProcessController controller = await CreateProcessController(user);
 
             var result = await controller.Index();
-
-            IList<string> roles = await _mockUserManager.Object.GetRolesAsync(user);
-
-            // Asserts
-            var viewResult = Assert.IsType<ViewResult>(result);
             
+            var viewResult = Assert.IsType<ViewResult>(result);
             Assert.NotNull(viewResult.ViewData["MyProcesses"]);
             Assert.NotNull(viewResult.ViewData["ArchivedProcesses"]);
             Assert.NotNull(viewResult.ViewData["AllProcesses"]);
             Assert.NotNull(viewResult.ViewData["AllArchivedProcesses"]);
         }
-
         
         [Fact]
         public async Task StartProcessWithValidProcessTemplate_WithAccess()
         {
             var user = await _mockUserManager.Object.FindByNameAsync("User");
-            var usersRoles = (await _mockUserManager.Object.GetRolesAsync(user)).ToList();
-            ApplicationRole mockRoleWithAccess = await _mockRoleManager.Object.FindByNameAsync(usersRoles.ToList().First());
+            var usersRoles = (await _mockUserManager.Object.GetRolesAsync(user));
+            Assert.NotNull(usersRoles);
             
-            var mockHttpContext = new Mock<HttpContext>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
-            var roles = _context.Roles.Select(r => r.Name).ToList();
-            var roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
-            var allClaims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, user.Id) }.Concat(roleClaims);
-
-            mockClaimsPrincipal.Setup(cp => cp.Claims).Returns(allClaims);
-            mockClaimsPrincipal.Setup(cp => cp.IsInRole(It.IsAny<string>()))
-                .Returns((string role) => roles.Contains(role));
-            
-            mockHttpContext.Setup(ctx => ctx.User).Returns(mockClaimsPrincipal.Object);
-            
-            
+            ApplicationRole mockRoleWithAccess = await _mockRoleManager.Object.FindByNameAsync(usersRoles.First());
 
             var contract = _context.Contracts.FirstOrDefault();
             var department = _context.Departments.FirstOrDefault();
@@ -262,24 +335,19 @@ namespace SoPro24Team06.Tests
             _context.ProcessTemplates.Add(template);
             _context.SaveChanges();
 
-            var controller = new ProcessController(_context, _mockUserManager.Object, _mockRoleManager.Object)
-            {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = mockHttpContext.Object
-                }
-            };
+            ProcessController controller = await CreateProcessController(user);
             
-            var result = await controller.Start(template.Id) as ViewResult;
+            var result = await controller.Start(template.Id);
             
             Assert.IsType<ViewResult>(result);
+
+            ViewResult viewResult = result as ViewResult;
             
             Assert.NotNull(result);
-            Assert.IsType<StartProcessViewModel>(result.Model);
-            StartProcessViewModel startProcessViewModel = result.Model as StartProcessViewModel;
+            Assert.IsType<StartProcessViewModel>(viewResult.Model);
             
-            // Assert
-            Assert.IsType<ViewResult>(result);
+            StartProcessViewModel startProcessViewModel = viewResult.Model as StartProcessViewModel;
+            
             Assert.NotNull(startProcessViewModel.Template);
             Assert.Equal(startProcessViewModel.Template.Id, template.Id);
             Assert.Equal(startProcessViewModel.Template.Title, "Test Template");
@@ -297,14 +365,6 @@ namespace SoPro24Team06.Tests
             var usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
             ApplicationRole mockRoleWithAccess = await _mockRoleManager.Object.FindByNameAsync(usersRoles.ToList().First());
 
-            var mockHttpContext = new Mock<HttpContext>();
-            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
-            
-            mockClaimsPrincipal.Setup(cp => cp.IsInRole(It.IsAny<string>()))
-                .Returns((string role) => usersRoles.ToList().Select(r => r).ToList().Contains(role));
-            mockHttpContext.Setup(ctx => ctx.User.FindFirst(It.IsAny<string>())).Returns(new Claim(ClaimTypes.NameIdentifier, user.Id));
-            mockHttpContext.Setup(ctx => ctx.User).Returns(mockClaimsPrincipal.Object);
-
             var contract = _context.Contracts.FirstOrDefault();
             var department = _context.Departments.FirstOrDefault();
 
@@ -314,57 +374,42 @@ namespace SoPro24Team06.Tests
             _context.ProcessTemplates.Add(template);
             _context.SaveChanges();
 
-            var controller = new ProcessController(_context, _mockUserManager.Object, _mockRoleManager.Object)
-            {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = mockHttpContext.Object
-                }
-            };
+            ProcessController controller = await CreateProcessController(user);
             
             var result = await controller.Start(template.Id);
             
             Assert.NotNull(result);
             Assert.IsType<RedirectToActionResult>(result);
+            RedirectToActionResult redirectResult = result as RedirectToActionResult;
+            Assert.Equal(redirectResult.ActionName, "Index");
             
         }
         
         [Fact]
         public async Task StartProcessWithInvalidProcessTemplate()
         {
-            //var admin = await _mockUserManager.Object.FindByNameAsync("Administrator");
             var user = await _mockUserManager.Object.FindByNameAsync("User");
 
             var mockHttpContext = new Mock<HttpContext>();
             var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
-            
-            mockClaimsPrincipal.Setup(cp => cp.IsInRole(It.IsAny<string>()))
-                .Returns((string role) => _roles.Select(r => r.Name).ToList().Contains(role));
-            mockHttpContext.Setup(ctx => ctx.User.FindFirst(It.IsAny<string>())).Returns(new Claim(ClaimTypes.NameIdentifier, user.Id));
-            mockHttpContext.Setup(ctx => ctx.User).Returns(mockClaimsPrincipal.Object);
 
             var contract = _context.Contracts.FirstOrDefault();
             var department = _context.Departments.FirstOrDefault();
-
-             var assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault();
+            var assignmentTemplate = _context.AssignmentTemplates.FirstOrDefault();
             
             var template = new ProcessTemplate {Title = "Test Template", RolesWithAccess = new List<ApplicationRole>(), ContractOfRefWorker = contract, DepartmentOfRefWorker = department, AssignmentTemplates = new List<AssignmentTemplate> {assignmentTemplate}, Description = "NONE"};
             _context.ProcessTemplates.Add(template);
             _context.SaveChanges();
             
 
-            var controller = new ProcessController(_context, _mockUserManager.Object, _mockRoleManager.Object)
-            {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = mockHttpContext.Object
-                }
-            };
+            ProcessController controller = await CreateProcessController(user);
 
             var result = await controller.Start(0);
             
             Assert.NotNull(result);
             Assert.IsType<RedirectToActionResult>(result);
+            RedirectToActionResult redirectResult = result as RedirectToActionResult;
+            Assert.Equal(redirectResult.ActionName, "Index");
             
         }
     }

@@ -221,13 +221,6 @@ public class ProcessContainer
             {
                 assignee = await _userManager.FindByIdAsync(assignment.Assignee.Id);
             }
-            else
-            {
-                /* später implementieren
-                ApplicationRole role = assignment.AssignedRole ?? throw new NullReferenceException("Role cannot be null if there is no assignee");
-                assignment.AssignedRole = await _roleManager.FindByIdAsync(role.Id);
-                */
-            }
 
             if (assignment.AssignedRole != null)
             {
@@ -238,6 +231,14 @@ public class ProcessContainer
             }
 
             assignment.Assignee = assignee;
+            
+            var departmentTasks = assignment.ForDepartmentsList.Select(async d => await _context.Departments.FindAsync(d.Id));
+            var departmentList = await Task.WhenAll(departmentTasks);
+            assignment.ForDepartmentsList = departmentList.ToList();
+            
+            var contractTasks = assignment.ForContractsList.Select(async c => await _context.Contracts.FindAsync(c.Id));
+            var contractList = await Task.WhenAll(contractTasks);
+            assignment.ForContractsList = contractList.ToList();    
 
             _context.Assignments.Add(assignment);
         }
