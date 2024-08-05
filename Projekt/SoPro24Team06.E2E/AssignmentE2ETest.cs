@@ -36,6 +36,10 @@ namespace SoPro24Team06.E2E
             options.AddArguments("--disable-infobars");
             options.AddArguments("--remote-debugging-port=9222");
             options.AddArguments("--window-size=1920,1080");
+            options.AddArguments("--headless");
+            options.AddArguments("--disable-dev-shm-usage");
+            options.AddArguments("--no-sandbox");
+            options.AddArguments("--window-size=1920,1080");
 
             var service = ChromeDriverService.CreateDefaultService();
             _driver = new ChromeDriver(service, options);
