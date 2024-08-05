@@ -225,6 +225,7 @@ namespace SoPro24Team06.E2E
             IWebElement submitButton = _driver.FindElement(By.CssSelector("button[type='submit']"));
             submitButton.Click();
 
+            await Task.Delay(10000);
             //check if changes arrive at the databse
             using (var scope = _factory.Services.CreateScope())
             {
