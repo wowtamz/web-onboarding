@@ -96,10 +96,11 @@ namespace SoPro24Team06.E2E
                 );
             }
             //find the assignmentListBody
-            IWebElement assignmentListBody = _wait.Until(d =>
-            {
-                return d.FindElement(By.Id("allAssignmentsBody"));
-            });
+            // IWebElement assignmentListBody = _wait.Until(d =>
+            // {
+            //     return d.FindElement(By.Id("allAssignmentsBody"));
+            // });
+            IWebElement assignmentListBody;
             try
             {
                 // assignmentListBody = _wait.Until(
