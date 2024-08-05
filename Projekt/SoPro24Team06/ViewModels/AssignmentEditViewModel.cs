@@ -141,15 +141,6 @@ namespace SoPro24Team06.ViewModels
                 this.RoleList = new SelectList(roleList, "Id", "Name");
             }
 
-            List<AssignmentStatus> assignmentStatusList =
-                EnumHelper.GetEnumList<AssignmentStatus>();
-            this.AssignmentStatusList = assignmentStatusList.Select(status => new SelectListItem
-            {
-                Value = status.ToString(),
-                Text = EnumHelper.GetDisplayName(status),
-                Selected = status == Assignment.Status
-            });
-
             List<AssigneeType> assigneeTypeList = new List<AssigneeType>()
             {
                 AssigneeType.ROLES,
