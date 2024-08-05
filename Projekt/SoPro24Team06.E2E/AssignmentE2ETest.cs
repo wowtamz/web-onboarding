@@ -99,8 +99,21 @@ namespace SoPro24Team06.E2E
             // IWebElement assignmentListBody = _wait.Until(d =>
             //     d.FindElement(By.Id("allAssignmentsBody"))
             // );
-
+            bool isPresent = _driver.FindElements(By.Id("allAssignmentsBody")).Count() > 0;
             IWebElement assignmentListBody;
+            if (!isPresent)
+            {
+                assignmentListBody = _driver.FindElement(By.Id("allAssignmentsBody"));
+                if (assignmentListBody == null)
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "AssignmentListBody is not Found (befor changes) with alternative method"
+                    );
+                }
+            }
             try
             {
                 // assignmentListBody = _wait.Until(
