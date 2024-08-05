@@ -38,10 +38,19 @@ namespace SoPro24Team06.E2E
                 SeedData.Initialize(userManager, roleManager, context).Wait();
             }
             var options = new ChromeOptions();
-            options.AddArguments("--headless");
-            options.AddArguments("--disable-dev-shm-usage");
-            options.AddArguments("--no-sandbox");
-            options.AddArguments("--window-size=1920,1080");
+            options.AddArguments(
+                "--no-sandbox",
+                "--headless",
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--disable-extensions",
+                "--disable-infobars",
+                "--remote-debugging-port=9222",
+                "--window-size=2560,1440",
+                "enable-automation",
+                "--disable-browser-side-navigation",
+                "--ignore-certificate-errors"
+            );
 
             var service = ChromeDriverService.CreateDefaultService();
             _driver = new ChromeDriver(service, options);
