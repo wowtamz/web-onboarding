@@ -664,8 +664,6 @@ namespace SoPro24Team06.E2E
                                 + e.Message
                         );
                     }
-                    //wait for page to load
-                    await Task.Delay(10000);
 
                     if (_driver.Url.Contains("Identity/Account/Login"))
                     {
