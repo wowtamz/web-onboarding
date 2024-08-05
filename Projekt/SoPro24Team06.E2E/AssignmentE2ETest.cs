@@ -222,40 +222,104 @@ namespace SoPro24Team06.E2E
             }
 
             //submit changes
-            IWebElement submitButton = _driver.FindElement(By.CssSelector("button[type='submit']"));
+            IWebElement submitButton = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                    By.CssSelector("button[type='submit']")
+                )
+            );
             submitButton.Click();
 
-            await Task.Delay(10000);
-            //check if changes arrive at the databse
-            using (var scope = _factory.Services.CreateScope())
+            if (_driver.Url.Contains("Assignment/Edit"))
             {
-                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "Assignment Edit View was not closed"
+                );
+            }
 
-                Assignment assignment = context.Assignments.First(a => a.Title == assignmentTitle);
-                if (assignment == null)
-                {
-                    throw new Exception(
-                        ""
-                            + _errorLocationClass
-                            + errorLocationFunktion
-                            + "Assignemnt with Title"
-                            + assignmentTitle
-                            + " not found in Database"
-                    );
-                }
+            //check if changes are visable at the main View:
+            assignmentListBody = _wait.Until(d => d.FindElement(By.Id("allAssignmentsBody")));
+            try
+            {
+                Assert.True(
+                    assignmentListBody.Displayed,
+                    "assignmentList myAssignmentsList not displayed"
+                );
+            }
+            catch (Exception e)
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-isDisplayed-Check: "
+                        + e.Message
+                );
+            }
+
+            //check if Assignments are Present
+            try
+            {
+                assignmentListBody.FindElement(
+                    By.XPath(".//tr/td[text()='Keine Aufgaben vorhanden']")
+                );
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
+                );
+            }
+            catch (Exception e)
+            {
                 if (
-                    assignment.AssigneeType != Enums.AssigneeType.USER
-                    || assignment.Assignee == null
-                    || assignment.Assignee.FullName != "Admin User"
-                )
-                {
-                    throw new Exception(
+                    e.Message
+                    == (
                         ""
-                            + _errorLocationClass
-                            + errorLocationFunktion
-                            + "Changes not detected in the Database"
-                    );
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
+                    )
+                )
+                    throw new Exception(e.Message);
+            }
+
+            //get list of All Assignments in List
+            assignmentListContent = assignmentListBody.FindElements(By.XPath(".//tr")).ToList();
+
+            if (assignmentListContent.Count == 0)
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-does not contain any elements"
+                );
+            }
+
+            //get the assignment wich should be tested
+            foreach (var e in assignmentListContent)
+            {
+                var title = e.FindElement(By.XPath(".//td[1]"));
+                if (title.Text == assignmentTitle)
+                {
+                    assignmentToTest = e;
+                    break;
                 }
+            }
+
+            IWebElement aufgabenverantwortlich = assignmentToTest.FindElement(By.XPath("./td[3]"));
+
+            if (aufgabenverantwortlich.Text != "Benutzer : Admin User")
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "Assignment Responsibility not set correctly"
+                );
             }
         }
 
