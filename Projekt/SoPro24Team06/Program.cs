@@ -88,14 +88,15 @@ using (var scope = app.Services.CreateScope())
         await context.Database.MigrateAsync();
         //await context.Database.MigrateAsync();
         await SeedData.Initialize(userManager, roleManager, context);
+        var keyRingPath = Path.Combine(Directory.GetCurrentDirectory(), "keys");
+
+        // Einmalige Invalidierung der Sessions beim Start der Anwendung
+        if (Directory.Exists(keyRingPath))
+        {
+            Directory.Delete(keyRingPath, true); // Lösche alle vorhandenen Schlüssel
+        }
+        Directory.CreateDirectory(keyRingPath); // Erstelle den Schlüsselordner neu
     }
-    // Einmalige Invalidierung der Sessions beim Start der Anwendung
-    var keyRingPath = Path.Combine(Directory.GetCurrentDirectory(), "keys");
-    if (Directory.Exists(keyRingPath))
-    {
-        Directory.Delete(keyRingPath, true); // Lösche alle vorhandenen Schlüssel
-    }
-    Directory.CreateDirectory(keyRingPath); // Erstelle den Schlüsselordner neu
 }
 
 if (!app.Environment.IsDevelopment())
