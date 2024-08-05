@@ -27,17 +27,19 @@ namespace SoPro24Team06.E2E
             _webClient = _factory.CreateDefaultClient();
 
             var options = new ChromeOptions();
-            options.AddArguments("--no-sandbox");
-            options.AddArguments("--headless");
-            options.AddArguments("--disable-gpu");
-            //options.AddArguments("--disable-dev-shm-usage");
-            options.AddArguments("--disable-extensions");
-            options.AddArguments("--disable-infobars");
-            options.AddArguments("--remote-debugging-port=9222");
-            options.AddArguments("--window-size=1920,1080");
-            options.AddArguments("--disable-browser-side-navigation");
-            options.AddArguments("--disable-notifications");
-            options.AddArguments("--disable-translate");
+            options.AddArguments(
+                "--no-sandbox",
+                "--headless",
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--disable-extensions",
+                "--disable-infobars",
+                "--remote-debugging-port=9222",
+                "--window-size=2560,1440",
+                "enable-automation",
+                "--disable-browser-side-navigation",
+                "--ignore-certificate-errors"
+            );
 
             var service = ChromeDriverService.CreateDefaultService();
             _driver = new ChromeDriver(service, options);
