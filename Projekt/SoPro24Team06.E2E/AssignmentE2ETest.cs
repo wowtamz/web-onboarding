@@ -28,23 +28,16 @@ namespace SoPro24Team06.E2E
             Environment.SetEnvironmentVariable("DISPLAY", ":99");
 
             var options = new ChromeOptions();
-            options.AddArguments("--no-sandbox");
-            options.AddArguments("--headless");
-            options.AddArguments("--disable-gpu");
-            options.AddArguments("--disable-dev-shm-usage");
-            options.AddArguments("--disable-extensions");
-            options.AddArguments("--disable-infobars");
             options.AddArguments("--remote-debugging-port=9222");
             options.AddArguments("--window-size=1920,1080");
             options.AddArguments("--headless");
             options.AddArguments("--disable-dev-shm-usage");
             options.AddArguments("--no-sandbox");
-            options.AddArguments("--window-size=1920,1080");
 
             var service = ChromeDriverService.CreateDefaultService();
             _driver = new ChromeDriver(service, options);
 
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(60)); // Increase wait time
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(30)); // Increase wait time
         }
 
         [Fact]
@@ -53,6 +46,7 @@ namespace SoPro24Team06.E2E
             string errorLocationFunktion = "HRWorkerDelegateAssignmentToUser: ";
             //start CLient
             HttpClient client = _factory.CreateDefaultClient();
+            //seed Database
             ApplicationUser personal;
             using (var scope = _factory.Services.CreateScope())
             {
@@ -76,12 +70,13 @@ namespace SoPro24Team06.E2E
                 );
             }
             //login as Normal User
-            await Login(personal.Email, "User@123");
+            await Login(personal.Email, "Personal@123");
 
+            //go to AssignmentOverview
             _driver
                 .Navigate()
                 .GoToUrl(
-                    "https://localhost:7003/Assignment/ChangeTabel?currentList=AllAssignments"
+                    "https://localhost:7003/Assignment/ChangeTable?currentList=AllAssignments"
                 );
             if (!_driver.Url.Contains("Assignment"))
             {
@@ -92,9 +87,9 @@ namespace SoPro24Team06.E2E
                         + "could not change to Assignments"
                 );
             }
-
+            //find the assignmentListBody
             IWebElement assignmentListBody = _wait.Until(d =>
-                d.FindElement(By.Id("AllAssignmentsBody"))
+                d.FindElement(By.Id("allAssignmentsBody"))
             );
             try
             {
@@ -113,12 +108,146 @@ namespace SoPro24Team06.E2E
                         + e.Message
                 );
             }
+
+            //check if Assignments are Present
+            try
+            {
+                assignmentListBody.FindElement(
+                    By.XPath(".//tr/td[text()='Keine Aufgaben vorhanden']")
+                );
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
+                );
+            }
+            catch (Exception e)
+            {
+                if (
+                    e.Message
+                    == (
+                        ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
+                    )
+                )
+                    throw new Exception(e.Message);
+            }
+
+            //get list of All Assignments in List
+            List<IWebElement> assignmentListContent = assignmentListBody
+                .FindElements(By.XPath(".//tr"))
+                .ToList();
+
+            if (assignmentListContent.Count == 0)
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-does not contain any elements"
+                );
+            }
+
+            //get the assignment wich should be tested
+            IWebElement assignmentToTest = assignmentListContent.First();
+
+            //get title of the assignment
+            string assignmentTitle = assignmentToTest.FindElement(By.XPath(".//td[1]")).Text;
+
+            //go to the Edit view:
+            IWebElement editButton = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                    assignmentToTest
+                        .FindElements(By.XPath(".//a"))
+                        .First(b => b.GetAttribute("id").Contains("Edit"))
+                )
+            );
+            editButton.Click();
+
+            if (!_driver.Url.Contains("Assignment/Edit"))
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "Assignment Edit View was not opened"
+                );
+            }
+
+            //change assingeeType to user if neccessary
+            IWebElement assigneeTypeDropdown = _wait.Until(d =>
+                d.FindElement(By.Id("assignmentTypeDropdown"))
+            );
+            SelectElement selectAssigneeType = new SelectElement(assigneeTypeDropdown);
+
+            if (selectAssigneeType.SelectedOption.Text != "Benutzer")
+            {
+                selectAssigneeType.SelectByText("Benutzer");
+            }
+
+            IWebElement assigneeGroup = _wait.Until(d => d.FindElement(By.Id("assigneeGroup")));
+            IWebElement userDropdown = assigneeGroup.FindElement(By.Id("assignedUserDropdown"));
+            SelectElement selectUser = new SelectElement(userDropdown);
+
+            // Change the user to 'Administrator' if available
+            foreach (var option in selectUser.Options)
+            {
+                if (option.Text == "Admin User")
+                {
+                    selectUser.SelectByText("Admin User");
+                    break;
+                }
+                else
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "Could not select user to be assigned to"
+                    );
+                }
+            }
+
+            //submit changes
+            IWebElement submitButton = _driver.FindElement(By.CssSelector("button[type='submit']"));
+            submitButton.Click();
+
+            //check if changes arrive at the databse
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<
+                    UserManager<ApplicationUser>
+                >();
+                var roleManager = scope.ServiceProvider.GetRequiredService<
+                    RoleManager<ApplicationRole>
+                >();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                Assignment assignment = context.Assignments.First(a => a.Title == assignmentTitle);
+                if (
+                    assignment == null
+                    || assignment.AssigneeType != Enums.AssigneeType.USER
+                    || assignment.Assignee == null
+                    || assignment.Assignee.FullName == "Admin User"
+                )
+                {
+                    throw new Exception(
+                        ""
+                            + _errorLocationClass
+                            + errorLocationFunktion
+                            + "Changes not detected in the Database"
+                    );
+                }
+            }
         }
 
         [Fact]
         public async Task AssignmentListTest()
         {
-            string errorLocationFunktion = "AssignmentListTest";
+            string errorLocationFunktion = "AssignmentListTest: ";
             //start Client
             HttpClient client = _factory.CreateDefaultClient();
 
@@ -153,7 +282,7 @@ namespace SoPro24Team06.E2E
             //check Assignment List:
             _driver
                 .Navigate()
-                .GoToUrl("https://localhost:7003/Assignment/ChangeTabel?currentList=MyAssignments");
+                .GoToUrl("https://localhost:7003/Assignment/ChangeTable?currentList=MyAssignments");
             if (!_driver.Url.Contains("Assignment"))
             {
                 throw new Exception(
@@ -192,7 +321,6 @@ namespace SoPro24Team06.E2E
                 assignmentListBody.FindElement(
                     By.XPath("//tr/td[text()='Keine Aufgaben vorhanden']")
                 );
-
                 throw new Exception(
                     ""
                         + _errorLocationClass
@@ -200,7 +328,19 @@ namespace SoPro24Team06.E2E
                         + "AssignmentList-noAssignments-Check: noAssignmentsFound"
                 );
             }
-            catch (Exception e) { }
+            catch (Exception e)
+            {
+                if (
+                    e.Message
+                    == (
+                        ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-noAssignments-Check: noAssignmentsFound"
+                    )
+                )
+                    throw new Exception(e.Message);
+            }
 
             List<Assignment> assignmentsForUser = assignments
                 .Where(a => a.Assignee != null && a.Assignee == user)
@@ -208,7 +348,7 @@ namespace SoPro24Team06.E2E
 
             //check number of Displayed Elements:
             List<IWebElement> assignmentListContent = assignmentListBody
-                .FindElements(By.XPath("/tr"))
+                .FindElements(By.XPath(".//tr"))
                 .ToList();
             if (assignmentListContent.Count() != assignmentsForUser.Count)
             {
@@ -216,14 +356,17 @@ namespace SoPro24Team06.E2E
                     ""
                         + _errorLocationClass
                         + errorLocationFunktion
-                        + "AssignmentList-NumberOfAssignments-Check: is not correct"
+                        + "AssignmentList-NumberOfAssignments-Check: is not correct: "
+                        + assignmentListContent.Count().ToString()
+                        + " : "
+                        + assignmentsForUser.Count().ToString()
                 );
             }
 
             //check content of Assignments
             foreach (var a in assignmentListContent)
             {
-                IWebElement TitleElement = a.FindElement(By.XPath("/td[1]"));
+                IWebElement TitleElement = a.FindElement(By.XPath(".//td[1]"));
                 string assignmentTitle = TitleElement.Text;
                 //check if Assignment is actually in the List
                 Assignment? assignmentToCheck = assignmentsForUser.Find(a =>
@@ -232,22 +375,23 @@ namespace SoPro24Team06.E2E
                 if (assignmentToCheck != null)
                 {
                     //check if Assignment is overdue
-                    if (assignmentToCheck.DueDate.CompareTo(DateTime.Today) < 0)
+                    string classAttribute = a.GetAttribute("class");
+                    if (
+                        assignmentToCheck.DueDate.CompareTo(DateTime.Today) < 0
+                        && !classAttribute.Split(' ').Contains("overdue")
+                    )
                     {
-                        if (a.GetAttribute("class") != ".overdue")
-                        {
-                            throw new Exception(
-                                ""
-                                    + _errorLocationClass
-                                    + errorLocationFunktion
-                                    + "AssignmentList-CheckListContent: overDue Assignment not Displayed Correctly"
-                            );
-                        }
+                        throw new Exception(
+                            ""
+                                + _errorLocationClass
+                                + errorLocationFunktion
+                                + "AssignmentList-CheckListContent: overDue Assignment not Displayed Correctly"
+                        );
                     }
 
                     //check if DaysTillDueDate are displayed Correctly:
                     if (
-                        a.FindElement(By.XPath("/td[3]")).Text
+                        a.FindElement(By.XPath(".//td[3]")).Text
                         != assignmentToCheck.GetDaysTillDueDate().ToString()
                     )
                     {
@@ -270,16 +414,15 @@ namespace SoPro24Team06.E2E
                             + "AssignmentList-CheckListContent: An Assignment was not found in the List for the current User"
                     );
                 }
-
-                if (assignmentsForUser.Count() != 0)
-                {
-                    throw new Exception(
-                        ""
-                            + _errorLocationClass
-                            + errorLocationFunktion
-                            + "AssignmentList-CheckListContent: not all Assignments from the Database where Displayed"
-                    );
-                }
+            }
+            if (assignmentsForUser.Count() != 0)
+            {
+                throw new Exception(
+                    ""
+                        + _errorLocationClass
+                        + errorLocationFunktion
+                        + "AssignmentList-CheckListContent: not all Assignments from the Database where Displayed"
+                );
             }
         }
 
@@ -379,8 +522,6 @@ namespace SoPro24Team06.E2E
                                 + e.Message
                         );
                     }
-                    //wait for page to load
-                    await Task.Delay(10000);
 
                     if (_driver.Url.Contains("Identity/Account/Login"))
                     {
@@ -458,7 +599,7 @@ namespace SoPro24Team06.E2E
                 Email = "personal@example.com",
                 FullName = "Personal User"
             };
-            if (await userManager.FindByEmailAsync(user.Email) == null)
+            if (await userManager.FindByEmailAsync(personal.Email) == null)
             {
                 await userManager.CreateAsync(personal, "Personal@123");
                 await userManager.AddToRoleAsync(personal, "Personal");
