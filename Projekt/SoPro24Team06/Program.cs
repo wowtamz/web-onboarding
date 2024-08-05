@@ -20,7 +20,6 @@ if (!Directory.Exists(dataDirectory))
 // Beginn: Neue DbContext
 if (builder.Environment.IsEnvironment("Testing") == false)
 {
-    throw new Exception("Enviroment is not testing");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
     );
