@@ -1,3 +1,6 @@
+//-------------------------
+// Author: Vincent Steiner
+//-------------------------
 using Microsoft.AspNetCore.Identity;
 using SoPro24Team06.Data;
 using SoPro24Team06.Enums;

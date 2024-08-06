@@ -64,8 +64,6 @@ namespace SoPro24Team06.XUnit
             _mockUserManager.Setup(um => um.FindByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((string fullname) => _users.FirstOrDefault(u => u.FullName == fullname));
 
-           // _mockUserManager.Setup(um => um.IsInRole(It.IsAny<string>())).ReturnsAsync(true);
-
             _mockUserManager.Setup(um => um.AddToRolesAsync(It.IsAny<ApplicationUser>(), It.IsAny<IEnumerable<string>>()))
                 .ReturnsAsync(IdentityResult.Success)
                 .Callback<ApplicationUser, IEnumerable<string>>((user, roles) =>
@@ -104,7 +102,7 @@ namespace SoPro24Team06.XUnit
             SeedData();
         }
         
-        private void SeedData()
+        private void SeedData() // Erstellt Daten die man dann in der gemockten DB hinzugrfügt 
         {
             var adminRole = new ApplicationRole { Name = "Administrator" };
             var userRole = new ApplicationRole { Name = "User", NormalizedName = "USER" };
@@ -401,6 +399,57 @@ namespace SoPro24Team06.XUnit
             Assert.Equal("Detail", redirectResult.ActionName);
             Assert.Equal("ProcessTemplate", redirectResult.ControllerName);
             Assert.Equal(12, redirectResult.RouteValues["id"]);
+        }
+
+        [Fact]
+        public async Task Model_Invalid_Test(){ // Tested ob das model nicht Valid ist
+
+            var user = await _mockUserManager.Object.FindByNameAsync("Administrator");
+            var _usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
+
+            var logger = new LoggerFactory().CreateLogger<AssignmentTemplateController>();
+
+            var mockHttpContext = new Mock<HttpContext>();
+            var mockClaimsPrincipal = new Mock<ClaimsPrincipal>();
+
+            mockClaimsPrincipal.Setup(cp => cp.IsInRole(It.IsAny<string>()))
+                .Returns((string role) => _usersRoles.Contains(role));
+            mockHttpContext.Setup(ctx => ctx.User.FindFirst(It.IsAny<string>()))
+                .Returns(new Claim(ClaimTypes.NameIdentifier, user.Id));
+            mockHttpContext.Setup(ctx => ctx.User).Returns(mockClaimsPrincipal.Object);
+            
+            var atController = new AssignmentTemplateController(_context, _mockUserManager.Object, _mockRoleManager.Object, logger)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };            var tempData = new Mock<ITempDataDictionary>();
+            atController.TempData = tempData.Object;
+
+            var model = new CreateEditAssignmentTemplateViewModel(
+                1,
+                12,
+                null,
+                "Dies sind die Anweisungen.",
+                "ASAP",
+                null, 
+                null, 
+                "SUPERVISOR",
+                "Administrator",
+                5,
+                1,
+                2,
+                "Nach:"
+            );
+
+            var result = await atController.Create(model);
+
+            Assert.NotNull(result);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Edit", redirectResult.ActionName);
+            Assert.Equal(12, redirectResult.RouteValues["id"]);
+
         }
     }
 }

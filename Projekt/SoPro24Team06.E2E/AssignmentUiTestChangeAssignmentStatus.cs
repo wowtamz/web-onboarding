@@ -14,7 +14,6 @@ using Xunit;
 
 namespace SoPro24Team06.E2E;
 
-[Collection("Sequential")]
 public class AssignmentUiTestChangeAssignmentStatus
     : IClassFixture<CustomWebApplicationFactory<Program>>,
         IDisposable

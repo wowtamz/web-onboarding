@@ -4,10 +4,9 @@
 @using SoPro24Team06.Helpers
 @using Microsoft.AspNetCore.Identity
 
+<!-- Author: Vincent Steiner -->
+
 @{
-    //-------------------------
-    // Author: Vincent Steiner
-    //-------------------------
     List<ApplicationRole> roleList = ViewData["roles"] as List<ApplicationRole> ?? new List<ApplicationRole>();
     List<Department> departmentList = ViewData["departments"] as List<Department> ?? new List<Department>();
     List<DueTime> dueInList = ViewData["dueIns"] as List<DueTime> ?? new List<DueTime>();

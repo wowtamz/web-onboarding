@@ -6,10 +6,8 @@
 @using SoPro24Team06.Helpers
 @using System.Text.RegularExpressions
 
+<!-- Author: Vincent Steiner -->
 @{
-    //-------------------------
-    // Author: Vincent Steiner
-    //-------------------------
     List<ApplicationRole> roleList = ViewData["roles"] as List<ApplicationRole> ?? new List<ApplicationRole>();
     List<Department> departmentList = ViewData["departments"] as List<Department> ?? new List<Department>();
     List<DueTime> dueInList = ViewData["dueIns"] as List<DueTime> ?? new List<DueTime>();
@@ -47,14 +45,21 @@
                 <textarea class="form-control" value="@Model.Instructions" asp-for="Instructions"></textarea>
             </fieldset>
 
-            <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>            
+            <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
             <div class="dropdown">
-                <select class="form-select valid" id="assigneeType" data-val="true" data-val-required="Ein Aufgabenverantwortlicher ist erforderlich" name="AssigneeType" aria-describedby="assigneeType-error" aria-invalid="false">
-                    @foreach(AssigneeType x in Enum.GetValues(typeof(AssigneeType)).Cast<AssigneeType>().Where(t => t != AssigneeType.USER)){
+                <select class="form-select valid" id="assigneeType" data-val="true"
+                    data-val-required="Ein Aufgabenverantwortlicher ist erforderlich" name="AssigneeType"
+                    aria-describedby="assigneeType-error" aria-invalid="false">
+                    @foreach (AssigneeType x in Enum.GetValues(typeof(AssigneeType)).Cast<AssigneeType>().Where(t => t !=
+                   AssigneeType.USER))
+                    {
                         int i = (int)x;
-                        @if(@Model.AssigneeType == x.ToString()){
+                        @if (@Model.AssigneeType == x.ToString())
+                        {
                             <option selected value="@i">@EnumHelper.GetDisplayName(x)</option>
-                        }else{
+                        }
+                        else
+                        {
                             <option value="@i">@EnumHelper.GetDisplayName(x)</option>
                         }
                     }
@@ -69,9 +74,12 @@
                     }
                     @foreach (var r in roleList)
                     {
-                        @if(Model.AssignedRole == r.Name){
+                        @if (Model.AssignedRole == r.Name)
+                        {
                             <option selected value="@r.Name">@r.Name</option>
-                        }else{
+                        }
+                        else
+                        {
                             <option value="@r.Name">@r.Name</option>
                         }
                     }
@@ -81,9 +89,11 @@
             <fieldset style="margin-top: 8px;">
                 <legend style="margin-top: 4px;">Fälligkeit</legend>
                 <div>
-                    @if (Regex.IsMatch(@Model.DueIn, @"^\d+ Tage \d+ Wochen \d+ Monate vor Start$") || Regex.IsMatch(@Model.DueIn, @"^\d+ Tage \d+ Wochen \d+ Monate nach Arbeitsbeginn$")){
-                            Model.DueIn = "Benutzerdefiniert";
-                        }
+                    @if (Regex.IsMatch(@Model.DueIn, @"^\d+ Tage \d+ Wochen \d+ Monate vor Start$") ||
+                   Regex.IsMatch(@Model.DueIn, @"^\d+ Tage \d+ Wochen \d+ Monate nach Arbeitsbeginn$"))
+                    {
+                        Model.DueIn = "Benutzerdefiniert";
+                    }
                     <select asp-for="DueIn" id="dueIn" class="form-select">
                         <option value="ASAP">ASAP</option>
                         <option value="2 Wochen vor Start">2 Wochen vor Start</option>
