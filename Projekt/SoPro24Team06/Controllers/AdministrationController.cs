@@ -526,7 +526,7 @@ namespace SoPro24Team06.Controllers
                 TempData["Message"] = $"Fehler beim Importieren der Daten: {ex.Message}";
             }
 
-            return RedirectToAction(nameof(Index));
+            return Redirect("/Identity/Account/Login");
         }
     }
 }
