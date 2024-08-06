@@ -95,7 +95,7 @@ namespace SoPro24Team06.E2E
         }
 
         [Fact]
-        public void CreateProcessTemplate()
+        public void CreateProcessTemplateWithAssignments()
         {
             Login();
             _driver.Navigate().GoToUrl("https://localhost:7003/ProcessTemplate/Create");
@@ -141,12 +141,54 @@ namespace SoPro24Team06.E2E
                 );
                 rolesSelect.SelectByIndex(0);
 
-                var createButton = _wait.Until(
+                Console.WriteLine("DEBUG: Creating assignments...");
+                for (int i = 0; i < 3; i++)
+                {
+                    var createAssignmentButton = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                            By.CssSelector("[aria-label='create-assignment-button']")
+                        )
+                    );
+                    createAssignmentButton.Click();
+
+                    var assignmentTitle = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("Title")
+                        )
+                    );
+                    assignmentTitle.SendKeys($"Assignment {i}");
+
+                    /*  var assignmentDescription = _wait.Until(
+                         SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                             By.Id("Description")
+                         )
+                     );
+                     assignmentDescription.SendKeys($"Assignment Description {i}"); */
+
+                    var assignmentRolesSelect = new SelectElement(
+                        _wait.Until(
+                            SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                                By.Id("AssignedRole")
+                            )
+                        )
+                    );
+                    assignmentRolesSelect.SelectByIndex(i + 1);
+
+                    var assignmentSaveButton = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                            By.CssSelector("[aria-label='save-assignment-button']")
+                        )
+                    );
+                    assignmentSaveButton.Click();
+                }
+
+                var saveButton = _wait.Until(
                     SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
-                        By.CssSelector("[aria-label='create-process-template-submit']")
+                        By.CssSelector("[aria-label='save-process-template-button']")
                     )
                 );
-                createButton.Click();
+
+                saveButton.Click();
             }
             catch (WebDriverTimeoutException ex)
             {

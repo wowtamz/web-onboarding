@@ -31,26 +31,26 @@
 {
 
     <body>
-        <form asp-controller="AssignmentTemplate" asp-action="Edit" method="post">
-            <input hidden asp-for="processId" value=@Model.processId />
-            <input type="hidden" name="Id" value="@Model.Id">
+    <form asp-controller="AssignmentTemplate" asp-action="Edit" method="post">
+        <input hidden asp-for="processId" value=@Model.processId />
+        <input type="hidden" name="Id" value="@Model.Id">
 
-            <fieldset>
-                <legend>Titel</legend>
-                <input class="form-control" value="@Model.Title" type="text" asp-for="Title">
-            </fieldset>
+        <fieldset>
+            <legend>Titel</legend>
+            <input class="form-control" value="@Model.Title" type="text" asp-for="Title">
+        </fieldset>
 
-            <fieldset style="margin-top: 8px;">
-                <legend>Anweisungen</legend>
-                <textarea class="form-control" value="@Model.Instructions" asp-for="Instructions"></textarea>
-            </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend>Anweisungen</legend>
+            <textarea class="form-control" value="@Model.Instructions" asp-for="Instructions"></textarea>
+        </fieldset>
 
-            <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
-            <div class="dropdown">
-                <select class="form-select valid" id="assigneeType" data-val="true"
-                    data-val-required="Ein Aufgabenverantwortlicher ist erforderlich" name="AssigneeType"
-                    aria-describedby="assigneeType-error" aria-invalid="false">
-                    @foreach (AssigneeType x in Enum.GetValues(typeof(AssigneeType)).Cast<AssigneeType>().Where(t => t !=
+        <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
+        <div class="dropdown">
+            <select class="form-select valid" id="assigneeType" data-val="true"
+                data-val-required="Ein Aufgabenverantwortlicher ist erforderlich" name="AssigneeType"
+                aria-describedby="assigneeType-error" aria-invalid="false">
+                @foreach (AssigneeType x in Enum.GetValues(typeof(AssigneeType)).Cast<AssigneeType>().Where(t => t !=
                    AssigneeType.USER))
                     {
                         int i = (int)x;
@@ -160,7 +160,8 @@
                 </div>
             </fieldset>
 
-            <button class="btn btn-dark" type="submit" style="margin-top: 12px;">Aufgabenvorlage speichern</button>
+            <button aria-label="save-assignment-button" class="btn btn-dark" type="submit"
+                style="margin-top: 12px;">Aufgabenvorlage speichern</button>
         </form>
     </body>
 }
