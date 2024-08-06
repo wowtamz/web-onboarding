@@ -1,10 +1,15 @@
+using System.Data.Common;
+using System.IO;
+using System.IO;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.DependencyInjection;
-using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,24 +19,34 @@ if (!Directory.Exists(dataDirectory))
     Directory.CreateDirectory(dataDirectory);
 }
 
-// Neue DbContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
-
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+// Beginn: Neue DbContext
+if (builder.Environment.IsEnvironment("Testing") == false)
 {
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequiredUniqueChars = 1;
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+    );
+}
+else
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseInMemoryDatabase("TestDatabase")
+    );
+}
 
-    options.SignIn.RequireConfirmedAccount = false;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders();
+builder
+    .Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequiredUniqueChars = 1;
+
+        options.SignIn.RequireConfirmedAccount = false;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -51,7 +66,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 });
 
-builder.Services.AddDataProtection()
+builder
+    .Services.AddDataProtection()
     .SetApplicationName("SoPro24Team06")
     .PersistKeysToFileSystem(new DirectoryInfo(@"./keys/"))
     .SetDefaultKeyLifetime(TimeSpan.FromDays(14));
@@ -65,16 +81,24 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
     var context = services.GetRequiredService<ApplicationDbContext>();
-    await context.Database.MigrateAsync();
-    await SeedData.Initialize(userManager, roleManager, context);
-
-    // Einmalige Invalidierung der Sessions beim Start der Anwendung
-    var keyRingPath = Path.Combine(Directory.GetCurrentDirectory(), "keys");
-    if (Directory.Exists(keyRingPath))
+    if (app.Environment.IsEnvironment("Testing"))
     {
-        Directory.Delete(keyRingPath, true); // Lösche alle vorhandenen Schlüssel
+        await context.Database.EnsureCreatedAsync();
     }
-    Directory.CreateDirectory(keyRingPath); // Erstelle den Schlüsselordner neu
+    else
+    {
+        await context.Database.MigrateAsync();
+        //await context.Database.MigrateAsync();
+        await SeedData.Initialize(userManager, roleManager, context);
+        var keyRingPath = Path.Combine(Directory.GetCurrentDirectory(), "keys");
+
+        // Einmalige Invalidierung der Sessions beim Start der Anwendung
+        if (Directory.Exists(keyRingPath))
+        {
+            Directory.Delete(keyRingPath, true); // Lösche alle vorhandenen Schlüssel
+        }
+        Directory.CreateDirectory(keyRingPath); // Erstelle den Schlüsselordner neu
+    }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -87,6 +111,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseWebSockets();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -106,3 +131,5 @@ app.UseEndpoints(endpoints =>
 app.MapRazorPages();
 
 app.Run();
+
+public partial class Program { }
