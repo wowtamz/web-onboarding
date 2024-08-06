@@ -1,6 +1,7 @@
 using System.Data.Common;
 using System.IO;
 using System.IO;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
@@ -71,6 +72,13 @@ builder
     .SetApplicationName("SoPro24Team06")
     .PersistKeysToFileSystem(new DirectoryInfo(@"./keys/"))
     .SetDefaultKeyLifetime(TimeSpan.FromDays(14));
+
+builder
+    .Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 var app = builder.Build();
 

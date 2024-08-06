@@ -88,36 +88,48 @@ namespace SoPro24Team06.Controllers
             if (await UserCanStartProcesses())
             {
                 await AddModelsToViewData();
-                StartProcessViewModel startProcessViewModel = new StartProcessViewModel(new Process());
+                StartProcessViewModel startProcessViewModel = new StartProcessViewModel(
+                    new Process()
+                );
 
                 ApplicationUser defaultSupervisor = await GetCurrentUser();
                 startProcessViewModel.Supervisor = defaultSupervisor;
 
                 if (templateId != null && templateId > 0)
                 {
-                    bool processExists = _context.ProcessTemplates.ToList().Any(p => p.Id == templateId);
+                    bool processExists = _context
+                        .ProcessTemplates.ToList()
+                        .Any(p => p.Id == templateId);
 
                     if (processExists)
                     {
                         ProcessTemplate template =
-                            await _processTemplateContainer.GetProcessTemplateByIdAsync((int)templateId);
+                            await _processTemplateContainer.GetProcessTemplateByIdAsync(
+                                (int)templateId
+                            );
 
                         // template von context lösen um Veränderungen zu ignorieren
                         _context.Entry(template).State = EntityState.Detached;
 
-                        template.AssignmentTemplates.ForEach(a => _context.Entry(a).State = EntityState.Detached);
+                        template.AssignmentTemplates.ForEach(a =>
+                            _context.Entry(a).State = EntityState.Detached
+                        );
                         template.AssignmentTemplates.ForEach(a =>
                         {
                             if (a.ForContractsList != null)
                             {
-                                a.ForContractsList.ForEach(c => _context.Entry(c).State = EntityState.Detached);
+                                a.ForContractsList.ForEach(c =>
+                                    _context.Entry(c).State = EntityState.Detached
+                                );
                                 a.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);
                                 a.ForContractsList.ForEach(c => c.Assignments = null);
                             }
 
                             if (a.ForDepartmentsList != null)
                             {
-                                a.ForDepartmentsList.ForEach(d => _context.Entry(d).State = EntityState.Detached);
+                                a.ForDepartmentsList.ForEach(d =>
+                                    _context.Entry(d).State = EntityState.Detached
+                                );
                                 a.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null);
                                 a.ForDepartmentsList.ForEach(d => d.Assignments = null);
                             }
@@ -127,7 +139,9 @@ namespace SoPro24Team06.Controllers
 
                         startProcessViewModel.Template = template;
 
-                        IList<string> userRoles = await _userManager.GetRolesAsync(defaultSupervisor);
+                        IList<string> userRoles = await _userManager.GetRolesAsync(
+                            defaultSupervisor
+                        );
                         List<string> rolesWithAccess = new List<string> { };
                         template.RolesWithAccess.ForEach(r => rolesWithAccess.Add(r.Name));
 
@@ -146,18 +160,17 @@ namespace SoPro24Team06.Controllers
                     if (TempData["startProcessViewModel"] != null)
                     {
                         string jsonViewModel = TempData["startProcessViewModel"] as string;
-                        startProcessViewModel = JsonConvert.DeserializeObject<StartProcessViewModel>(
-                            jsonViewModel
-                        );
+                        startProcessViewModel =
+                            JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
                     }
-                    
+
                     return View(startProcessViewModel);
                 }
             }
 
             return RedirectToAction("Index");
         }
-        
+
         [HttpPost("/Process/Start/{templateId}")]
         [HttpPost("/Process/Start")]
         public async Task<IActionResult> Start(
@@ -221,13 +234,12 @@ namespace SoPro24Team06.Controllers
 
                 try
                 {
-
                     startProcessViewModel.AssignmentTemplates = GetFilteredAssignmentTemplates(
                         startProcessViewModel.AssignmentTemplates,
                         startProcessViewModel.ContractOfRefWorker.Id,
                         startProcessViewModel.DepartmentOfRefWorker.Id
                     );
-                    
+
                     ActiveProcess newProcess = startProcessViewModel.ToProcess();
 
                     startProcessViewModel
@@ -241,7 +253,7 @@ namespace SoPro24Team06.Controllers
                     newProcess.Supervisor = await _userManager.FindByIdAsync(
                         startProcessViewModel.Supervisor.Id
                     );
-                    
+
                     newProcess.ContractOfRefWorker = _context.Contracts.Find(
                         startProcessViewModel.ContractOfRefWorker.Id
                     );
@@ -283,7 +295,7 @@ namespace SoPro24Team06.Controllers
                 // Auf Create mit processId = 0 redirecten, da wir noch kein process haben
                 return Redirect("/AssignmentTemplate/Create/0");
             }
-            
+
             return RedirectToAction("Index");
         }
 
@@ -316,7 +328,9 @@ namespace SoPro24Team06.Controllers
                 EditProcessViewModel editProcessViewModel
         )
         {
-            ActiveProcess process = await _processContainer.GetProcessByIdAsync((int)editProcessViewModel.Id);
+            ActiveProcess process = await _processContainer.GetProcessByIdAsync(
+                (int)editProcessViewModel.Id
+            );
 
             if (process.Supervisor.Id == GetCurrentUserId() || User.IsInRole("Administrator"))
             {
@@ -326,7 +340,7 @@ namespace SoPro24Team06.Controllers
                 // Auf Create mit processId = 0, weil processId sich auf ProcessTemplateBezieht
                 return Redirect("/AssignmentTemplate/Create/0");
             }
-            
+
             return RedirectToAction("Index");
         }
 
@@ -339,7 +353,9 @@ namespace SoPro24Team06.Controllers
                 EditProcessViewModel editProcessViewModel
         )
         {
-            ActiveProcess process = await _processContainer.GetProcessByIdAsync((int)editProcessViewModel.Id);
+            ActiveProcess process = await _processContainer.GetProcessByIdAsync(
+                (int)editProcessViewModel.Id
+            );
 
             if (process.Supervisor.Id == GetCurrentUserId() || User.IsInRole("Administrator"))
             {
@@ -347,7 +363,7 @@ namespace SoPro24Team06.Controllers
                 TempData["editProcessViewModel"] = jsonViewModel;
                 return Redirect($"/Assignment/Edit/{assignmentId}");
             }
-            
+
             return RedirectToAction("Index");
         }
 
@@ -381,7 +397,7 @@ namespace SoPro24Team06.Controllers
 
                 bool hasAccess =
                     process.Supervisor.Id
-                    == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                        == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
                     || User.IsInRole("Administrator");
 
                 if (process.IsArchived || !hasAccess)
@@ -408,7 +424,7 @@ namespace SoPro24Team06.Controllers
         )
         {
             ActiveProcess process = await _processContainer.GetProcessByIdAsync(id);
-            
+
             if (process.Supervisor.Id == GetCurrentUserId() || User.IsInRole("Administrator"))
             {
                 List<Assignment> newAssignments = new List<Assignment> { };
@@ -418,13 +434,15 @@ namespace SoPro24Team06.Controllers
                     .AssignmentTemplates.Where(temp =>
                         (
                             temp.ForContractsList == null
-                            || temp.ForContractsList.Contains(editProcessViewModel.ContractOfRefWorker)
-                            && (
-                                temp.ForDepartmentsList == null
-                                || temp.ForDepartmentsList.Contains(
-                                    editProcessViewModel.DepartmentOfRefWorker
-                                )
+                            || temp.ForContractsList.Contains(
+                                editProcessViewModel.ContractOfRefWorker
                             )
+                                && (
+                                    temp.ForDepartmentsList == null
+                                    || temp.ForDepartmentsList.Contains(
+                                        editProcessViewModel.DepartmentOfRefWorker
+                                    )
+                                )
                         )
                     )
                     .ToList();
@@ -450,7 +468,9 @@ namespace SoPro24Team06.Controllers
                             );
                             break;
                         default:
-                            newAssignments.Add(temp.ToAssignment(null, editProcessViewModel.DueDate));
+                            newAssignments.Add(
+                                temp.ToAssignment(null, editProcessViewModel.DueDate)
+                            );
                             break;
                     }
                 }
@@ -532,7 +552,7 @@ namespace SoPro24Team06.Controllers
         public async Task<IActionResult> Detail(int id)
         {
             ApplicationUser user = await GetCurrentUser();
-            List<string> roles = (List<string>) await _userManager.GetRolesAsync(user);
+            List<string> roles = (List<string>)await _userManager.GetRolesAsync(user);
             ActiveProcess process = await _processContainer.GetProcessByIdAsync(id);
             bool canViewProcessDetails = false;
 
@@ -543,11 +563,14 @@ namespace SoPro24Team06.Controllers
                     canViewProcessDetails = true;
                 }
             }
-            
-            if (process.Supervisor.Id == user.Id || process.WorkerOfReference.Id == user.Id ||
-                User.IsInRole("Administrator") || canViewProcessDetails)
-            {
 
+            if (
+                process.Supervisor.Id == user.Id
+                || process.WorkerOfReference.Id == user.Id
+                || User.IsInRole("Administrator")
+                || canViewProcessDetails
+            )
+            {
                 DetailProcessViewModel detailProcessViewModel = new DetailProcessViewModel(process);
 
                 return View("Detail", detailProcessViewModel);
@@ -555,7 +578,7 @@ namespace SoPro24Team06.Controllers
 
             return RedirectToAction("Index");
         }
-        
+
         /*
         [HttpGet("/Process/UpdateAssignmentStatus/{processId}")]
         public async Task<IActionResult> UpdateAssignmentStatus(
@@ -613,25 +636,36 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
-        public List<AssignmentTemplate> GetFilteredAssignmentTemplates(List<AssignmentTemplate> assignmentTemplates, int contractId, int departmentId)
+        public List<AssignmentTemplate> GetFilteredAssignmentTemplates(
+            List<AssignmentTemplate> assignmentTemplates,
+            int contractId,
+            int departmentId
+        )
         {
             Console.WriteLine($"ASSIGNMENT COUNT: {assignmentTemplates.Count()}");
-            
+
             List<AssignmentTemplate> filteredAssignmentTemplates = new List<AssignmentTemplate>();
             assignmentTemplates.ForEach(a =>
             {
                 var contractMatch = false;
                 var departmentMatch = false;
-                if ((a.ForContractsList != null && a.ForContractsList.Any() && a.ForContractsList.Select(c => c.Id).Contains(contractId)) ||
-                    (a.ForContractsList == null || !a.ForContractsList.Any())
-                    )
+                if (
+                    (
+                        a.ForContractsList != null
+                        && a.ForContractsList.Any()
+                        && a.ForContractsList.Select(c => c.Id).Contains(contractId)
+                    ) || (a.ForContractsList == null || !a.ForContractsList.Any())
+                )
                 {
                     contractMatch = true;
                 }
 
-                if (a.ForDepartmentsList != null && a.ForDepartmentsList.Any() && a.ForDepartmentsList.Select(d => d.Id).Contains(departmentId) ||
-                    (a.ForDepartmentsList == null || !a.ForDepartmentsList.Any())
-                    )
+                if (
+                    a.ForDepartmentsList != null
+                        && a.ForDepartmentsList.Any()
+                        && a.ForDepartmentsList.Select(d => d.Id).Contains(departmentId)
+                    || (a.ForDepartmentsList == null || !a.ForDepartmentsList.Any())
+                )
                 {
                     departmentMatch = true;
                 }
@@ -642,7 +676,9 @@ namespace SoPro24Team06.Controllers
                 }
                 else
                 {
-                    Console.WriteLine($"IGNORING ASSIGNMENTTEMPLE: {a.Title}\nCONTRACT: {a.ForContractsList.FirstOrDefault().Label}\nDEPARTMENT: {a.ForDepartmentsList.FirstOrDefault().Name}");
+                    Console.WriteLine(
+                        $"IGNORING ASSIGNMENTTEMPLE: {a.Title}\nCONTRACT: {a.ForContractsList.FirstOrDefault().Label}\nDEPARTMENT: {a.ForDepartmentsList.FirstOrDefault().Name}"
+                    );
                 }
             });
             return filteredAssignmentTemplates;
@@ -651,25 +687,28 @@ namespace SoPro24Team06.Controllers
         public async Task AddModelsToViewData()
         {
             ApplicationUser user = await GetCurrentUser();
-            List<ApplicationUser> users = _userManager.Users.Where(u => u.LockoutEnd == null).ToList();
+            List<ApplicationUser> users = _userManager
+                .Users.Where(u => u.LockoutEnd == null)
+                .ToList();
             List<ProcessTemplate> processTemplates =
                 await _processTemplateContainer.GetProcessListByAccessRights(user.UserName);
-            
+
             processTemplates.ForEach(p => _context.Entry(p).State = EntityState.Detached);
 
-            processTemplates.ForEach(p => p.AssignmentTemplates.ForEach(a =>
+            processTemplates.ForEach(p =>
+                p.AssignmentTemplates.ForEach(a =>
                 {
                     _context.Entry(a).State = EntityState.Detached;
-                    
+
                     // Liste leeren um Json serialization Fehler zu vermeiden
                     p.RolesWithAccess.ForEach(r => r.ProcessTemplates = null);
-                    
+
                     if (a.ForContractsList != null)
                     {
                         a.ForContractsList.ForEach(c => c.Assignments = null);
                         a.ForContractsList.ForEach(c => c.AssignmentsTemplates = null);
                     }
-                    
+
                     if (a.ForDepartmentsList != null)
                     {
                         a.ForDepartmentsList.ForEach(c => c.Assignments = null);
@@ -677,12 +716,16 @@ namespace SoPro24Team06.Controllers
                     }
                 })
             );
-            
+
             List<Assignment> assignments = _context.Assignments.ToList();
             assignments.ForEach(a => a.ForContractsList.ForEach(c => c.Assignments = null));
-            assignments.ForEach(a => a.ForContractsList.ForEach(c => c.AssignmentsTemplates = null));
+            assignments.ForEach(a =>
+                a.ForContractsList.ForEach(c => c.AssignmentsTemplates = null)
+            );
             assignments.ForEach(a => a.ForDepartmentsList.ForEach(d => d.Assignments = null));
-            assignments.ForEach(a => a.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null));
+            assignments.ForEach(a =>
+                a.ForDepartmentsList.ForEach(d => d.AssignmentsTemplates = null)
+            );
 
             List<Contract> contracts = _context.Contracts.ToList();
             contracts.ForEach(c => c.AssignmentsTemplates = null);
@@ -702,13 +745,14 @@ namespace SoPro24Team06.Controllers
         {
             ApplicationUser user = await GetCurrentUser();
             var roles = await _userManager.GetRolesAsync(user);
-            List<ProcessTemplate> processTemplates = await _processTemplateContainer.GetProcessTemplatesAsync();
-                //await _processTemplateContainer.GetProcessListByAccessRights(user.UserName);
+            List<ProcessTemplate> processTemplates =
+                await _processTemplateContainer.GetProcessTemplatesAsync();
+            //await _processTemplateContainer.GetProcessListByAccessRights(user.UserName);
             if (User.IsInRole("Administrator"))
             {
                 return true;
             }
-            
+
             foreach (var template in processTemplates)
             {
                 if (template.RolesWithAccess.Select(r => r.Name).Intersect(roles).Any())
@@ -716,24 +760,27 @@ namespace SoPro24Team06.Controllers
                     return true;
                 }
             }
-                
+
             return false;
         }
 
         public async Task<bool> UserIsAssignee(Assignment assignment)
         {
             ApplicationUser user = await GetCurrentUser();
-            List<string> roles = (List<string>) await _userManager.GetRolesAsync(user);
-            
-            return ((assignment.Assignee != null && assignment.Assignee.Id == user.Id) 
-                    || (assignment.AssignedRole != null && roles.Contains(assignment.AssignedRole.Name)));
+            List<string> roles = (List<string>)await _userManager.GetRolesAsync(user);
+
+            return (
+                (assignment.Assignee != null && assignment.Assignee.Id == user.Id)
+                || (assignment.AssignedRole != null && roles.Contains(assignment.AssignedRole.Name))
+            );
         }
 
         public string? GetCurrentUserId()
         {
             return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
-        public async Task<ApplicationUser?>  GetCurrentUser()
+
+        public async Task<ApplicationUser?> GetCurrentUser()
         {
             string? userId = GetCurrentUserId();
             if (userId != null)
@@ -741,7 +788,7 @@ namespace SoPro24Team06.Controllers
                 ApplicationUser? user = await _userManager.FindByIdAsync(userId);
                 return user;
             }
-            return  null;
+            return null;
         }
     }
 }
