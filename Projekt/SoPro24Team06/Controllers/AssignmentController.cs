@@ -144,7 +144,10 @@ namespace SoPro24Team06.Controllers
                     _logger.LogInformation("EditAssignment AssigneeType Error");
                 }
                 //checks if Status is set
-                if (model.Assignment.Status == null)
+                if (
+                    model.Assignment.Status == null
+                    && Enum.IsDefined<AssignmentStatus>(model.Assignment.Status)
+                )
                 {
                     ModelState.AddModelError(
                         "Assignment.Status",
@@ -210,17 +213,15 @@ namespace SoPro24Team06.Controllers
             if (assignment.AssigneeType == AssigneeType.ROLES)
             {
                 assignment.AssignedRole = selectedRole;
-                _context.Assignments.Update(assignment);
-                _context.Entry(assignment).Reference(a => a.Assignee).CurrentValue = null;
+                assignment.Assignee = null;
             }
             if (assignment.AssigneeType == AssigneeType.USER)
             {
                 assignment.Assignee = selectedUser;
-                _context.Assignments.Update(assignment);
-                _context.Entry(assignment).Reference(a => a.AssignedRole).CurrentValue = null;
+                assignment.AssignedRole = null;
             }
+            await _assignmentContainer.SaveEditedAssignment(assignment);
             //save changes in database
-            await _context.SaveChangesAsync();
 
             //Author: Tamas Varadi
             // Begin
@@ -302,7 +303,10 @@ namespace SoPro24Team06.Controllers
                     );
                 }
                 //checks if Assignment Status is set
-                if (model.Assignment.Status == null)
+                if (
+                    model.Assignment.Status == null
+                    && Enum.IsDefined<AssignmentStatus>(model.Assignment.Status)
+                )
                 {
                     ModelState.AddModelError(
                         "Assignment.Status",
@@ -338,9 +342,7 @@ namespace SoPro24Team06.Controllers
                 return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
             }
             //check if Assignment can be found in database if not return not found
-            Assignment? assignment = await _context.Assignments.FirstOrDefaultAsync(a =>
-                a.Id == model.Assignment.Id
-            );
+            Assignment? assignment = _assignmentContainer.GetAssignmentById(model.Assignment.Id);
             if (assignment == null)
             {
                 return NotFound();
@@ -354,19 +356,16 @@ namespace SoPro24Team06.Controllers
             //set changes for AssingeeType, AssignedRole and Assignee
             if (assignment.AssigneeType == AssigneeType.ROLES)
             {
-                _logger.LogInformation("AssingeeType == ROLES" + assignment.AssigneeType);
                 assignment.AssignedRole = selectedRole;
-                _context.Assignments.Update(assignment);
-                _context.Entry(assignment).Reference(a => a.Assignee).CurrentValue = null;
+                assignment.Assignee = null;
             }
             if (assignment.AssigneeType == AssigneeType.USER)
             {
                 assignment.Assignee = selectedUser;
-                _context.Assignments.Update(assignment);
-                _context.Entry(assignment).Reference(a => a.AssignedRole).CurrentValue = null;
+                assignment.AssignedRole = null;
             }
             //save changes to database
-            await _context.SaveChangesAsync();
+            await _assignmentContainer.SaveEditedAssignment(assignment);
             //return to Index
             return RedirectToAction("Index");
         }
@@ -585,9 +584,43 @@ namespace SoPro24Team06.Controllers
             // get current User and Roles current user
             ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
             List<string> roles = new List<string>(await _userManager.GetRolesAsync(user));
-
-            List<Process> processList = await _processContainer.GetActiveProcessesAsync();
-            // überprüfung einfügen ob Process noch nicht Archiviert ist.
+            //get all not archived Processes
+            List<Process> tempProcessList = await _processContainer.GetActiveProcessesAsync();
+            //filter processes for wich user has access (needs to be able to filter for that process)
+            List<Process> processList = new List<Process>();
+            if (!roles.Contains("Administrator"))
+            {
+                foreach (Process p in tempProcessList)
+                {
+                    //check if user has access and add to list if true
+                    if (
+                        //if user is supervisor he has acess
+                        p.Supervisor == user
+                        //if he is Assignee of atleast one Assignment
+                        || p.Assignments.Any(a =>
+                            (
+                                a.AssigneeType == AssigneeType.USER
+                                && a.Assignee != null
+                                && a.Assignee == user
+                            )
+                            //if he has the role to wich atleast one Assignment is Assigned
+                            || (
+                                a.AssigneeType == AssigneeType.ROLES
+                                && a.AssignedRole != null
+                                && roles.Contains(a.AssignedRole.ToString())
+                            )
+                        )
+                    )
+                    {
+                        processList.Add(p);
+                    }
+                }
+            }
+            else
+            {
+                //if he is Admin he has Access to all active Processes
+                processList = tempProcessList;
+            }
             List<Assignment> assignmentList = new List<Assignment>();
             //changes contents of Lists depending on which list was selected in Index ViewModel
 
@@ -692,9 +725,13 @@ namespace SoPro24Team06.Controllers
 
             //filter list
             int? selectedProcess = HttpContext.Session.GetInt32("selectedProcessId");
-            if (selectedProcess.HasValue)
+            if (selectedProcess.HasValue && processList.Any(p => p.Id == selectedProcess))
             {
                 model.FilterAssignments(selectedProcess.Value);
+            }
+            else
+            {
+                HttpContext.Session.Remove("selectedProcessId");
             }
 
             //sort Lists
@@ -710,4 +747,4 @@ namespace SoPro24Team06.Controllers
     }
 }
 
-//end codeownership Jan Pfluger
+//end codeownership Jan  Pfluger
