@@ -123,6 +123,7 @@ public class AssignmentUnitTest
         //create all neccecary Data
         // List<DueTime> testDueTimes = new List<DueTime>
         // {
+        DueTime ASAP = new DueTime("ASAP", 0, 0, 0);
         DueTime Test1 = new DueTime("TestMonths+", 0, 0, 2);
         DueTime Test2 = new DueTime("TestWeeks+", 0, 3, 0);
         DueTime Test3 = new DueTime("TestDays+", 20, 0, 0);
@@ -135,6 +136,16 @@ public class AssignmentUnitTest
         //assignmentTemplate Instructions where generated with https://www.blindtextgenerator.com/lorem-ipsum and https://www.textfixer.com/tools/random-string-generator.php
         List<AssignmentTemplate> testAssignments = new List<AssignmentTemplate>
         {
+            new AssignmentTemplate(
+                "ASAP",
+                "BJadw*ETs*Aze@htzYp&",
+                ASAP,
+                new List<Department>(),
+                new List<Contract>(),
+                Enums.AssigneeType.SUPERVISOR,
+                role1,
+                0
+            ),
             new AssignmentTemplate(
                 "TestMonths+",
                 "BJadw*ETs*Aze@htzYp&",
@@ -334,6 +345,19 @@ public class AssignmentUnitTest
             int numberOfTemplatesChecked = 0;
             switch (t.Title)
             {
+                case "ASAP":
+                    try
+                    {
+                        Assert.True(a1.DueDate.CompareTo(DateTime.Today) == 0);
+                        Assert.True(a2.DueDate.CompareTo(DateTime.Today) == 0);
+                        Assert.True(a3.DueDate.CompareTo(DateTime.Today) == 0);
+                        numberOfTemplatesChecked = +1;
+                    }
+                    catch
+                    {
+                        throw new Exception("Assignemnt Due Date was set Incorrectly: " + t.Title);
+                    }
+                    break;
                 case "TestMonths+":
                     try
                     {
