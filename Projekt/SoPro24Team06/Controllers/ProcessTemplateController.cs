@@ -2,9 +2,11 @@
 // Author: Kevin Tornquist
 //-------------------------
 
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
 using SoPro24Team06.Containers;
@@ -284,13 +286,63 @@ namespace SoPro24Team06.Controllers
                 .GetProcessTemplateByIdAsync(id)
                 .Result;
 
-            foreach (var role in processTemplate.RolesWithAccess)
+            // --- Start: Get the User and their Roles ---
+            try
             {
-                if (!IsAuthorized(role.Name))
+                var user = _modelContext
+                    .Users.Where(u => u.UserName == User.Identity.Name)
+                    .FirstOrDefault();
+
+                var userRoles = await _modelContext
+                    .UserRoles.AsNoTracking()
+                    .Where(ur => ur.UserId == user.Id)
+                    .Select(x => x.RoleId)
+                    .ToListAsync();
+
+                var roles = await _modelContext
+                    .Roles.AsNoTracking()
+                    .Where(r => userRoles.Contains(r.Id))
+                    .ToListAsync();
+
+                foreach (var role in roles)
                 {
-                    return View("~/Views/Index.cshtml");
+                    _logger.LogInformation(
+                        "User {UserName} has role {Role}",
+                        User.Identity.Name,
+                        role.Name
+                    );
+                }
+
+                foreach (var role in processTemplate.RolesWithAccess)
+                {
+                    _logger.LogInformation(
+                        "Process template with ID {TemplateId} has role {Role}",
+                        processTemplate.Id,
+                        role.Name
+                    );
+                }
+
+                // if the process template roles with access do not contain any of the user roles, redirect to index
+                if (
+                    !processTemplate.RolesWithAccess.Any(r =>
+                        roles.Select(r => r.Name).Contains(r.Name)
+                    )
+                )
+                {
+                    _logger.LogWarning(
+                        "User {UserName} is not authorized to edit process template with ID {TemplateId}",
+                        User.Identity.Name,
+                        processTemplate.Id
+                    );
+                    return RedirectToAction("Index");
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching user roles.");
+                return RedirectToAction("Index");
+            }
+            // --- End: Get the User and their Roles ---
 
             ProcessTemplateViewModel model =
                 new()
@@ -314,20 +366,70 @@ namespace SoPro24Team06.Controllers
         [HttpPost("ProcessTemplate/Edit/{id:int}")]
         public async Task<IActionResult> Edit([FromForm] ProcessTemplateViewModel model)
         {
-            foreach (var role in model.RolesWithAccess)
-            {
-                if (!IsAuthorized(role))
-                {
-                    return View("~/Views/Index.cshtml");
-                }
-            }
-
             _logger.LogInformation("Editing process template with {template}", model.ToJson());
             if (!ModelState.IsValid)
             {
                 LogModelErrors(model);
                 return RedirectToAction("Edit", model);
             }
+
+            // --- Start: Get the User and their Roles ---
+            try
+            {
+                var pt = await _modelContext
+                    .ProcessTemplates.Include(pt => pt.RolesWithAccess)
+                    .FirstOrDefaultAsync(pt => pt.Id == model.Id);
+
+                var user = _modelContext
+                    .Users.Where(u => u.UserName == User.Identity.Name)
+                    .FirstOrDefault();
+
+                var userRoles = await _modelContext
+                    .UserRoles.AsNoTracking()
+                    .Where(ur => ur.UserId == user.Id)
+                    .Select(x => x.RoleId)
+                    .ToListAsync();
+
+                var roles = await _modelContext
+                    .Roles.AsNoTracking()
+                    .Where(r => userRoles.Contains(r.Id))
+                    .ToListAsync();
+
+                foreach (var role in roles)
+                {
+                    _logger.LogInformation(
+                        "User {UserName} has role {Role}",
+                        User.Identity.Name,
+                        role.Name
+                    );
+                }
+
+                foreach (var role in pt.RolesWithAccess)
+                {
+                    _logger.LogInformation(
+                        "Process template with ID {TemplateId} has role {Role}",
+                        pt.Id,
+                        role.Name
+                    );
+                }
+
+                // if the process template roles with access do not contain any of the user roles, redirect to index
+                if (!pt.RolesWithAccess.Any(r => roles.Select(r => r.Name).Contains(r.Name)))
+                {
+                    _logger.LogWarning(
+                        "User {UserName} is not authorized to edit process template with ID {TemplateId}",
+                        User.Identity.Name,
+                        model.Id
+                    );
+                    return RedirectToAction("Index");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching user roles.");
+                return RedirectToAction("Index");
+            }
+            // --- End: Get the User and their Roles ---
 
             try
             {
@@ -422,8 +524,8 @@ namespace SoPro24Team06.Controllers
             List<ApplicationUser> users = _userManager.Users.ToList();
             List<ProcessTemplate> processTemplates =
                 await _processTemplateContainer.GetProcessTemplatesAsync();
-            List<AssignmentTemplate> assignmentTemplates = await
-                _assignmentTemplateContainer.GetAllAssignmentTemplates();
+            List<AssignmentTemplate> assignmentTemplates =
+                await _assignmentTemplateContainer.GetAllAssignmentTemplates();
 
             // Replace with Containers;
             List<Assignment> assignments = _modelContext.Assignments.ToList();
