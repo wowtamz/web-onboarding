@@ -550,23 +550,6 @@ namespace SoPro24Team06.Controllers
         }
 
         /// <summary>
-        /// Checks if the current user is authorized based on the specified role.
-        /// </summary>
-        /// <param name="role">The role to check authorization for.</param>
-        /// <returns>True if the user is authorized or administrator, otherwise false.</returns>
-        public bool IsAuthorized(string role)
-        {
-            if (User.IsInRole("Administrator"))
-            {
-                return true;
-            }
-            else
-            {
-                return User.IsInRole(role);
-            }
-        }
-
-        /// <summary>
         /// Logs model errors for debugging purposes.
         /// </summary>
         /// <param name="model">The ProcessTemplate view model.</param>
