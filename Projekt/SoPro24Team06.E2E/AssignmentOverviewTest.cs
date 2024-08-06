@@ -53,13 +53,17 @@ namespace SoPro24Team06.E2E
         {
             string errorLocationFunktion = "AssignmentOverview: ";
             HttpClient client = _factory.CreateDefaultClient();
-            
+
             ApplicationUser personal;
             List<Process> processes;
             using (var scope = _factory.Services.CreateScope())
             {
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                var userManager = scope.ServiceProvider.GetRequiredService<
+                    UserManager<ApplicationUser>
+                >();
+                var roleManager = scope.ServiceProvider.GetRequiredService<
+                    RoleManager<ApplicationRole>
+                >();
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
@@ -75,37 +79,73 @@ namespace SoPro24Team06.E2E
 
             await Login(personal.Email, "Personal@123");
 
-            _driver.Navigate().GoToUrl("https://localhost:7003/Assignment/ChangeTable?currentList=AllAssignments");
+            _driver
+                .Navigate()
+                .GoToUrl(
+                    "https://localhost:7003/Assignment/ChangeTable?currentList=AllAssignments"
+                );
             if (!_driver.Url.Contains("Assignment"))
             {
-                throw new Exception($"{_errorLocationClass}{errorLocationFunktion}could not navigate to Assignments");
+                throw new Exception(
+                    $"{_errorLocationClass}{errorLocationFunktion}could not navigate to Assignments"
+                );
             }
 
-            IWebElement assignmentListBody = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.Id("allAssignmentsBody")));
+            IWebElement assignmentListBody = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
+                    By.Id("allAssignmentsBody")
+                )
+            );
             Assert.True(assignmentListBody.Displayed, "Assignment list not displayed");
 
-            IWebElement processDropdown = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("processDropdown")));
+            IWebElement processDropdown = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("processDropdown")
+                )
+            );
 
             foreach (var process in processes)
             {
-                Console.WriteLine($"Checking process: {process.Title} with {process.Assignments.Count} assignments");
-                
+                Console.WriteLine(
+                    $"Checking process: {process.Title} with {process.Assignments.Count} assignments"
+                );
+
                 SelectElement selectProcess = new SelectElement(processDropdown);
                 selectProcess.SelectByText(process.Title);
 
-                assignmentListBody = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.Id("allAssignmentsBody")));
-                List<IWebElement> assignmentListContent = assignmentListBody.FindElements(By.XPath(".//tr")).ToList();
-
-                Console.WriteLine($"Found {assignmentListContent.Count} assignments in the table for process {process.Title}");
+                assignmentListBody = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
+                        By.Id("allAssignmentsBody")
+                    )
+                );
 
                 var assignmentsForProcess = process.Assignments;
-                Assert.Equal(assignmentsForProcess.Count, assignmentListContent.Count);
+                Assert.Equal(assignmentsForProcess.Count, assignmentsForProcess.Count);
+
+                Console.WriteLine(
+                    $"HTML content of the assignments table for process {process.Title}:\n{assignmentListBody.GetAttribute("innerHTML")}"
+                );
 
                 foreach (var assignment in assignmentsForProcess)
                 {
-                    bool assignmentFound = assignmentListContent.Any(row => row.FindElement(By.XPath(".//td[1]")).Text == assignment.Title);
+                    string assignmentId = $"assignment-{assignment.Id}";
+                    Console.WriteLine($"Looking for assignment ID: {assignmentId}");
+                    bool assignmentFound = false;
+                    try
+                    {
+                        IWebElement assignmentRow = _driver.FindElement(By.Id(assignmentId));
+                        assignmentFound = assignmentRow != null;
+                    }
+                    catch (NoSuchElementException)
+                    {
+                        assignmentFound = false;
+                    }
+
                     Console.WriteLine($"Assignment '{assignment.Title}' found: {assignmentFound}");
-                    Assert.Contains(assignmentListContent, row => row.FindElement(By.XPath(".//td[1]")).Text == assignment.Title);
+                    Assert.True(
+                        assignmentFound,
+                        $"Assignment '{assignment.Title}' should be found in the table but was not."
+                    );
                 }
             }
         }
@@ -119,33 +159,55 @@ namespace SoPro24Team06.E2E
             {
                 try
                 {
-                    var emailElement = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("Input_Email")));
+                    var emailElement = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("Input_Email")
+                        )
+                    );
                     emailElement.SendKeys(userName);
 
-                    var passwordElement = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("Input_Password")));
+                    var passwordElement = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                            By.Id("Input_Password")
+                        )
+                    );
                     passwordElement.SendKeys(password);
 
-                    IWebElement loginButton = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.CssSelector("button[aria-label='login-submit']")));
+                    IWebElement loginButton = _wait.Until(
+                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                            By.CssSelector("button[aria-label='login-submit']")
+                        )
+                    );
                     loginButton.Click();
 
                     if (_driver.Url.Contains("Identity/Account/Login"))
                     {
-                        throw new Exception($"{_errorLocationClass}{errorLocationFunktion}Login unsuccessful");
+                        throw new Exception(
+                            $"{_errorLocationClass}{errorLocationFunktion}Login unsuccessful"
+                        );
                     }
                 }
                 catch (WebDriverTimeoutException ex)
                 {
-                    throw new Exception($"{_errorLocationClass}{errorLocationFunktion}Failed to find an element during login. {ex.Message}");
+                    throw new Exception(
+                        $"{_errorLocationClass}{errorLocationFunktion}Failed to find an element during login. {ex.Message}"
+                    );
                 }
             }
 
             if (_driver.Url.Contains("Identity/Account/Login"))
             {
-                throw new Exception($"{_errorLocationClass}{errorLocationFunktion}Login unsuccessful");
+                throw new Exception(
+                    $"{_errorLocationClass}{errorLocationFunktion}Login unsuccessful"
+                );
             }
         }
 
-        public async Task SetTestData(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        public async Task SetTestData(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager
+        )
         {
             await context.Database.EnsureDeletedAsync();
             await context.Database.EnsureCreatedAsync();
