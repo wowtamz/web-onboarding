@@ -11,11 +11,12 @@ using OpenQA.Selenium.Support.UI;
 using SoPro24Team06.Controllers;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
+using SoPro24Team06.Enums;
 using Xunit;
 
 namespace SoPro24Team06.E2E
 {
-    public class AssignmentUiTestChangeAssignmentStatus : IClassFixture<CustomWebApplicationFactory<Program>>, IDisposable
+    public class AssignmentOverviewTest : IClassFixture<CustomWebApplicationFactory<Program>>, IDisposable
     {
         // Class-level variables
         private readonly string baseurl = "https://localhost:7003/";
@@ -25,7 +26,7 @@ namespace SoPro24Team06.E2E
         private readonly HttpClient _webClient;
 
         // Constructor
-        public AssignmentUiTestChangeAssignmentStatus()
+        public AssignmentOverviewTest()
         {
             // Set environment variable for testing
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
@@ -108,26 +109,26 @@ namespace SoPro24Team06.E2E
             // Add assignments and processes
             var assignments1 = new List<Assignment>
             {
-                new Assignment { Title = "Assignment 1.1", Instructions = "Instructions 1.1", Status = "Pending", DueDate = DateTime.Now.AddDays(5) },
-                new Assignment { Title = "Assignment 1.2", Instructions = "Instructions 1.2", Status = "Pending", DueDate = DateTime.Now.AddDays(10) }
+                new Assignment { Title = "Assignment 1.1", Instructions = "Instructions 1.1", Status = AssignmentStatus.NOT_STARTED, DueDate = DateTime.Now.AddDays(5) },
+                new Assignment { Title = "Assignment 1.2", Instructions = "Instructions 1.2", Status = AssignmentStatus.NOT_STARTED, DueDate = DateTime.Now.AddDays(10) }
             };
 
             var assignments2 = new List<Assignment>
             {
-                new Assignment { Title = "Assignment 2.1", Instructions = "Instructions 2.1", Status = "Pending", DueDate = DateTime.Now.AddDays(15) },
-                new Assignment { Title = "Assignment 2.2", Instructions = "Instructions 2.2", Status = "Pending", DueDate = DateTime.Now.AddDays(20) }
+                new Assignment { Title = "Assignment 2.1", Instructions = "Instructions 2.1", Status = AssignmentStatus.NOT_STARTED, DueDate = DateTime.Now.AddDays(15) },
+                new Assignment { Title = "Assignment 2.2", Instructions = "Instructions 2.2", Status = AssignmentStatus.NOT_STARTED, DueDate = DateTime.Now.AddDays(20) }
             };
 
             var process1 = new Process
             {
-                Name = "Vorgang 1",
+                Title = "Vorgang 1",
                 Description = "Description 1",
                 Assignments = assignments1
             };
 
             var process2 = new Process
             {
-                Name = "Vorgang 2",
+                Title = "Vorgang 2",
                 Description = "Description 2",
                 Assignments = assignments2
             };
@@ -137,7 +138,7 @@ namespace SoPro24Team06.E2E
         }
 
         // Test method to verify processes in overview
-        //[Fact]
+        [Fact]
         public void Verify_Processes_In_Overview()
         {
             // Login to the application
