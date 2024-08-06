@@ -317,9 +317,9 @@
 								<td></td>
 							}
 							<td id="status">@Model.GetAssignmentStatus(assignment)</td>
-							<td class="d-flex flex-row justify-content-evenly gap-3">
+							<td>
 								<a id="Details-@assignment.Id.-Button" href="#"
-									onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
+									onclick="document.getElementById('Details-@assignment.Id').submit(); return false;" style="padding-right: 10px;">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
