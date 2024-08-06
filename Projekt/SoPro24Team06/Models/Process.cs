@@ -25,7 +25,7 @@ namespace SoPro24Team06.Models
         public string? Description { get; set; }
 
         [JsonProperty("startDate")]
-        public DateTime StartDate { get; }
+        public DateTime StartDate { get; set; }
 
         [Required(ErrorMessage = "DueDate is required")]
         [JsonProperty("dueDate")]
