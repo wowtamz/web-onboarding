@@ -67,7 +67,14 @@
         {
           <tr onclick="window.location='/ProcessTemplate/Detail/@processTemplate.Id'" class="hoverTableRow">
             <td>@processTemplate.Title</td>
-            <td>@Html.Raw(processTemplate.Description.Replace("\n", "<br>"))</td>
+            @if (processTemplate.Description != null)
+            {
+              <td>@Html.Raw(processTemplate.Description.Replace("\n", "<br>"))</td>
+            }
+            else
+            {
+              <td></td>
+            }
             <td>@processTemplate.ContractOfRefWorker?.Label</td>
             <td>@processTemplate.DepartmentOfRefWorker?.Name</td>
             <td>
