@@ -1,8 +1,3 @@
-//-------------------------
-// Author: Kevin Tornquist
-//-------------------------
-
-
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -23,10 +18,6 @@ using Xunit;
 
 namespace SoPro24Team06.Tests
 {
-    [CollectionDefinition("Sequential Tests Collection", DisableParallelization = true)]
-    public class SequentialTestCollections { }
-
-    [Collection("Sequential Tests Collection")]
     public class ProcessTemplateControllerTest
     {
         private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
@@ -308,7 +299,7 @@ namespace SoPro24Team06.Tests
         [Fact]
         public async Task EditProcessTemplateWithStartedProcesses()
         {
-            var user = await _mockUserManager.Object.FindByNameAsync("Administrator");
+            var user = await _mockUserManager.Object.FindByNameAsync("User");
             var usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
 
             Assert.NotNull(usersRoles);
@@ -349,30 +340,47 @@ namespace SoPro24Team06.Tests
             );
             _context.SaveChanges();
 
-            var processTemplateToUpdate = _context.ProcessTemplates.FirstOrDefault(x =>
-                x.Id == template.Id
-            );
+            var result = await controller.Edit(template.Id);
 
-            processTemplateToUpdate.Title = "Updated Title";
-            processTemplateToUpdate.Description = "Updated Description";
-            processTemplateToUpdate.RolesWithAccess = new List<ApplicationRole> { };
+            Assert.IsType<ViewResult>(result);
 
-            await _context.SaveChangesAsync();
+            ViewResult ptViewmodel = result as ViewResult;
 
-            var processUnchanged = _context.Processes.FirstOrDefault(x =>
-                x.Id == process.Entity.Id
-            );
+            Assert.IsType<ProcessTemplateViewModel>(ptViewmodel.Model);
 
-            Assert.Equal(process.Entity.Id, processUnchanged.Id);
-            Assert.Equal(process.Entity.Title, processUnchanged.Title);
-            Assert.Equal(process.Entity.Description, processUnchanged.Description);
-            Assert.Equal(process.Entity.ContractOfRefWorker, processUnchanged.ContractOfRefWorker);
+            ProcessTemplateViewModel ptViewModel = ptViewmodel.Model as ProcessTemplateViewModel;
+
+            Assert.NotNull(ptViewModel);
+            Assert.Equal("Test Template", ptViewModel.Title);
+            Assert.Equal("NONE", ptViewModel.Description);
+            Assert.Equal(1, ptViewModel.SelectedAssignmentTemplateIds.Count);
+            Assert.Equal(1, ptViewModel.RolesWithAccess.Count);
+            Assert.Equal(department.Id, ptViewModel.DepartmentOfRefWorkerId);
+
+            // update the process template
+            var templateToUpdate = _context.ProcessTemplates.Find(template.Id);
+            templateToUpdate.Title = "Updated Test Template";
+            templateToUpdate.Description = "UPDATED";
+            templateToUpdate.DepartmentOfRefWorker = _context.Departments.Last();
+            templateToUpdate.RolesWithAccess = new List<ApplicationRole> { };
+            templateToUpdate.AssignmentTemplates = new List<AssignmentTemplate> { };
+
+            _context.SaveChanges();
+
+            // check if process was changed
+
+            var processToCheck = _context.Processes.Find(process.Entity.Id = 1);
+
+            Assert.Equal(process.Entity.Title, processToCheck.Title);
+            Assert.Equal(process.Entity.ContractOfRefWorker, processToCheck.ContractOfRefWorker);
             Assert.Equal(
                 process.Entity.DepartmentOfRefWorker,
-                processUnchanged.DepartmentOfRefWorker
+                processToCheck.DepartmentOfRefWorker
             );
-            Assert.Equal(process.Entity.WorkerOfReference, processUnchanged.WorkerOfReference);
-            Assert.Equal(process.Entity.Supervisor, processUnchanged.Supervisor);
+            Assert.Equal(process.Entity.Description, processToCheck.Description);
+            Assert.Equal(process.Entity.Supervisor, processToCheck.Supervisor);
+            Assert.Equal(process.Entity.WorkerOfReference, processToCheck.WorkerOfReference);
+            Assert.Equal(process.Entity.IsArchived, processToCheck.IsArchived);
         }
 
         [Fact]
@@ -403,6 +411,37 @@ namespace SoPro24Team06.Tests
 
             var redirectResult = result as RedirectToActionResult;
             Assert.Equal("Create", redirectResult.ActionName);
+        }
+
+        [Fact]
+        public async Task SupervisorCanEditProcessTemplate()
+        {
+            var supervisor = await _mockUserManager.Object.FindByNameAsync("Administrator");
+            var controller = await CreateProcessTemplateController(supervisor);
+
+            var existingTemplate = _context.ProcessTemplates.First();
+            var updatedTitle = "Updated Process Template";
+            var updatedDescription = "Updated Description";
+
+            var templateViewModel = new ProcessTemplateViewModel
+            {
+                Id = existingTemplate.Id,
+                Title = updatedTitle,
+                Description = updatedDescription,
+                ContractOfRefWorkerId = existingTemplate.ContractOfRefWorker.Id,
+                DepartmentOfRefWorkerId = existingTemplate.DepartmentOfRefWorker.Id,
+                SelectedAssignmentTemplateIds = existingTemplate
+                    .AssignmentTemplates.Select(at => at.Id)
+                    .ToList(),
+                RolesWithAccess = new List<string> { "Administrator" }
+            };
+
+            var result = await controller.Edit(templateViewModel);
+
+            Assert.IsType<RedirectToActionResult>(result);
+
+            var redirectResult = result as RedirectToActionResult;
+            Assert.Equal("Index", redirectResult.ActionName);
         }
 
         [Fact]

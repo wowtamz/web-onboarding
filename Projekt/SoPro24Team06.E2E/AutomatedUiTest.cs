@@ -1,7 +1,3 @@
-//-------------------------
-// Author: Kevin Tornquist
-//-------------------------
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using OpenQA.Selenium;
