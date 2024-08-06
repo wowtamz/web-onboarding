@@ -297,7 +297,7 @@ namespace SoPro24Team06.Tests
         }
 
         [Fact]
-        public async Task EditProcessTemplateWithStartedProcesses()
+        public async Task EditProcessTemplateWithStartedProcessesRedirect()
         {
             var user = await _mockUserManager.Object.FindByNameAsync("User");
             var usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
@@ -342,45 +342,7 @@ namespace SoPro24Team06.Tests
 
             var result = await controller.Edit(template.Id);
 
-            Assert.IsType<ViewResult>(result);
-
-            ViewResult ptViewmodel = result as ViewResult;
-
-            Assert.IsType<ProcessTemplateViewModel>(ptViewmodel.Model);
-
-            ProcessTemplateViewModel ptViewModel = ptViewmodel.Model as ProcessTemplateViewModel;
-
-            Assert.NotNull(ptViewModel);
-            Assert.Equal("Test Template", ptViewModel.Title);
-            Assert.Equal("NONE", ptViewModel.Description);
-            Assert.Equal(1, ptViewModel.SelectedAssignmentTemplateIds.Count);
-            Assert.Equal(1, ptViewModel.RolesWithAccess.Count);
-            Assert.Equal(department.Id, ptViewModel.DepartmentOfRefWorkerId);
-
-            // update the process template
-            var templateToUpdate = _context.ProcessTemplates.Find(template.Id);
-            templateToUpdate.Title = "Updated Test Template";
-            templateToUpdate.Description = "UPDATED";
-            templateToUpdate.DepartmentOfRefWorker = _context.Departments.Last();
-            templateToUpdate.RolesWithAccess = new List<ApplicationRole> { };
-            templateToUpdate.AssignmentTemplates = new List<AssignmentTemplate> { };
-
-            _context.SaveChanges();
-
-            // check if process was changed
-
-            var processToCheck = _context.Processes.Find(process.Entity.Id = 1);
-
-            Assert.Equal(process.Entity.Title, processToCheck.Title);
-            Assert.Equal(process.Entity.ContractOfRefWorker, processToCheck.ContractOfRefWorker);
-            Assert.Equal(
-                process.Entity.DepartmentOfRefWorker,
-                processToCheck.DepartmentOfRefWorker
-            );
-            Assert.Equal(process.Entity.Description, processToCheck.Description);
-            Assert.Equal(process.Entity.Supervisor, processToCheck.Supervisor);
-            Assert.Equal(process.Entity.WorkerOfReference, processToCheck.WorkerOfReference);
-            Assert.Equal(process.Entity.IsArchived, processToCheck.IsArchived);
+            Assert.IsType<RedirectToActionResult>(result);
         }
 
         [Fact]
