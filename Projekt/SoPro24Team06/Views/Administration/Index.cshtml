@@ -147,6 +147,7 @@
     <script>
         $(document).ready(function () {
             updateRoleList();
+
             var popup = $("#userdelete-popup, #role-popup");
             if (popup.length) {
                 setTimeout(function () {
@@ -155,6 +156,12 @@
                     });
                 }, 3000);
             }
+
+            // Clear error message when the modal is shown
+            $('#modal-1').on('show.bs.modal', function () {
+                $('#role-message').text('');
+                $('#role-message').removeClass('text-danger text-success');
+            });
 
             $('#createRoleForm').submit(function (e) {
                 e.preventDefault(); // Prevent form submission
@@ -171,12 +178,12 @@
                             }, 3000);
                             updateRoleList();
                         } else {
-                            var errorMessage = response.error || "Es gab einen Fehler beim erstellen der Rolle";
+                            var errorMessage = response.error || "Es gab einen Fehler beim Erstellen der Rolle";
                             $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                         }
                     },
                     error: function (response) {
-                        var errorMessage = response.responseJSON ? response.responseJSON.error : "Es gab einen Fehler beim erstellen der Rolle";
+                        var errorMessage = response.responseJSON ? response.responseJSON.error : "Es gab einen Fehler beim Erstellen der Rolle";
                         $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                     }
                 });
@@ -198,13 +205,13 @@
                             }, 3000);
                             updateRoleList();
                         } else {
-                            var errorMessage = response.error || "Es gab einen Fehler beim löschen der Rolle";
+                            var errorMessage = response.error || "Es gab einen Fehler beim Löschen der Rolle";
                             $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                         }
                     },
                     error: function (response) {
                         console.error("Error response:", response); // Log the full response object
-                        var errorMessage = response.responseJSON ? response.responseJSON.error : "Es gab einen Fehler beim löschen der Rolle";
+                        var errorMessage = response.responseJSON ? response.responseJSON.error : "Es gab einen Fehler beim Löschen der Rolle";
                         $('#role-message').removeClass('text-success').addClass('text-danger').html(errorMessage); // Ändere text() zu html()
                     }
                 });
@@ -243,14 +250,14 @@
                                 }, 3000);
                                 updateRoleList();
                             } else {
-                                var errorMessage = response.error || "Es gab einen Fehler beim bearbeiten der Rolle";
+                                var errorMessage = response.error || "Es gab einen Fehler beim Bearbeiten der Rolle";
                                 $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                                 roleNameElement.text(originalRoleName);
                                 resetSaveButtonToEdit(saveButton, originalRoleName);
                             }
                         },
                         error: function (response) {
-                            var errorMessage = response.responseJSON ? response.responseJSON.error : "Es gab einen Fehler beim bearbeiten der Rolle";
+                            var errorMessage = response.responseJSON ? response.responseJSON.error : "Es gab einen Fehler beim Bearbeiten der Rolle";
                             $('#role-message').removeClass('text-success').addClass('text-danger').text(errorMessage);
                             roleNameElement.text(originalRoleName);
                             resetSaveButtonToEdit(saveButton, originalRoleName);
