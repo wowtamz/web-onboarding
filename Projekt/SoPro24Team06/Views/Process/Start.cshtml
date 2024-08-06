@@ -317,7 +317,7 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
 
             <input type="hidden" id="modelAssignmentTemplates" onclick="storeAssignmentTemplateData('@assignmentTemplatesDict')"/>
             <input type="hidden" id="modelAssignmentTemplateCount" value="@Model.AssignmentTemplates.Count"/>
-            
+
             @for(int j = 0; j < @Model.AssignmentTemplates.Count; j++)
             {
 
@@ -428,7 +428,7 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
 <script>
 
     function onEditAssignmentTemplatePressed(assignmentTemplateId) {
-        
+
         if (getAllAssignmentTemplates().some(obj => obj.id === assignmentTemplateId)) {
             const matchingAssignment = getAllAssignmentTemplates().find(obj => obj.id === assignmentTemplateId);
             if (matchingAssignment.processTemplateId !== null) {
@@ -611,7 +611,7 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
     }
 
     function addAssignmentTemplate(template) {
-        
+
         var index = window.assignmentTemplateCount++;
 
         let inputs = '';

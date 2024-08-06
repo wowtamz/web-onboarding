@@ -80,17 +80,27 @@
                             onclick="window.location='/Process/DetailRedirectEditAssignment/@Model.Id?assignmentId=@assignment.Id'" id="assignmentItem">
                             <td>@title</td>
                             
-                            @if (assignment.AssignedRole != null)
+                            @if (assignment.AssigneeType == AssigneeType.SUPERVISOR)
                             {
-                                <td>@assignment.AssignedRole.Name</td>
+                                <td>@Model.Supervisor.FullName</td>
                             }
-                            @if (assignment.Assignee != null)
+                            @if (assignment.AssigneeType == AssigneeType.WORKER_OF_REF)
                             {
-                                <td>@assignment.Assignee.FullName</td>
+                                <td>@Model.WorkerOfReference.FullName</td>
                             }
-                            @if (assignment.Assignee == null && assignment.AssignedRole == null)
+                            @if (assignment.AssigneeType == AssigneeType.ROLES)
                             {
-                                <td>Keine Angabe</td>
+                                @if (assignment.AssignedRole != null)
+                                {
+                                    <td>@assignment.AssignedRole.Name</td>
+                                }
+                            }
+                            @if (assignment.AssigneeType == AssigneeType.USER)
+                            {
+                                @if (assignment.Assignee != null)
+                                {
+                                    <td>@assignment.Assignee.FullName</td>
+                                }
                             }
 
                             <td>@EnumHelper.GetDisplayName(assignment.AssigneeType)</td>
@@ -114,7 +124,7 @@
 
     <a class="btn" style="background-color: var(--ash); color: white;" href="/Process">Zurück</a>
     
-    @if (!Model.IsArchived && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Supervisor.Id)
+    @if (!Model.IsArchived && (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Supervisor.Id || User.IsInRole("Administrator")))
     {
         <a class="btn" style="background-color: var(--lemming); color: white;" href="/Process/Edit/@Model.Id">Bearbeiten</a>
     }

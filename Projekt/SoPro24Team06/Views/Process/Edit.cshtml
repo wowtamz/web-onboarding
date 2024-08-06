@@ -3,6 +3,7 @@
 <------------------------->
 
 @model SoPro24Team06.ViewModels.EditProcessViewModel
+@using SoPro24Team06.Enums
 @using SoPro24Team06.Helpers;
 @{
 ViewData["Title"] = "Vorgang starten";
@@ -216,17 +217,27 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
 
             <tr class="hoverTableRow" id="assignmentItem" name="" onclick="onEditAssignmentPressed(@assignment.Id)" id="assignmentItem">
                 <td>@title</td>
-                @if (assignment.AssignedRole != null)
+                @if (assignment.AssigneeType == AssigneeType.SUPERVISOR)
                 {
-                    <td>@assignment.AssignedRole.Name</td>
+                    <td>@Model.Supervisor.FullName</td>
                 }
-                @if (assignment.Assignee != null)
+                @if (assignment.AssigneeType == AssigneeType.WORKER_OF_REF)
                 {
-                    <td>@assignment.Assignee.FullName</td>
+                    <td>@Model.WorkerOfReference.FullName</td>
                 }
-                @if (assignment.Assignee == null && assignment.AssignedRole == null)
+                @if (assignment.AssigneeType == AssigneeType.ROLES)
                 {
-                    <td>Keine Angabe</td>
+                    @if (assignment.AssignedRole != null)
+                    {
+                        <td>@assignment.AssignedRole.Name</td>
+                    }
+                }
+                @if (assignment.AssigneeType == AssigneeType.USER)
+                {
+                    @if (assignment.Assignee != null)
+                    {
+                        <td>@assignment.Assignee.FullName</td>
+                    }
                 }
                 <td>@assigneeType</td>
                 <td>@dueDate.ToShortDateString()</td>
