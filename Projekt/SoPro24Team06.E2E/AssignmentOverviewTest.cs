@@ -3,10 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.Extensions;
 using OpenQA.Selenium.Support.UI;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
 using Xunit;
+
+//-------------------------
+// Author: Michael Adolf
+//-------------------------
 
 namespace SoPro24Team06.E2E
 {
@@ -91,60 +96,66 @@ namespace SoPro24Team06.E2E
                 );
             }
 
-            IWebElement assignmentListBody = _wait.Until(
-                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
-                    By.Id("allAssignmentsBody")
-                )
-            );
-            Assert.True(assignmentListBody.Displayed, "Assignment list not displayed");
-
-            IWebElement processDropdown = _wait.Until(
-                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
-                    By.Id("processDropdown")
-                )
-            );
-
             foreach (var process in processes)
             {
+                IWebElement assignmentListBody = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                        By.Id("allAssignmentsBody")
+                    )
+                );
+                Assert.True(assignmentListBody.Displayed, "Assignment list not displayed");
+
                 Console.WriteLine(
                     $"Checking process: {process.Title} with {process.Assignments.Count} assignments"
                 );
 
+                IWebElement processDropdown = _wait.Until(
+                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                        By.Id("processDropdown")
+                    )
+                );
+                processDropdown.Click();
                 SelectElement selectProcess = new SelectElement(processDropdown);
-                selectProcess.SelectByText(process.Title);
-
+                var options = selectProcess.Options;
+                foreach (var o in options)
+                {
+                    if (o.Text == process.Title)
+                    {
+                        _wait.Until(
+                            SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(o)
+                        );
+                        o.Click();
+                        _driver.ExecuteJavaScript(
+                            "document.getElementById('assingmentFilterForm').submit();"
+                        );
+                        break;
+                    }
+                }
                 assignmentListBody = _wait.Until(
                     SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
                         By.Id("allAssignmentsBody")
                     )
                 );
-
-                var assignmentsForProcess = process.Assignments;
-                Assert.Equal(assignmentsForProcess.Count, assignmentsForProcess.Count);
+                List<IWebElement> assignmentListContent = assignmentListBody
+                    .FindElements(By.XPath(".//tr"))
+                    .ToList();
 
                 Console.WriteLine(
-                    $"HTML content of the assignments table for process {process.Title}:\n{assignmentListBody.GetAttribute("innerHTML")}"
+                    $"Found {assignmentListContent.Count} assignments in the table for process {process.Title}"
                 );
+
+                var assignmentsForProcess = process.Assignments;
+                Assert.Equal(assignmentsForProcess.Count, assignmentListContent.Count);
 
                 foreach (var assignment in assignmentsForProcess)
                 {
-                    string assignmentId = $"assignment-{assignment.Id}";
-                    Console.WriteLine($"Looking for assignment ID: {assignmentId}");
-                    bool assignmentFound = false;
-                    try
-                    {
-                        IWebElement assignmentRow = _driver.FindElement(By.Id(assignmentId));
-                        assignmentFound = assignmentRow != null;
-                    }
-                    catch (NoSuchElementException)
-                    {
-                        assignmentFound = false;
-                    }
-
+                    bool assignmentFound = assignmentListContent.Any(row =>
+                        row.FindElement(By.XPath(".//td[1]")).Text == assignment.Title
+                    );
                     Console.WriteLine($"Assignment '{assignment.Title}' found: {assignmentFound}");
-                    Assert.True(
-                        assignmentFound,
-                        $"Assignment '{assignment.Title}' should be found in the table but was not."
+                    Assert.Contains(
+                        assignmentListContent,
+                        row => row.FindElement(By.XPath(".//td[1]")).Text == assignment.Title
                     );
                 }
             }
