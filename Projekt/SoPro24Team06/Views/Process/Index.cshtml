@@ -111,7 +111,7 @@
 
                         <tr onclick="window.location='/Process/Detail/@process.Id'" class="hoverTableRow">
                             <td>@process.Title</td>
-                            <td>@process.Description</td>
+                            <td>@Html.Raw(process.Description.Replace("\n", "<br>"))</td>
                             <td>@process.ContractOfRefWorker.Label</td>
                             <td>@process.DepartmentOfRefWorker.Name</td>
                             <td>@process.WorkerOfReference.FullName</td>

@@ -68,7 +68,7 @@
                             <tr class="hoverTableRow"
                                 onclick="window.location='/AssignmentTemplate/Edit/@at.Id?processId=@Model.Id'">
                                 <td>@at.Title</td>
-                                <td>@at.Instructions</td>
+                                <td>@Html.Raw(at.Instructions.Replace("\n", "<br>"))</td>
                                 <td>@EnumHelper.GetDisplayName(@at.AssigneeType)</td>
                                 <td>@at.AssignedRole</td>
                                 @if (at.DueIn != null)
