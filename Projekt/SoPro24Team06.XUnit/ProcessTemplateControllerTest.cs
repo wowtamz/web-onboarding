@@ -306,9 +306,9 @@ namespace SoPro24Team06.Tests
         }
 
         [Fact]
-        public async Task EditProcessTemplateWithStartedProcessesRedirect()
+        public async Task EditProcessTemplateWithStartedProcesses()
         {
-            var user = await _mockUserManager.Object.FindByNameAsync("User");
+            var user = await _mockUserManager.Object.FindByNameAsync("Administrator");
             var usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
 
             Assert.NotNull(usersRoles);
@@ -349,9 +349,30 @@ namespace SoPro24Team06.Tests
             );
             _context.SaveChanges();
 
-            var result = await controller.Edit(template.Id);
+            var processTemplateToUpdate = _context.ProcessTemplates.FirstOrDefault(x =>
+                x.Id == template.Id
+            );
 
-            Assert.IsType<RedirectToActionResult>(result);
+            processTemplateToUpdate.Title = "Updated Title";
+            processTemplateToUpdate.Description = "Updated Description";
+            processTemplateToUpdate.RolesWithAccess = new List<ApplicationRole> { };
+
+            await _context.SaveChangesAsync();
+
+            var processUnchanged = _context.Processes.FirstOrDefault(x =>
+                x.Id == process.Entity.Id
+            );
+
+            Assert.Equal(process.Entity.Id, processUnchanged.Id);
+            Assert.Equal(process.Entity.Title, processUnchanged.Title);
+            Assert.Equal(process.Entity.Description, processUnchanged.Description);
+            Assert.Equal(process.Entity.ContractOfRefWorker, processUnchanged.ContractOfRefWorker);
+            Assert.Equal(
+                process.Entity.DepartmentOfRefWorker,
+                processUnchanged.DepartmentOfRefWorker
+            );
+            Assert.Equal(process.Entity.WorkerOfReference, processUnchanged.WorkerOfReference);
+            Assert.Equal(process.Entity.Supervisor, processUnchanged.Supervisor);
         }
 
         [Fact]
