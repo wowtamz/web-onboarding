@@ -102,6 +102,10 @@ namespace SoPro24Team06.Models
                 dueDate = dueDate.AddDays(DueIn.Weeks * 7);
                 dueDate = dueDate.AddDays(DueIn.Days);
             }
+            if (DueIn != null && DueIn.Label == "ASAP")
+            {
+                dueDate = DateTime.Today;
+            }
             // sollte berechnet werden
             return new Assignment(this, dueDate, user);
         }
