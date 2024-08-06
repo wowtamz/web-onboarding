@@ -94,7 +94,7 @@ namespace SoPro24Team06.E2E
             }
         }
 
-        //[Fact]
+        [Fact]
         public void CreateProcessTemplate()
         {
             Login();
@@ -152,43 +152,6 @@ namespace SoPro24Team06.E2E
             {
                 throw new Exception(
                     "Failed to find an element during process template creation.",
-                    ex
-                );
-            }
-        }
-
-        //[Fact]
-        public void DeleteProcessTemplate()
-        {
-            Login();
-            _driver.Navigate().GoToUrl("https://localhost:7003/ProcessTemplate");
-
-            try
-            {
-                var processTemplateTitleElement = _wait.Until(
-                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
-                        By.XPath("//td[text()='Test Process Template']")
-                    )
-                );
-                processTemplateTitleElement.Click();
-
-                var deleteButton = _wait.Until(
-                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
-                        By.CssSelector("[aria-label='delete-process-template-submit']")
-                    )
-                );
-                deleteButton.Click();
-
-                _driver.Navigate().GoToUrl("https://localhost:7003/ProcessTemplate");
-                var processTemplateTitleElementsAfterDelete = _wait.Until(driver =>
-                    driver.FindElements(By.XPath("//td[text()='Test Process Template']"))
-                );
-                Assert.Empty(processTemplateTitleElementsAfterDelete);
-            }
-            catch (WebDriverTimeoutException ex)
-            {
-                throw new Exception(
-                    "Failed to find an element during process template deletion.",
                     ex
                 );
             }
