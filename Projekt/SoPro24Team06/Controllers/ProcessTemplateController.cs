@@ -287,60 +287,63 @@ namespace SoPro24Team06.Controllers
                 .Result;
 
             // --- Start: Get the User and their Roles ---
-            try
+            var user = _modelContext
+                .Users.Where(u => u.UserName == User.Identity.Name)
+                .FirstOrDefault();
+
+            var userRoles = await _modelContext
+                .UserRoles.AsNoTracking()
+                .Where(ur => ur.UserId == user.Id)
+                .Select(x => x.RoleId)
+                .ToListAsync();
+
+            var roles = await _modelContext
+                .Roles.AsNoTracking()
+                .Where(r => userRoles.Contains(r.Id))
+                .ToListAsync();
+
+            if (!roles.Select(x => x.Name).Contains("Administrator"))
             {
-                var user = _modelContext
-                    .Users.Where(u => u.UserName == User.Identity.Name)
-                    .FirstOrDefault();
-
-                var userRoles = await _modelContext
-                    .UserRoles.AsNoTracking()
-                    .Where(ur => ur.UserId == user.Id)
-                    .Select(x => x.RoleId)
-                    .ToListAsync();
-
-                var roles = await _modelContext
-                    .Roles.AsNoTracking()
-                    .Where(r => userRoles.Contains(r.Id))
-                    .ToListAsync();
-
-                foreach (var role in roles)
+                try
                 {
-                    _logger.LogInformation(
-                        "User {UserName} has role {Role}",
-                        User.Identity.Name,
-                        role.Name
-                    );
-                }
+                    foreach (var role in roles)
+                    {
+                        _logger.LogInformation(
+                            "User {UserName} has role {Role}",
+                            User.Identity.Name,
+                            role.Name
+                        );
+                    }
 
-                foreach (var role in processTemplate.RolesWithAccess)
-                {
-                    _logger.LogInformation(
-                        "Process template with ID {TemplateId} has role {Role}",
-                        processTemplate.Id,
-                        role.Name
-                    );
-                }
+                    foreach (var role in processTemplate.RolesWithAccess)
+                    {
+                        _logger.LogInformation(
+                            "Process template with ID {TemplateId} has role {Role}",
+                            processTemplate.Id,
+                            role.Name
+                        );
+                    }
 
-                // if the process template roles with access do not contain any of the user roles, redirect to index
-                if (
-                    !processTemplate.RolesWithAccess.Any(r =>
-                        roles.Select(r => r.Name).Contains(r.Name)
+                    // if the process template roles with access do not contain any of the user roles, redirect to index
+                    if (
+                        !processTemplate.RolesWithAccess.Any(r =>
+                            roles.Select(r => r.Name).Contains(r.Name)
+                        )
                     )
-                )
+                    {
+                        _logger.LogWarning(
+                            "User {UserName} is not authorized to edit process template with ID {TemplateId}",
+                            User.Identity.Name,
+                            processTemplate.Id
+                        );
+                        return RedirectToAction("Index");
+                    }
+                }
+                catch (Exception ex)
                 {
-                    _logger.LogWarning(
-                        "User {UserName} is not authorized to edit process template with ID {TemplateId}",
-                        User.Identity.Name,
-                        processTemplate.Id
-                    );
+                    _logger.LogError(ex, "Error fetching user roles.");
                     return RedirectToAction("Index");
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching user roles.");
-                return RedirectToAction("Index");
             }
             // --- End: Get the User and their Roles ---
 
@@ -372,62 +375,66 @@ namespace SoPro24Team06.Controllers
                 LogModelErrors(model);
                 return RedirectToAction("Edit", model);
             }
+            var pt = await _modelContext
+                .ProcessTemplates.Include(pt => pt.RolesWithAccess)
+                .FirstOrDefaultAsync(pt => pt.Id == model.Id);
+
+            var user = _modelContext
+                .Users.Where(u => u.UserName == User.Identity.Name)
+                .FirstOrDefault();
+
+            var userRoles = await _modelContext
+                .UserRoles.AsNoTracking()
+                .Where(ur => ur.UserId == user.Id)
+                .Select(x => x.RoleId)
+                .ToListAsync();
+
+            var rolesUser = await _modelContext
+                .Roles.AsNoTracking()
+                .Where(r => userRoles.Contains(r.Id))
+                .ToListAsync();
 
             // --- Start: Get the User and their Roles ---
-            try
+            if (!rolesUser.Select(x => x.Name).Contains("Administrator"))
             {
-                var pt = await _modelContext
-                    .ProcessTemplates.Include(pt => pt.RolesWithAccess)
-                    .FirstOrDefaultAsync(pt => pt.Id == model.Id);
-
-                var user = _modelContext
-                    .Users.Where(u => u.UserName == User.Identity.Name)
-                    .FirstOrDefault();
-
-                var userRoles = await _modelContext
-                    .UserRoles.AsNoTracking()
-                    .Where(ur => ur.UserId == user.Id)
-                    .Select(x => x.RoleId)
-                    .ToListAsync();
-
-                var roles = await _modelContext
-                    .Roles.AsNoTracking()
-                    .Where(r => userRoles.Contains(r.Id))
-                    .ToListAsync();
-
-                foreach (var role in roles)
+                try
                 {
-                    _logger.LogInformation(
-                        "User {UserName} has role {Role}",
-                        User.Identity.Name,
-                        role.Name
-                    );
+                    foreach (var role in rolesUser)
+                    {
+                        _logger.LogInformation(
+                            "User {UserName} has role {Role}",
+                            User.Identity.Name,
+                            role.Name
+                        );
+                    }
+
+                    foreach (var role in pt.RolesWithAccess)
+                    {
+                        _logger.LogInformation(
+                            "Process template with ID {TemplateId} has role {Role}",
+                            pt.Id,
+                            role.Name
+                        );
+                    }
+
+                    // if the process template roles with access do not contain any of the user roles, redirect to index
+                    if (
+                        !pt.RolesWithAccess.Any(r => rolesUser.Select(r => r.Name).Contains(r.Name))
+                    )
+                    {
+                        _logger.LogWarning(
+                            "User {UserName} is not authorized to edit process template with ID {TemplateId}",
+                            User.Identity.Name,
+                            model.Id
+                        );
+                        return RedirectToAction("Index");
+                    }
                 }
-
-                foreach (var role in pt.RolesWithAccess)
+                catch (Exception ex)
                 {
-                    _logger.LogInformation(
-                        "Process template with ID {TemplateId} has role {Role}",
-                        pt.Id,
-                        role.Name
-                    );
-                }
-
-                // if the process template roles with access do not contain any of the user roles, redirect to index
-                if (!pt.RolesWithAccess.Any(r => roles.Select(r => r.Name).Contains(r.Name)))
-                {
-                    _logger.LogWarning(
-                        "User {UserName} is not authorized to edit process template with ID {TemplateId}",
-                        User.Identity.Name,
-                        model.Id
-                    );
+                    _logger.LogError(ex, "Error fetching user roles.");
                     return RedirectToAction("Index");
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching user roles.");
-                return RedirectToAction("Index");
             }
             // --- End: Get the User and their Roles ---
 
