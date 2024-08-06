@@ -78,34 +78,6 @@ public class AssignmentUiTestChangeAssignmentStatus
         _factory.Dispose();
     }
 
-    public void Login()
-    {
-        _driver.Navigate().GoToUrl("https://localhost:7003/");
-
-        try
-        {
-            var emailElement = _wait.Until(
-                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("Input_Email"))
-            );
-            emailElement.SendKeys("user@example.com");
-            var passwordElement = _wait.Until(
-                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
-                    By.Id("Input_Password")
-                )
-            );
-            passwordElement.SendKeys("User@123");
-            var loginButton = _wait.Until(
-                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
-                    By.CssSelector("[aria-label='login-submit']")
-                )
-            );
-            loginButton.Click();
-        }
-        catch (WebDriverTimeoutException ex)
-        {
-            throw new Exception("Failed to find an element during login.", ex);
-        }
-    }
 
     //-------------------------
     // Author: Vincent Steiner
@@ -113,7 +85,6 @@ public class AssignmentUiTestChangeAssignmentStatus
     [Fact]
     public void New_Employee_Change_AssignmentStatus()
     {
-        // Login();
         _driver.Navigate().GoToUrl("https://localhost:7003/");
 
         var emailElement = _wait.Until(
