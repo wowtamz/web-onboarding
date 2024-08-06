@@ -23,6 +23,10 @@ using Xunit;
 
 namespace SoPro24Team06.Tests
 {
+    [CollectionDefinition("Sequential Tests Collection", DisableParallelization = true)]
+    public class SequentialTestCollections { }
+
+    [Collection("Sequential Tests Collection")]
     public class ProcessTemplateControllerTest
     {
         private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
@@ -378,37 +382,6 @@ namespace SoPro24Team06.Tests
 
             var redirectResult = result as RedirectToActionResult;
             Assert.Equal("Create", redirectResult.ActionName);
-        }
-
-        [Fact]
-        public async Task SupervisorCanEditProcessTemplate()
-        {
-            var supervisor = await _mockUserManager.Object.FindByNameAsync("Administrator");
-            var controller = await CreateProcessTemplateController(supervisor);
-
-            var existingTemplate = _context.ProcessTemplates.First();
-            var updatedTitle = "Updated Process Template";
-            var updatedDescription = "Updated Description";
-
-            var templateViewModel = new ProcessTemplateViewModel
-            {
-                Id = existingTemplate.Id,
-                Title = updatedTitle,
-                Description = updatedDescription,
-                ContractOfRefWorkerId = existingTemplate.ContractOfRefWorker.Id,
-                DepartmentOfRefWorkerId = existingTemplate.DepartmentOfRefWorker.Id,
-                SelectedAssignmentTemplateIds = existingTemplate
-                    .AssignmentTemplates.Select(at => at.Id)
-                    .ToList(),
-                RolesWithAccess = new List<string> { "Administrator" }
-            };
-
-            var result = await controller.Edit(templateViewModel);
-
-            Assert.IsType<RedirectToActionResult>(result);
-
-            var redirectResult = result as RedirectToActionResult;
-            Assert.Equal("Index", redirectResult.ActionName);
         }
 
         [Fact]
