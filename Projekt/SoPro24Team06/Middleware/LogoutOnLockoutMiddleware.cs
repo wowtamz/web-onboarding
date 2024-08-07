@@ -1,12 +1,15 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System.Threading.Tasks;
 using SoPro24Team06.Models;
 
 //-------------------------
 // Author: Michael Adolf
 //-------------------------
 
+/// <summary>
+/// Middleware to log out the user if they are locked out
+/// </summary>
 public class LogoutOnLockoutMiddleware
 {
     private readonly RequestDelegate _next;
@@ -16,7 +19,11 @@ public class LogoutOnLockoutMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+    public async Task InvokeAsync(
+        HttpContext context,
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager
+    )
     {
         if (context.User.Identity.IsAuthenticated)
         {
