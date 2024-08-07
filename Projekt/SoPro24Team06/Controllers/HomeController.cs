@@ -18,6 +18,10 @@ namespace SoPro24Team06.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Redirect to assignments overview view
+        /// </summary>
+        /// <returns>Index view of AssignmentController</returns>
         public IActionResult Index()
         {
             return RedirectToAction("Index", "Assignment");
