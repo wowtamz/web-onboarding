@@ -26,7 +26,7 @@ public static class EnumHelper
     ///  Method used to get list of all enums of a sepcific type
     ///  Returns List
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">Type of enum for wich the list should be generated</typeparam>
     /// <returns></returns>
     public static List<T> GetEnumList<T>()
         where T : Enum
