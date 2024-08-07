@@ -290,14 +290,11 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
 <!-- Ende: Zieldatum Input -->
 
 <!-- Start: Aufgaben -->
-<div class="form-group mt-2">
-    <legend>Aufgaben</legend>
-    <button id="createAssignmentTemplateButton" class="btn" onclick="onCreateAssignmentTemplatePressed()" style="background-color: var(--ash); color: white;">Aufgabe hinzufügen</button>
-</div>
 <!-- Ende: Aufgaben Select -->
 
 <!-- Start: Aufgaben Liste -->
 <fieldset style="margin-top: 8px;">
+    <legend>Aufgaben</legend>
     <div class="table-responsive">
         <table class="table" id="assignmentTemplateTable">
             <thead>
