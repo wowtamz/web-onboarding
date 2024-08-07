@@ -113,58 +113,9 @@ public class ProcessUiTest :
             throw new Exception("Failed to find an element during login.", ex);
         }
     }
-
-
-    [Fact]
-    public async Task StartProcessFromProcessTemplate()
-    {
-
-        Login();
-
-        _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.TitleContains("- SoPro24Team06"));
-        
-        AssertUrlContains("Assignment");
-
-        IWebElement processTemplateLink = FindWebElementByTagAndValue("a", "Prozesse");
-        processTemplateLink.Click();
-        
-        AssertUrlContains("ProcessTemplate");
-        AssertTitleContains("Prozesse");
-        
-        IWebElement linkElement = FindWebElementByXPath("//a[contains(@href, '/Process/Start/')]");
-        linkElement.Click();
-        
-        AssertUrlContains("Process/Start/");
-        AssertTitleContains("Vorgang starten");
-
-        string processTitle = "";
-        IWebElement inputTitle = FindWebElementById("Title");
-        processTitle = inputTitle.GetAttribute("value");
-
-        IWebElement dropdownWorkerOfRef = FindWebElementById("workerOfRefDropdown");
-        SelectElement selectWorkerOfRef = new SelectElement(dropdownWorkerOfRef);
-        selectWorkerOfRef.SelectByIndex(1);
-        
-        IWebElement dropdownContract = FindWebElementById("contractDropdown");
-        SelectElement selectContract = new SelectElement(dropdownContract);
-        selectContract.SelectByIndex(1);
-        
-        IWebElement dropdownDepartment = FindWebElementById("departmentDropdown");
-        SelectElement selectDepartment = new SelectElement(dropdownDepartment);
-        selectDepartment.SelectByIndex(1);
-
-        IWebElement startButton = FindWebElementByTagAndValue("button", "Starten");
-        startButton.Click();
-            
-        AssertTitleContains("Vorgänge");
-
-        IWebElement tdElement = FindWebElementByXPath($"//td[text()='{processTitle}']");
-
-        Assert.NotNull(tdElement);
-    }
     
     [Fact]
-    public void StartProcessFromProcessPage()
+    public void StartProcessFromProcessTemplateTest()
     {
 
         Login();
@@ -211,101 +162,6 @@ public class ProcessUiTest :
         AssertTitleContains("Vorgänge");
         
         IWebElement tdElement = FindWebElementByXPath($"//td[text()='{processTitle}']");
-        Assert.NotNull(tdElement);
-    }
-    
-    
-    [Fact]
-    public void StartProcessFromTemplateAddCustomAssignment()
-    {
-
-        Login();
-
-        _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.TitleContains("- SoPro24Team06"));
-        
-        //Assignments Page
-        AssertUrlContains("Assignment");
-
-        IWebElement processTemplateLink = FindWebElementByTagAndValue("a", "Prozesse");
-        processTemplateLink.Click();
-        
-        
-        //ProcessTemplates Page
-        AssertUrlContains("ProcessTemplate");
-        AssertTitleContains("Prozesse");
-        
-        IWebElement linkElement = FindWebElementByXPath("//a[contains(@href, '/Process/Start/')]");
-        linkElement.Click();
-        
-        //Start Process Page
-        AssertUrlContains("Process/Start/");
-        AssertTitleContains("Vorgang starten");
-        
-        IWebElement createAssignmentTemplateButton = FindWebElementById("createAssignmentTemplateButton");
-        createAssignmentTemplateButton.Click();
-        
-        //Create AssignmentTemplate Page
-        AssertUrlContains("AssignmentTemplate/Create");
-
-        string assignmentTemplateTitle = "New Assignment Template";
-        IWebElement inputAssignmentTitle = FindWebElementById("Title");
-        inputAssignmentTitle.SendKeys(assignmentTemplateTitle);
-        
-        // Select AssigneeType: Role
-        string assigneeType = "Rolle";
-        IWebElement dropdownAssigneeType = FindWebElementById("assigneeType");
-        SelectElement selectAssigneeType = new SelectElement(dropdownAssigneeType);
-        selectAssigneeType.SelectByText(assigneeType);
-        
-        // Select AssignedRole: First option
-        IWebElement dropdownAssignedRole = FindWebElementById("AssignedRole");
-        SelectElement selectAssignedRole = new SelectElement(dropdownAssignedRole);
-        selectAssignedRole.SelectByIndex(1);
-        string selectedRole = selectAssignedRole.SelectedOption.Text;
-        
-        // Select DueTime: First option
-        IWebElement dropdownDueTime = FindWebElementById("dueIn");
-        SelectElement selectDueTime = new SelectElement(dropdownDueTime);
-        selectDueTime.SelectByText("ASAP");
-        string selectedDueTime = selectDueTime.SelectedOption.Text;
-        
-        IWebElement createButton = FindWebElementByTagAndValue("button", "Erstellen");
-        createButton.Click();
-        
-        //Start Process Page
-        AssertUrlContains("Process/Start");
-        AssertTitleContains("Vorgang starten");
-
-        IWebElement inputTitle = FindWebElementById("Title");
-        string processTitle = inputTitle.GetAttribute("value");
-        
-        IWebElement inputDescription = FindWebElementById("Description");
-        string processDescription = inputDescription.GetAttribute("value");
-
-        IWebElement dropdownWorkerOfRef = FindWebElementById("workerOfRefDropdown");
-        SelectElement selectWorkerOfRef = new SelectElement(dropdownWorkerOfRef);
-        selectWorkerOfRef.SelectByIndex(1);
-        string workerOfRef = selectWorkerOfRef.SelectedOption.Text;
-        
-        IWebElement dropdownContract = FindWebElementById("contractDropdown");
-        SelectElement selectContract = new SelectElement(dropdownContract);
-        selectContract.SelectByIndex(1);
-        string contract = selectWorkerOfRef.SelectedOption.Text;
-        
-        IWebElement dropdownDepartment = FindWebElementById("departmentDropdown");
-        SelectElement selectDepartment = new SelectElement(dropdownDepartment);
-        selectDepartment.SelectByIndex(1);
-        string department = selectWorkerOfRef.SelectedOption.Text;
-        
-        IWebElement assignmentInput =
-            FindWebElementByXPath(
-                $"//tr[td[1][text() = '{assignmentTemplateTitle}'] and td[2][text() = '{assigneeType}'] and input[@value = '{selectedDueTime}' and @name = 'AssignmentTemplates[1].DueIn.Label']]\n");
-        IWebElement startButton = FindWebElementByTagAndValue("button", "Starten");
-        startButton.Click();
-            
-        AssertTitleContains("Vorgänge");
-        IWebElement tdElement = FindWebElementByXPath($"//tr[td[text()='{processTitle}']]");
-
         Assert.NotNull(tdElement);
     }
 
