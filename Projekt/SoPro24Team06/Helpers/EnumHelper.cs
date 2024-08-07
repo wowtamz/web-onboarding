@@ -11,6 +11,11 @@ namespace SoPro24Team06.Helpers;
 
 public static class EnumHelper
 {
+    /// <summary>
+    /// Gets the display name of the passed enum
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns>String display name of enum</returns>
     public static string GetDisplayName(Enum value)
     {
         var field = value.GetType().GetField(value.ToString());
