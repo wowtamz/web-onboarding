@@ -35,6 +35,9 @@ namespace SoPro24Team06.Tests
         private readonly List<ApplicationRole> _roles;
         private readonly List<IdentityUserRole<string>> _userRoles;
 
+        /// <summary>
+        /// Sets up mock for User- & Rolemanager amd ApplicationDbContect
+        /// </summary>
         public ProcessControllerTests()
         {
             var userStore = new Mock<IUserStore<ApplicationUser>>();
@@ -53,9 +56,6 @@ namespace SoPro24Team06.Tests
             _roles = new List<ApplicationRole>();
             _userRoles = new List<IdentityUserRole<string>>();
             
-            // Set up mock Managers to persist storage
-            
-            // Set up the mock UserManager to use the list for storage
             _mockUserManager.Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>()))
                 .ReturnsAsync(IdentityResult.Success)
                 .Callback<ApplicationUser>(user => _users.Add(user));
@@ -86,7 +86,7 @@ namespace SoPro24Team06.Tests
                 {
                     if (user == null)
                     {
-                        return new List<string>(); // Return an empty list if user is null
+                        return new List<string>();
                     }
 
                     var userRoleIds = _userRoles.Where(ur => ur.UserId == user.Id).Select(ur => ur.RoleId).ToList();
@@ -94,7 +94,6 @@ namespace SoPro24Team06.Tests
                     return userRoleNames;
                 });
             
-            // Set up the mock RoleManager to use the list for storage
             _mockRoleManager.Setup(rm => rm.CreateAsync(It.IsAny<ApplicationRole>()))
                 .ReturnsAsync(IdentityResult.Success)
                 .Callback<ApplicationRole>(role => _roles.Add(role));
@@ -105,6 +104,9 @@ namespace SoPro24Team06.Tests
             SeedData();
         }
         
+        /// <summary>
+        /// Adds pseudo data for testing purposes
+        /// </summary>
         private void SeedData()
         {
             // Create roles
@@ -180,6 +182,12 @@ namespace SoPro24Team06.Tests
 
         }
 
+        /// <summary>
+        /// Creates a mock http-context for passed user,
+        /// so the controller can simulate user session
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public async Task<HttpContext> CreateMockHttpContextForUser(ApplicationUser user)
         {
             var usersRoles = await _mockUserManager.Object.GetRolesAsync(user);
@@ -198,8 +206,11 @@ namespace SoPro24Team06.Tests
             return mockHttpContext.Object;
         }
 
-        // Creates ProcessController with all mocked resources ready for testing
-        // user = the user which is accessing the methods from the controller
+        /// <summary>
+        /// Creates a ProcessController initialized with all mocked objects
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public async Task<ProcessController> CreateProcessController(ApplicationUser user)
         {
             
@@ -214,6 +225,9 @@ namespace SoPro24Team06.Tests
             return controller;
         }
 
+        /// <summary>
+        /// Tests to see if mocking user session is working
+        /// </summary>
         [Fact]
         public async Task GetCurrentUserTest()
         {
@@ -234,6 +248,9 @@ namespace SoPro24Team06.Tests
 
         }
 
+        /// <summary>
+        /// Tests to see if user has rights to start a process
+        /// </summary>
         [Fact]
         public async Task UserCanStartProcessesTest()
         {
@@ -260,6 +277,9 @@ namespace SoPro24Team06.Tests
 
         }
         
+        /// <summary>
+        /// Tests to see if user has no right start a process
+        /// </summary>
         [Fact]
         public async Task UserCannotStartProcessesTest()
         {
@@ -286,6 +306,9 @@ namespace SoPro24Team06.Tests
 
         }
 
+        /// <summary>
+        /// Tests if non admin user sees all processes
+        /// </summary>
         [Fact]
         public async Task IndexReturnProcessesNotAdmin()
         {
@@ -304,6 +327,9 @@ namespace SoPro24Team06.Tests
 
         }
         
+        /// <summary>
+        /// Tests if admin user sees all processes
+        /// </summary>
         [Fact]
         public async Task IndexReturnProcessesAdmin()
         {
@@ -320,6 +346,10 @@ namespace SoPro24Team06.Tests
             Assert.NotNull(viewResult.ViewData["AllArchivedProcesses"]);
         }
         
+        /// <summary>
+        /// Tests if possible to start a process with valid process template
+        /// while the user has rights to start a process
+        /// </summary>
         [Fact]
         public async Task StartProcessWithValidProcessTemplate_WithAccess()
         {
@@ -361,6 +391,10 @@ namespace SoPro24Team06.Tests
             
         }
         
+        /// <summary>
+        /// Tests if possible to start a process with valid process template
+        /// without access rights for the process template
+        /// </summary>
         [Fact]
         public async Task StartProcessWithValidProcessTemplate_WithoutAccess()
         {
@@ -388,6 +422,9 @@ namespace SoPro24Team06.Tests
             
         }
         
+        /// <summary>
+        /// Tests if possible to start a process with invalid process template
+        /// </summary>
         [Fact]
         public async Task StartProcessWithInvalidProcessTemplate()
         {

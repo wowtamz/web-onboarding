@@ -85,6 +85,11 @@ public class ProcessUiTest :
         _factory.Dispose();
     }
 
+    /// <summary>
+    /// Logs the test user into a session
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public void Login()
     {
         _driver.Navigate().GoToUrl("https://localhost:7003/");
@@ -114,6 +119,9 @@ public class ProcessUiTest :
         }
     }
     
+    /// <summary>
+    /// Tests if users can start a process from a process template
+    /// </summary>
     [Fact]
     public void StartProcessFromProcessTemplateTest()
     {
@@ -165,6 +173,11 @@ public class ProcessUiTest :
         Assert.NotNull(tdElement);
     }
 
+    /// <summary>
+    /// Checks if url contains string
+    /// </summary>
+    /// <param name="url"></param>
+    /// <exception cref="Exception"></exception>
     public void AssertUrlContains(string url)
     {
         if (!_driver.Url.Contains(url))
@@ -173,6 +186,11 @@ public class ProcessUiTest :
         }
     }
 
+    /// <summary>
+    /// checks if page title contains string
+    /// </summary>
+    /// <param name="title"></param>
+    /// <exception cref="Exception"></exception>
     public void AssertTitleContains(string title)
     {
         if (!_driver.Title.Contains(title))
@@ -181,6 +199,12 @@ public class ProcessUiTest :
         }
     }
 
+    /// <summary>
+    /// Finds web element by its id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public IWebElement FindWebElementById(string id)
     {
         IWebElement webElement = null;
@@ -204,6 +228,13 @@ public class ProcessUiTest :
         return webElement;
     }
 
+    /// <summary>
+    /// Find web element by its tag and value
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public IWebElement FindWebElementByTagAndValue(string tag, string value)
     {
         IWebElement webElement = null;
@@ -231,6 +262,12 @@ public class ProcessUiTest :
         return webElement;
     }
 
+    /// <summary>
+    /// Finds web element by xpath
+    /// </summary>
+    /// <param name="expression"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public IWebElement FindWebElementByXPath(string expression)
     {
         IWebElement webElement = null;
@@ -254,6 +291,12 @@ public class ProcessUiTest :
         return webElement;
     }
     
+    /// <summary>
+    /// Setup default database for testing purposes
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="userManager"></param>
+    /// <param name="roleManager"></param>
     public async Task SetTestData(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
