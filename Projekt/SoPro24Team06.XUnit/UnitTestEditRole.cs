@@ -9,12 +9,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SoPro24Team06.Controllers;
-using SoPro24Team06.Models;
 using SoPro24Team06.Data;
+using SoPro24Team06.Models;
 using Xunit;
 
 namespace SoPro24Team06.Tests
 {
+    /// <summary>
+    /// Tests for the EditRole method in the AdministrationController
+    /// </summary>
     public class AdministrationControllerEditRoleTests
     {
         private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
@@ -26,13 +29,25 @@ namespace SoPro24Team06.Tests
         public AdministrationControllerEditRoleTests()
         {
             _userManagerMock = new Mock<UserManager<ApplicationUser>>(
-                Mock.Of<IUserStore<ApplicationUser>>(), 
-                null, null, null, null, null, null, null, null);
+                Mock.Of<IUserStore<ApplicationUser>>(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
 
             var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
             _roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
                 roleStoreMock.Object,
-                null, null, null, null);
+                null,
+                null,
+                null,
+                null
+            );
 
             _loggerMock = new Mock<ILogger<AdministrationController>>();
 
@@ -40,10 +55,14 @@ namespace SoPro24Team06.Tests
                 _userManagerMock.Object,
                 _roleManagerMock.Object,
                 _loggerMock.Object,
-                null // ApplicationDbContext nicht benötigt
+                null // ApplicationDbContext wird hier nicht benötigt
             );
         }
 
+        /// <summary>
+        /// Test for the JSON result of the EditRole method if the role is successfully edited
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task EditRole_ReturnsJsonResult_Success()
         {
@@ -52,32 +71,46 @@ namespace SoPro24Team06.Tests
             var newRoleName = "NewRole";
             var role = new ApplicationRole { Name = oldRoleName };
             _roleManagerMock.Setup(r => r.FindByNameAsync(oldRoleName)).ReturnsAsync(role);
-            _roleManagerMock.Setup(r => r.UpdateAsync(It.IsAny<ApplicationRole>())).ReturnsAsync(IdentityResult.Success);
+            _roleManagerMock
+                .Setup(r => r.UpdateAsync(It.IsAny<ApplicationRole>()))
+                .ReturnsAsync(IdentityResult.Success);
 
             // Act
             var result = await _controller.EditRole(oldRoleName, newRoleName) as JsonResult;
 
             // Assert
             Assert.NotNull(result);
-            var success = (bool)result.Value.GetType().GetProperty("success").GetValue(result.Value);
+            var success = (bool)
+                result.Value.GetType().GetProperty("success").GetValue(result.Value);
             Assert.True(success);
         }
 
+        /// <summary>
+        /// Test for the JSON result of the EditRole method if the role is not found
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task EditRole_ReturnsJsonResult_RoleNotFound()
         {
             // Arrange
             var oldRoleName = "NonExistingRole";
             var newRoleName = "NewRole";
-            _roleManagerMock.Setup(r => r.FindByNameAsync(oldRoleName)).ReturnsAsync((ApplicationRole)null);
+            _roleManagerMock
+                .Setup(r => r.FindByNameAsync(oldRoleName))
+                .ReturnsAsync((ApplicationRole)null);
 
             // Act
             var result = await _controller.EditRole(oldRoleName, newRoleName) as JsonResult;
 
             // Assert
             Assert.NotNull(result);
-            var success = (bool)result.Value.GetType().GetProperty("success").GetValue(result.Value);
-            var error = result.Value.GetType().GetProperty("error").GetValue(result.Value).ToString();
+            var success = (bool)
+                result.Value.GetType().GetProperty("success").GetValue(result.Value);
+            var error = result
+                .Value.GetType()
+                .GetProperty("error")
+                .GetValue(result.Value)
+                .ToString();
             Assert.False(success);
             Assert.Equal("Role not found.", error);
         }

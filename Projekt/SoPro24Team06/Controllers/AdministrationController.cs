@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SoPro24Team06.Data;
 using SoPro24Team06.Enums;
 using SoPro24Team06.Helpers;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
-using SoPro24Team06.Data;
 
 //-------------------------
 // Author: Michael Adolf
@@ -38,7 +38,6 @@ namespace SoPro24Team06.Controllers
             _roleManager = roleManager;
             _logger = logger;
             _context = context;
-
         }
 
         /// <summary>
@@ -124,7 +123,7 @@ namespace SoPro24Team06.Controllers
                 }
             }
 
-            model.Roles = await _roleManager.Roles.Select(r => r.Name).ToListAsync(); // Re-populate roles in case of an error
+            model.Roles = await _roleManager.Roles.Select(r => r.Name).ToListAsync(); // Bei Fehler werden die Rollen neu geladen
             return View("~/Views/Administration/CreateUser.cshtml", model);
         }
 
@@ -148,7 +147,7 @@ namespace SoPro24Team06.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null)
             {
-                user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100); // Lock the user indefinitely
+                user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
                 await _userManager.UpdateAsync(user);
                 TempData["Message"] = $"User {user.FullName} wurde gesperrt.";
             }
@@ -166,7 +165,7 @@ namespace SoPro24Team06.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null)
             {
-                user.LockoutEnd = null; // Unlock the user
+                user.LockoutEnd = null;
                 await _userManager.UpdateAsync(user);
                 TempData["Message"] = $"User {user.FullName} wurde entsperrt.";
             }
@@ -260,7 +259,7 @@ namespace SoPro24Team06.Controllers
                 allRolesList,
                 model.SelectedRoles
             );
-            model.Roles = allRolesList; // Re-populate roles in case of an error
+            model.Roles = allRolesList;
             return View("~/Views/Administration/EditUserDetails.cshtml", model);
         }
 
@@ -385,33 +384,43 @@ namespace SoPro24Team06.Controllers
 
             if (model.RoleName == "Administrator")
             {
-                return Json(new { success = false, error = "Die Administrator-Rolle kann nicht gelöscht werden." });
+                return Json(
+                    new
+                    {
+                        success = false,
+                        error = "Die Administrator-Rolle kann nicht gelöscht werden."
+                    }
+                );
             }
 
-            var involvedAssignments = _context.Assignments
-                .Where(a => a.AssignedRole.Name == model.RoleName)
+            var involvedAssignments = _context
+                .Assignments.Where(a => a.AssignedRole.Name == model.RoleName)
                 .ToList();
 
-            var involvedAssignmentTemplates = _context.AssignmentTemplates
-                .Where(at => at.AssignedRole.Name == model.RoleName)
+            var involvedAssignmentTemplates = _context
+                .AssignmentTemplates.Where(at => at.AssignedRole.Name == model.RoleName)
                 .ToList();
 
-            var involvedProcessTemplates = _context.ProcessTemplates
-                .Where(pt => pt.RolesWithAccess.Any(r => r.Name == model.RoleName))
+            var involvedProcessTemplates = _context
+                .ProcessTemplates.Where(pt => pt.RolesWithAccess.Any(r => r.Name == model.RoleName))
                 .ToList();
 
-            if (involvedAssignments.Any() || involvedAssignmentTemplates.Any() || involvedProcessTemplates.Any())
+            if (
+                involvedAssignments.Any()
+                || involvedAssignmentTemplates.Any()
+                || involvedProcessTemplates.Any()
+            )
             {
-                var assignmentNames = involvedAssignments.Any() 
-                    ? string.Join(", ", involvedAssignments.Select(a => a.Title)) 
+                var assignmentNames = involvedAssignments.Any()
+                    ? string.Join(", ", involvedAssignments.Select(a => a.Title))
                     : "";
 
-                var assignmentTemplateNames = involvedAssignmentTemplates.Any() 
-                    ? string.Join(", ", involvedAssignmentTemplates.Select(at => at.Title)) 
+                var assignmentTemplateNames = involvedAssignmentTemplates.Any()
+                    ? string.Join(", ", involvedAssignmentTemplates.Select(at => at.Title))
                     : "";
 
-                var processTemplateNames = involvedProcessTemplates.Any() 
-                    ? string.Join(", ", involvedProcessTemplates.Select(pt => pt.Title)) 
+                var processTemplateNames = involvedProcessTemplates.Any()
+                    ? string.Join(", ", involvedProcessTemplates.Select(pt => pt.Title))
                     : "";
 
                 var involvementDetails = new List<string>();
@@ -432,7 +441,8 @@ namespace SoPro24Team06.Controllers
                 }
 
                 var involvementMessage = string.Join("<br>", involvementDetails);
-                var errorMessage = $"Die Rolle '{model.RoleName}' kann nicht gelöscht werden, da sie in den folgenden Elementen involviert ist:<br>{involvementMessage}.";
+                var errorMessage =
+                    $"Die Rolle '{model.RoleName}' kann nicht gelöscht werden, da sie in den folgenden Elementen involviert ist:<br>{involvementMessage}.";
 
                 TempData["RoleDeleteMessage"] = errorMessage;
                 return Json(new { success = false, error = errorMessage });
@@ -455,7 +465,6 @@ namespace SoPro24Team06.Controllers
 
             return Json(new { success = false, error = "Rolle nicht gefunden." });
         }
-
 
         /// <summary>
         /// Changes the role name
@@ -503,6 +512,11 @@ namespace SoPro24Team06.Controllers
             return Json(roles);
         }
 
+        /// <summary>
+        /// Imports data from the initial JSON file
+        /// </summary>
+        /// <param name="jsonFile">the JSON file in question</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> ImportJson(IFormFile jsonFile)
         {

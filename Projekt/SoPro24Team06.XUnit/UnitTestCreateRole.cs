@@ -9,13 +9,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SoPro24Team06.Controllers;
+using SoPro24Team06.Data;
 using SoPro24Team06.Models;
 using SoPro24Team06.ViewModels;
-using SoPro24Team06.Data;
 using Xunit;
 
 namespace SoPro24Team06.Tests
 {
+    /// <summary>
+    /// Tests for the CreateRole method in the AdministrationController
+    /// </summary>
     public class AdministrationControllerTests
     {
         private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
@@ -27,13 +30,25 @@ namespace SoPro24Team06.Tests
         public AdministrationControllerTests()
         {
             _userManagerMock = new Mock<UserManager<ApplicationUser>>(
-                Mock.Of<IUserStore<ApplicationUser>>(), 
-                null, null, null, null, null, null, null, null);
+                Mock.Of<IUserStore<ApplicationUser>>(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
 
             var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
             _roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
                 roleStoreMock.Object,
-                null, null, null, null);
+                null,
+                null,
+                null,
+                null
+            );
 
             _loggerMock = new Mock<ILogger<AdministrationController>>();
 
@@ -41,27 +56,38 @@ namespace SoPro24Team06.Tests
                 _userManagerMock.Object,
                 _roleManagerMock.Object,
                 _loggerMock.Object,
-                null // ApplicationDbContext nicht benötigt
+                null // ApplicationDbContext wird hier nicht benötigt
             );
         }
 
+        /// <summary>
+        /// Test if the CreateRole method returns a JsonResult with success true
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateRole_ReturnsJsonResult_Success()
         {
             // Arrange
             var model = new RoleViewModel { RoleName = "NewRole" };
             _roleManagerMock.Setup(r => r.RoleExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
-            _roleManagerMock.Setup(r => r.CreateAsync(It.IsAny<ApplicationRole>())).ReturnsAsync(IdentityResult.Success);
+            _roleManagerMock
+                .Setup(r => r.CreateAsync(It.IsAny<ApplicationRole>()))
+                .ReturnsAsync(IdentityResult.Success);
 
             // Act
             var result = await _controller.CreateRole(model) as JsonResult;
 
             // Assert
             Assert.NotNull(result);
-            var success = (bool)result.Value.GetType().GetProperty("success").GetValue(result.Value);
+            var success = (bool)
+                result.Value.GetType().GetProperty("success").GetValue(result.Value);
             Assert.True(success);
         }
 
+        /// <summary>
+        /// Test if the CreateRole method returns a JsonResult with success false and the error message
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateRole_ReturnsJsonResult_RoleAlreadyExists()
         {
@@ -74,8 +100,13 @@ namespace SoPro24Team06.Tests
 
             // Assert
             Assert.NotNull(result);
-            var success = (bool)result.Value.GetType().GetProperty("success").GetValue(result.Value);
-            var error = result.Value.GetType().GetProperty("error").GetValue(result.Value).ToString();
+            var success = (bool)
+                result.Value.GetType().GetProperty("success").GetValue(result.Value);
+            var error = result
+                .Value.GetType()
+                .GetProperty("error")
+                .GetValue(result.Value)
+                .ToString();
             Assert.False(success);
             Assert.Equal("Role existiert bereits.", error);
         }

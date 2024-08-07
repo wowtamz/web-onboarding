@@ -10,11 +10,15 @@ using SoPro24Team06.Models;
 using Xunit;
 
 //-------------------------
-// Author: Michael Adolf
+// Author of [Fact]: Michael Adolf
+// Everything else: Jan Pfluger
 //-------------------------
 
 namespace SoPro24Team06.E2E
 {
+    /// <summary>
+    /// Test class for the assignment overview page
+    /// </summary>
     public class AssignmentOverviewTest
         : IClassFixture<CustomWebApplicationFactory<Program>>,
             IDisposable
@@ -50,9 +54,14 @@ namespace SoPro24Team06.E2E
             var service = ChromeDriverService.CreateDefaultService();
             _driver = new ChromeDriver(service, options);
 
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(60)); // Increase wait time
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(60));
         }
 
+        /// <summary>
+        /// Test the assignment overview page by checking if all assignments are displayed correctly
+        /// after logging in as a personal user and selecting each process
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AssignmentOverview()
         {
@@ -161,6 +170,9 @@ namespace SoPro24Team06.E2E
             }
         }
 
+        /// <summary>
+        /// Logs in the user with the given username and password and navigates to the home page
+        /// </summary>
         public async Task Login(string userName, string password)
         {
             string errorLocationFunktion = "Login";
@@ -214,6 +226,9 @@ namespace SoPro24Team06.E2E
             }
         }
 
+        /// <summary>
+        /// Sets test data in the database for the assignment overview test
+        /// </summary>
         public async Task SetTestData(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,

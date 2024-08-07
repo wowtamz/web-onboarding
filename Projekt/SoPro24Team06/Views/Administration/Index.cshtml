@@ -1,6 +1,6 @@
 @model SoPro24Team06.ViewModels.AdministrationViewModel
 
-<!-- Ganze Datei bis auf den Banner: Code Ownership Michael Adolf -->
+<!-- Ganze Datei: Code Ownership Michael Adolf -->
 
 @if (TempData["Message"] != null)
 {
@@ -164,7 +164,7 @@
             });
 
             $('#createRoleForm').submit(function (e) {
-                e.preventDefault(); // Prevent form submission
+                e.preventDefault();
                 var form = $(this);
                 $.ajax({
                     type: "POST",
@@ -190,7 +190,7 @@
             });
 
             $(document).on('submit', '.delete-role-form', function (e) {
-                e.preventDefault(); // Prevent default form submission
+                e.preventDefault();
                 var form = $(this);
                 var actionUrl = "/Administration/DeleteRole";
                 $.ajax({
@@ -218,7 +218,6 @@
             });
 
             $(document).on('click', '.edit-role', function () {
-                // Cancel the edit mode of any other role
                 cancelEditMode();
 
                 var roleNameElement = $(this).closest('li').find('.role-name');
@@ -236,11 +235,11 @@
                 if (newRoleName && newRoleName !== originalRoleName) {
                     $.ajax({
                         type: "POST",
-                        url: '/Administration/EditRole', // Add the appropriate URL for editing roles
+                        url: '/Administration/EditRole', 
                         data: {
                             oldRoleName: originalRoleName,
                             newRoleName: newRoleName,
-                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() // Include anti-forgery token
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() 
                         },
                         success: function (response) {
                             if (response.success) {
