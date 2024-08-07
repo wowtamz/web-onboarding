@@ -136,6 +136,7 @@ namespace SoPro24Team06.Controllers
                         });
 
                         template.RolesWithAccess.ForEach(r => r.ProcessTemplates = null);
+                        template.AssignmentTemplates.ForEach(a => a.Instructions = "");
 
                         startProcessViewModel.Template = template;
 
@@ -162,6 +163,12 @@ namespace SoPro24Team06.Controllers
                         string jsonViewModel = TempData["startProcessViewModel"] as string;
                         startProcessViewModel =
                             JsonConvert.DeserializeObject<StartProcessViewModel>(jsonViewModel);
+                    }
+
+                    if (startProcessViewModel.Template != null &&
+                        startProcessViewModel.Template.AssignmentTemplates != null)
+                    {
+                        startProcessViewModel.Template.AssignmentTemplates.ForEach(a => a.Instructions = "");
                     }
 
                     return View(startProcessViewModel);
@@ -228,14 +235,17 @@ namespace SoPro24Team06.Controllers
                         }
                     }
 
-                    //return BadRequest(ModelState);
                     return View("Start", startProcessViewModel);
                 }
 
                 try
                 {
+                    
+                    ProcessTemplate processTemplate = await _processTemplateContainer.GetProcessTemplateByIdAsync(
+                        startProcessViewModel.Template.Id);
+                    
                     startProcessViewModel.AssignmentTemplates = GetFilteredAssignmentTemplates(
-                        startProcessViewModel.AssignmentTemplates,
+                        processTemplate.AssignmentTemplates,
                         startProcessViewModel.ContractOfRefWorker.Id,
                         startProcessViewModel.DepartmentOfRefWorker.Id
                     );
