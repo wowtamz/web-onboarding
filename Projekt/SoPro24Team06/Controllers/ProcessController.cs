@@ -684,12 +684,6 @@ namespace SoPro24Team06.Controllers
                 {
                     filteredAssignmentTemplates.Add(a);
                 }
-                else
-                {
-                    Console.WriteLine(
-                        $"IGNORING ASSIGNMENTTEMPLE: {a.Title}\nCONTRACT: {a.ForContractsList.FirstOrDefault().Label}\nDEPARTMENT: {a.ForDepartmentsList.FirstOrDefault().Name}"
-                    );
-                }
             });
             return filteredAssignmentTemplates;
         }
