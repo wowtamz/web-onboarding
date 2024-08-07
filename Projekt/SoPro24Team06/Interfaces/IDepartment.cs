@@ -10,6 +10,6 @@ namespace SoPro24Team06.Interfaces
 {
     public interface IDepartment
     {
-         public Department GetDepartment(string name);
+         public Task<Department> GetDepartment(string name);
     }
 }

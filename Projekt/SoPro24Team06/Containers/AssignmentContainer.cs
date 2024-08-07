@@ -15,6 +15,7 @@ public class AssingmentContainer
         this._context = context;
     }
 
+    //beginn codeownership Jan Pfluger
     public Assignment? GetAssignmentById(int id)
     {
         return _context
@@ -22,6 +23,23 @@ public class AssingmentContainer
             .Include(a => a.Assignee)
             .ToList()
             .Find(a => a.Id == id);
+    }
+
+    public async Task SaveEditedAssignment(Assignment assignment)
+    {
+        _context.Update(assignment);
+        switch (assignment.AssigneeType)
+        {
+            case AssigneeType.ROLES:
+                _context.Entry(assignment).Reference(a => a.Assignee).CurrentValue = null;
+                break;
+            case AssigneeType.USER:
+                _context.Entry(assignment).Reference(a => a.AssignedRole).CurrentValue = null;
+                break;
+            default:
+                break;
+        }
+        await _context.SaveChangesAsync();
     }
 
     public async Task AddAssingmentAsync(Assignment assignmentToAdd)
@@ -48,3 +66,4 @@ public class AssingmentContainer
         }
     }
 }
+//end codeownership Jan Pfluger

@@ -9,9 +9,9 @@ namespace SoPro24Team06.Interfaces
 {
     public interface IDueTime
     {
-        public void AddDueTime(DueTime dueIn);
-        public DueTime GetDueTime(string label);
-        public void DeleteDueTime(int id);
-        public List<DueTime> GetAllDueTimes();
+        public Task AddDueTime(DueTime dueIn);
+        public Task<DueTime> GetDueTime(string label);
+        public Task DeleteDueTime(int id);
+        public Task<List<DueTime>> GetAllDueTimes();
     }
 }

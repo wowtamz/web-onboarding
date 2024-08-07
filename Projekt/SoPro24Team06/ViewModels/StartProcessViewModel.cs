@@ -85,21 +85,8 @@ public class StartProcessViewModel
     {
         List<Assignment> assignmentList = new List<Assignment> { };
         //beginn codeownership Jan Pfluger
-        List<AssignmentTemplate> assignmentTemplates = new List<AssignmentTemplate>();
-        assignmentTemplates = this
-            .AssignmentTemplates.Where(temp =>
-                (temp.ForContractsList == null 
-                 || temp.ForContractsList.Contains(this.ContractOfRefWorker)
-                 || !temp.ForContractsList.Any()
-                )
-                && (temp.ForDepartmentsList == null 
-                    || temp.ForDepartmentsList.Contains(this.DepartmentOfRefWorker)
-                    || !temp.ForDepartmentsList.Any()
-                )
-            )
-            .ToList();
 
-        foreach (AssignmentTemplate temp in assignmentTemplates) //delete for production use
+        foreach (AssignmentTemplate temp in AssignmentTemplates) //delete for production use
         {
             Assignment assignment = temp.ToAssignment(null, this.DueDate); //change !!!!
             switch (temp.AssigneeType)
@@ -113,6 +100,7 @@ public class StartProcessViewModel
                 default:
                     break;
             }
+            
             assignmentList.Add(assignment);
         }
 

@@ -32,9 +32,11 @@
 				case "RoleAssignment":
 					<a href="/Assignment/ChangeTable?currentList=MyAssignments" class="btn btn-primary" type="button">Meine
 						Aufgaben</a>
-					<a href="/Assignment/ChangeTable?currentList=RoleAssignment" class="btn btn-secondary" type="button">Rollen
+					<a href="/Assignment/ChangeTable?currentList=RoleAssignment" class="btn btn-secondary" type="button"
+						id="roleAssignmentsButton">Rollen
 						Aufgaben</a>
-					<a href="/Assignment/ChangeTable?currentList=AllAssignments" class="btn btn-primary" type="button">Alle
+					<a href="/Assignment/ChangeTable?currentList=AllAssignments" class="btn btn-primary" type="button"
+						id="allAssignmentsButton">Alle
 						Aufgaben</a>
 					break;
 				case "AllAssignments":
@@ -42,7 +44,8 @@
 						Aufgaben</a>
 					<a href="/Assignment/ChangeTable?currentList=RoleAssignment" class="btn btn-primary" type="button">Rollen
 						Aufgaben</a>
-					<a href="/Assignment/ChangeTable?currentList=AllAssignments" class="btn btn-secondary" type="button">Alle
+					<a href="/Assignment/ChangeTable?currentList=AllAssignments" class="btn btn-secondary" type="button"
+						id="allAssignmentButton">Alle
 						Aufgaben</a>
 					break;
 				default:
@@ -59,11 +62,11 @@
 	<div class="d-flex flex-row gap-2">
 		<form id="assingmentFilterForm" method="post" oninput="this.submit()" asp-action="FilterAssignments">
 			<div class="dropdown-menue">
-					<select class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown"
+				<select class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown"
 					type="button" style="margin-bottom: 12px;" id="processDropdown" name="SelectedProcessId"
 					asp-items="@(new SelectList(Model.ProcessList, "Id", "Title", ViewData["selectedProcessId"]));">
-						<option value=null>Filtern</option>
-					</select>
+					<option value=null>Filtern</option>
+				</select>
 				<input type="hidden" name="currentList" />
 			</div>
 		</form>
@@ -77,13 +80,13 @@
 						<option value="name" selected>Name</option>
 						<option value="dueDate">Fälligkeit</option>
 					}
-					else if(ViewData["sortingMethod"] as string == "dueDate")
+					else if (ViewData["sortingMethod"] as string == "dueDate")
 					{
 						<option value="none">Sortieren</option>
 						<option value="name">Name</option>
 						<option value="dueDate" selected>Fälligkeit</option>
 					}
-					else 
+					else
 					{
 						<option value="none" selected>Sortieren</option>
 						<option value="name">Name</option>
@@ -111,7 +114,7 @@
 					<th>Aktionen</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="myAssignmentsBody">
 				@if (Model.AssignmentList == null || Model.AssignmentList.Count == 0)
 				{
 					<tr>
@@ -136,8 +139,9 @@
 								<td></td>
 							}
 							<td>@Model.GetAssignmentStatus(assignment)</td>
-							<td class="d-flex flex-row justify-content-evenly gap-3">
-								<a href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
+							<td>
+								<a id="Details-@assignment.Id.-Button" href="#"
+									onclick="document.getElementById('Details-@assignment.Id').submit(); return false;" style="padding-right: 10px">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
@@ -148,7 +152,8 @@
 										</path>
 									</svg>
 								</a>
-								<a href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
+								<a id="Edit-@assignment.Id.-Button" href="#"
+									onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
 										class="far fa-edit" style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
 							</td>
 							<form id="Edit-@assignment.Id" asp-action="Edit" method="post" style="display:none;">
@@ -169,7 +174,7 @@
 @if (ViewData["currentList"] as string == "RoleAssignment")
 {
 	<div class="table-responsive">
-		<table class="table">
+		<table class="table" id="roleAssignmentsTable">
 			<thead>
 				<tr>
 					<th>Titel</th>
@@ -181,7 +186,7 @@
 					<th>Aktionen</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="roleAssignmentBody">
 				@if (Model.AssignmentList == null || Model.AssignmentList.Count == 0)
 				{
 					<tr>
@@ -214,9 +219,10 @@
 								<td></td>
 								<td></td>
 							}
-							<td>@Model.GetAssignmentStatus(assignment)</td>
-							<td class="d-flex flex-row justify-content-evenly gap-3">
-								<a href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
+							<td id="assignmentStatusCheck">@Model.GetAssignmentStatus(assignment)</td>
+							<td>
+								<a id="Details-@assignment.Id.-Button" href="#"
+									onclick="document.getElementById('Details-@assignment.Id').submit(); return false;" style="padding-right: 10px">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
@@ -227,7 +233,8 @@
 										</path>
 									</svg>
 								</a>
-								<a href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
+								<a id="Edit-@assignment.Id.-Button" href="#"
+									onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
 										class="far fa-edit" style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
 							</td>
 							<form id="Edit-@assignment.Id" asp-action="Edit" method="post" style="display:none;">
@@ -249,7 +256,7 @@
 @if (ViewData["currentList"] as string == "AllAssignments")
 {
 	<div class="table-responsive">
-		<table class="table">
+		<table class="table" id="allAssignmentsTable">
 			<thead>
 				<tr>
 					<th>Title</th>
@@ -261,7 +268,7 @@
 					<th>Aktionen</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id="allAssignmentsBody">
 				@if (Model.AssignmentList == null || Model.AssignmentList.Count == 0)
 				{
 					<tr>
@@ -311,9 +318,10 @@
 								<td></td>
 								<td></td>
 							}
-							<td>@Model.GetAssignmentStatus(assignment)</td>
-							<td class="d-flex flex-row justify-content-evenly gap-3">
-								<a href="#" onclick="document.getElementById('Details-@assignment.Id').submit(); return false;">
+							<td id="status">@Model.GetAssignmentStatus(assignment)</td>
+							<td>
+								<a id="Details-@assignment.Id.-Button" href="#"
+									onclick="document.getElementById('Details-@assignment.Id').submit(); return false;" style="padding-right: 10px;">
 									<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
 										viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
 										<path fill-rule="evenodd"
@@ -324,7 +332,8 @@
 										</path>
 									</svg>
 								</a>
-								<a href="#" onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
+								<a id="Edit-@assignment.Id.-Button" href="#"
+									onclick="document.getElementById('Edit-@assignment.Id').submit(); return false;"><i
 										class="far fa-edit" style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
 							</td>
 							<form id="Edit-@assignment.Id" asp-action="Edit" method="post" style="display:none;">

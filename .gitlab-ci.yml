@@ -47,9 +47,6 @@ e2e_test_project:
     - dotnet build
     - dotnet dev-certs https --clean
     - dotnet dev-certs https --trust
-    - dotnet run --project SoPro24Team06/SoPro24Team06.csproj  &
-    - sleep 30
-    - cd ./SoPro24Team06.E2E
     - xvfb-run -a dotnet test --logger "trx;LogFileName=test_results.trx"
 
 

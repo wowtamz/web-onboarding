@@ -59,13 +59,10 @@
                 <thead>
                 <tr>
                     <th>Titel</th>
-                    <th>Anleitung</th>
+                    <th>Aufgabenzuständiger</th>
+                    <th>Art der Aufgabenzuständiger</th>
                     <th>Zieldatum</th>
                     <th>Status</th>
-                    @if (Model.IsArchived == false)
-                    {
-                        <th>Aktionen</th>
-                    }
                 </tr>
                 </thead>
                 <tbody id="assignments" name="assignments">
@@ -74,38 +71,42 @@
                     @foreach (Assignment assignment in @Model.Assignments)
                     {
                         var title = assignment.Title;
-                        var description = assignment.Instructions;
                         var due_date = assignment.DueDate;
 
                         var status = EnumHelper.GetDisplayName(assignment.Status);
+                        var assigneeType = assignment.AssigneeType;
 
                         <tr class="hoverTableRow" id="templateItem" name="" 
                             onclick="window.location='/Process/DetailRedirectEditAssignment/@Model.Id?assignmentId=@assignment.Id'" id="assignmentItem">
                             <td>@title</td>
-                            <td><a href="#">Mehr anzeigen</a></td>
-                            <td>@assignment.DueDate</td>
-                            <td>@status</td>
-                            @if (Model.IsArchived == false)
+                            
+                            @if (assignment.AssigneeType == AssigneeType.SUPERVISOR)
                             {
-                                <td class="d-flex flex-row">
-                                    
-                                        @if (assignment.Status == AssignmentStatus.NOT_STARTED)
-                                        {
-                                            <a href="/Process/UpdateAssignmentStatus/@Model.Id?assignmentId=@assignment.Id&status=@AssignmentStatus.IN_PROGRESS" class='btn btn-primary' type='button' style='background-color: #FFB199;'
-                                               onclick=''>Annehmen</a>
-                                        }
-                                        @if (assignment.Status == AssignmentStatus.IN_PROGRESS)
-                                        {
-                                            <a href="/Process/UpdateAssignmentStatus/@Model.Id?assignmentId=@assignment.Id&status=@AssignmentStatus.DONE" class='btn btn-success' type='button' style='background-color: var(--lemming); color: white;'
-                                               onclick=''>Erledigen</a>
-                                        }
-                                        @if (assignment.Status == AssignmentStatus.DONE)
-                                        {
-                                            <a class='btn' type='button' style='margin-left: 16px; background-color: #FFFFFF; color: #FFFFFF;'
-                                               onclick=''>nichts zu tun</a>
-                                        }
-                                </td>
+                                <td>@Model.Supervisor.FullName</td>
+                            }
+                            @if (assignment.AssigneeType == AssigneeType.WORKER_OF_REF)
+                            {
+                                <td>@Model.WorkerOfReference.FullName</td>
+                            }
+                            @if (assignment.AssigneeType == AssigneeType.ROLES)
+                            {
+                                @if (assignment.AssignedRole != null)
+                                {
+                                    <td>@assignment.AssignedRole.Name</td>
                                 }
+                            }
+                            @if (assignment.AssigneeType == AssigneeType.USER)
+                            {
+                                @if (assignment.Assignee != null)
+                                {
+                                    <td>@assignment.Assignee.FullName</td>
+                                }
+                            }
+
+                            <td>@EnumHelper.GetDisplayName(assignment.AssigneeType)</td>
+                            <td>@assignment.DueDate.ToShortDateString()</td>
+                            <td>@status</td>
+                            <td class="d-flex flex-row"></td>
                         </tr>
                     }
                 }
@@ -123,7 +124,7 @@
 
     <a class="btn" style="background-color: var(--ash); color: white;" href="/Process">Zurück</a>
     
-    @if (!Model.IsArchived && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Supervisor.Id)
+    @if (!Model.IsArchived && (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Supervisor.Id || User.IsInRole("Administrator")))
     {
         <a class="btn" style="background-color: var(--lemming); color: white;" href="/Process/Edit/@Model.Id">Bearbeiten</a>
     }

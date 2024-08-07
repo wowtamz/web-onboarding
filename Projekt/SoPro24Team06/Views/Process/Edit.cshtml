@@ -3,6 +3,7 @@
 <------------------------->
 
 @model SoPro24Team06.ViewModels.EditProcessViewModel
+@using SoPro24Team06.Enums
 @using SoPro24Team06.Helpers;
 @{
 ViewData["Title"] = "Vorgang starten";
@@ -191,17 +192,15 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
 
 <fieldset style="margin-top: 8px;">
     <legend>Aufgaben</legend>
-    <button id="createAssignmentTemplateButton" class="btn" onclick="onCreateAssignmentTemplatePressed()" style="background-color: var(--ash); color: white;">Aufgabe hinzufügen</button>
     <div class="table-responsive">
         <table class="table" id="assignmentTable">
             <thead>
             <tr>
                 <th>Titel</th>
-                <th>Anleitung</th>
                 <th>Aufgabenzuständiger</th>
-                <th>Vertragsart</th>
-                <th>Abteilung</th>
+                <th>Art der Aufgabenzuständiger</th>
                 <th>Fälligkeit</th>
+                <th>Status</th>
                 <th>Aktionen</th>
             </tr>
             </thead>
@@ -212,17 +211,36 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
             @foreach (Assignment assignment in @Model.Assignments)
             {
             var title = assignment.Title;
-            var description = assignment.Instructions;
-            var assignee = EnumHelper.GetDisplayName(assignment.AssigneeType);
+            var assigneeType = EnumHelper.GetDisplayName(assignment.AssigneeType);
             var dueDate = assignment.DueDate;
 
             <tr class="hoverTableRow" id="assignmentItem" name="" onclick="onEditAssignmentPressed(@assignment.Id)" id="assignmentItem">
                 <td>@title</td>
-                <td><a href="#">Mehr anzeigen</a></td>
-                <td>@assignee</td>
-                <td>Vollzeit</td>
-                <td>Personal</td>
-                <td>@dueDate.ToString()</td>
+                @if (assignment.AssigneeType == AssigneeType.SUPERVISOR)
+                {
+                    <td>@Model.Supervisor.FullName</td>
+                }
+                @if (assignment.AssigneeType == AssigneeType.WORKER_OF_REF)
+                {
+                    <td>@Model.WorkerOfReference.FullName</td>
+                }
+                @if (assignment.AssigneeType == AssigneeType.ROLES)
+                {
+                    @if (assignment.AssignedRole != null)
+                    {
+                        <td>@assignment.AssignedRole.Name</td>
+                    }
+                }
+                @if (assignment.AssigneeType == AssigneeType.USER)
+                {
+                    @if (assignment.Assignee != null)
+                    {
+                        <td>@assignment.Assignee.FullName</td>
+                    }
+                }
+                <td>@assigneeType</td>
+                <td>@dueDate.ToShortDateString()</td>
+                <td>@EnumHelper.GetDisplayName(assignment.Status)</td>
                 <td class="d-flex flex-row justify-content-evenly">
                     <button class='btn btn-danger' type='button' style='margin-left: 16px;'
                             onclick='removeAssignment(this, @assignment.Id)'>Entfernen</button>
@@ -337,15 +355,6 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
             $('#preselectedTemplate').click();
         }
 
-        var processTemplateDropdown = document.getElementById("processTemplateDropdown");
-
-        if (processTemplateDropdown) {
-            processTemplateDropdown.addEventListener("change", function () {
-                var selectedOption = processTemplateDropdown.options[processTemplateDropdown.selectedIndex];
-                onProcessTemplateSelected(selectedOption.value);
-            });
-        }
-
         var supervisorDropdown = document.getElementById("supervisorDropdown");
         supervisorDropdown.addEventListener("change", function () {
             var selectedOption = supervisorDropdown.options[supervisorDropdown.selectedIndex];
@@ -368,111 +377,6 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
         departmentDropdown.addEventListener("change", function () {
             var selectedOption = departmentDropdown.options[departmentDropdown.selectedIndex];
             onDepartmentSelected(selectedOption.value);
-        });
-
-        /*
-        var createAssignmentTemplateButton = document.getElementById("createAssignmentTemplateButton");
-        createAssignmentTemplateButton.addEventListener("click", function () {
-            var form = document.getElementById("formId")
-
-            //client side validation ignorieren
-            if (typeof (form) === 'object' && form != null) {
-                form.setAttribute('novalidate', 'novalidate');
-            }
-
-            form.action = "/Process/EditRedirectToNewAssignment";
-            form.submit();
-        });
-        */
-    }
-
-    function onProcessTemplateSelected(temp_string) {
-
-        template = JSON.parse(temp_string);
-
-        console.log(template);
-
-        $('#Title').val(template.title);
-        $('#Description').val(template.description);
-
-        if (template.contractOfRefWorker.id > 0) {
-            onContractSelected(template.contractOfRefWorker.id, template.contractOfRefWorker.label)
-        }
-        if (template.departmentOfRefWorker.id > 0) {
-            onDepartmentSelected(template.departmentOfRefWorker.id, template.departmentOfRefWorker.name)
-        }
-
-
-        $('#TemplateId').val(template.id);
-        $('#TemplateTitle').val(template.title);
-        $('#TemplateDescription').val(template.description);
-        $('#TemplateAssignmentTemplates').val(template.id);
-
-        $('#TemplateContractId').val(template.contractOfRefWorker.id);
-        $('#TemplateContractLabel').val(template.contractOfRefWorker.label);
-        $('#TemplateDepartmentId').val(template.departmentOfRefWorker.id);
-        $('#TemplateDepartmentName').val(template.departmentOfRefWorker.name);
-
-        var assignmentTemplates = template.assignmentTemplates;
-
-        for (var i = 0; i < assignmentTemplates.length; i++) {
-
-            var assignmentTemplate_string = JSON.stringify(assignmentTemplates[i]);
-
-            onAssignmentTemplateSelected(assignmentTemplate_string);
-        }
-    }
-
-    function onAssignmentTemplateSelected(temp_string) {
-
-        var template = JSON.parse(temp_string);
-
-        console.log(template);
-
-        //document.getElementById("assignmentTemplateDropdown").selectedIndex = "0";
-
-        var dueInDict = template.dueIn;
-        var departmentArray = template.forDepartments;
-        var contractArray = template.forContracts;
-        var roleDict = template.assignedRole;
-
-        const assignmentTemplate = {
-            id: template.id,
-            title: template.title,
-            instructions: template.instructions,
-            dueIn: dueInDict,
-            forDepartmentsList: departmentArray,
-            forContractsList: contractArray,
-            assigneeType: template.assigneeType,
-            assignedRole: roleDict
-
-        };
-
-        $.ajax({
-            url: '@Url.Action("AddAssignmentTemplate", "Process")?index=' + window.assignmentTemplateCount++,
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(assignmentTemplate),
-            success: function(result) {
-                let html = JSON.parse(JSON.stringify(result)).html;
-
-                let obj = $('tr[name="templateItem'+ template.id +'"]')
-
-                if (obj.length) {
-                    alert('Die Aufgabe "' + template.title + '" wurde bereits hinzugefügt');
-                } else {
-                    if ($('#templateItem').length) {
-                        console.log("Append");
-                        $('#assignmentTemplates').append(html);
-                    } else {
-                        console.log("Wiped List");
-                        $('#assignmentTemplates').html(html);
-                    }
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("Error applying Assignment Template: " + error);
-            }
         });
     }
 
@@ -501,27 +405,7 @@ List<Department> Departments = ViewData["Departments"] as List<Department>;
         var workerOfRef = JSON.parse(workerOfRef_string);
         $('#WorkerOfRefId').val(workerOfRef.id);
         $('#WorkerOfRefName').val(workerOfRef.fullName)
-        //$('#WorkerOfRefStr').val(workerOfRef.name)
 
-    }
-
-    function removeAssignmentTemplate(obj, assignmentId) {
-        obj.closest('tr').remove();
-        window.assignmentTemplateCount--;
-
-        if (!$('#templateItem').length) {
-            $('#assignmentTemplates').html("<tr><td>Keine Aufgabevorlagen vorhanden</td></tr>");
-        } else {
-
-            var rows = $("#assignmentTemplateTable").find("tbody>tr");
-
-            for (var i = 0; i < rows.length; i++) {
-
-                var pattern = /AssignmentTemplates\[\d+\]/g;
-                let text = rows[i].innerHTML.replace(pattern, 'AssignmentTemplates[' + i + ']');
-                rows[i].innerHTML = text;
-            }
-        }
     }
 
     function removeAssignment(obj, assignmentId) {

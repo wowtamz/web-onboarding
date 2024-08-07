@@ -6,6 +6,7 @@
   //-------------------------
 
   ViewData["Title"] = "Prozesse";
+  Boolean isUserAdmin = (Boolean)ViewData["isUserAdmin"];
 }
 
 <!-- Start: Banner Heading -->
@@ -29,10 +30,13 @@
         erstellten Prozess als Blaupause aus, um einen Vorgang zu kreieren.
       </p>
       <div class="my-3">
-        <a class="btn btn-primary btn-lg me-2" role="button" asp-controller="ProcessTemplate" asp-action="Create"
-          style="background: rgb(204, 212, 217); border-style: none">
-          Prozess erstellen
-        </a>
+        @if (isUserAdmin)
+        {
+          <a class="btn btn-primary btn-lg me-2" role="button" asp-controller="ProcessTemplate" asp-action="Create"
+            style="background: rgb(204, 212, 217); border-style: none">
+            Prozess erstellen
+          </a>
+        }
       </div>
     </div>
   </div>
@@ -51,7 +55,7 @@
       </tr>
     </thead>
     <tbody>
-      @if (Model.ProcessTemplateList.Count == 0)
+      @if (Model.ProcessTemplateList == null || Model.ProcessTemplateList.Count == 0)
       {
         <tr>
           <td colspan="7">Keine Prozesse vorhanden</td>
@@ -63,9 +67,16 @@
         {
           <tr onclick="window.location='/ProcessTemplate/Detail/@processTemplate.Id'" class="hoverTableRow">
             <td>@processTemplate.Title</td>
-            <td>@processTemplate.Description</td>
-            <td>@processTemplate.ContractOfRefWorker.Label</td>
-            <td>@processTemplate.DepartmentOfRefWorker.Name</td>
+            @if (processTemplate.Description != null)
+            {
+              <td>@Html.Raw(processTemplate.Description.Replace("\n", "<br>"))</td>
+            }
+            else
+            {
+              <td></td>
+            }
+            <td>@processTemplate.ContractOfRefWorker?.Label</td>
+            <td>@processTemplate.DepartmentOfRefWorker?.Name</td>
             <td>
               @foreach (var role in processTemplate.RolesWithAccess)
               {
@@ -73,20 +84,12 @@
               }
             </td>
             <td class="d-flex flex-row justify-content-evenly gap-3">
-              <a href="/Process/Start/@processTemplate.Id">
-                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="black" viewBox="0 0 16 16"
-                  class="bi bi-box-arrow-up-left fs-4">
-                  <path fill-rule="evenodd"
-                    d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5">
-                  </path>
-                  <path fill-rule="evenodd"
-                    d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z">
-                  </path>
-                </svg>
-              </a>
               <a href="/ProcessTemplate/Edit/@processTemplate.Id"><i class="far fa-edit"
                   style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
-              <a href="/ProcessTemplate/Delete/@processTemplate.Id" class="btn-close" type="button" aria-label="Close"></a>
+              @if (isUserAdmin)
+              {
+                <a href="/ProcessTemplate/Delete/@processTemplate.Id" class="btn-close" type="button" aria-label="Close"></a>
+              }
             </td>
           </tr>
         }

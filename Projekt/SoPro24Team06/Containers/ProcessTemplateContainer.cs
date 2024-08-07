@@ -30,6 +30,7 @@ public class ProcessTemplateContainer
     /// <exception cref="InvalidOperationException">Thrown when the user or their role is not found.</exception>
     public async Task<List<ProcessTemplate>> GetProcessListByAccessRights(string userName)
     {
+        // --- Start: Get the User and their Roles ---
         var user = _context.Users.Where(u => u.UserName == userName).FirstOrDefault();
 
         if (user == null)
@@ -37,23 +38,44 @@ public class ProcessTemplateContainer
             throw new InvalidOperationException($"No User found with UserName {userName}");
         }
 
-        var userRole = _context.UserRoles.Where(r => r.UserId == user.Id).FirstOrDefault();
-        var role = _context.Roles.Where(r => r.Id == userRole.RoleId).FirstOrDefault();
+        var userRoles = await _context
+            .UserRoles.AsNoTracking()
+            .Where(ur => ur.UserId == user.Id)
+            .Select(x => x.RoleId)
+            .ToListAsync();
 
-        if (role == null)
+        var roles = await _context
+            .Roles.AsNoTracking()
+            .Where(r => userRoles.Contains(r.Id))
+            .Select(x => x.Name)
+            .ToListAsync();
+
+        // --- End: Get the User and their Roles ---
+
+        if (roles.Count == 0)
         {
-            throw new InvalidOperationException($"No Role found for User {userName}");
+            return null;
         }
 
-        if (role.Name == "Administrator")
+        if (roles.Contains("Administrator"))
         {
             return await GetProcessTemplatesAsync();
         }
         else
         {
-            return await GetProcessTemplatesWithIncludes()
-                .Where(pt => pt.RolesWithAccess.Contains(role))
-                .ToListAsync();
+            List<ProcessTemplate> pt = await GetProcessTemplatesWithIncludes().ToListAsync();
+
+            return pt.Aggregate(
+                new List<ProcessTemplate>(),
+                (acc, x) =>
+                {
+                    if (x.RolesWithAccess.Any(y => roles.Contains(y.Name)))
+                    {
+                        acc.Add(x);
+                    }
+                    return acc;
+                }
+            );
         }
     }
 

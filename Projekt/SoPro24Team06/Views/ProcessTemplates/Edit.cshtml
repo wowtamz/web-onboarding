@@ -97,8 +97,8 @@
   <!-- Start: Aufgaben Select -->
   <fieldset style="margin-top: 12px;">
     <legend>Aufgaben</legend>
-    <button asp-action="RedirectAssignmentTemplateCreate" type="submit" class="btn "
-      style="background-color: var(--ash); color: white;">
+    <button aria-label="create-assignment-button" asp-action="RedirectAssignmentTemplateCreate" type="submit"
+      class="btn " style="background-color: var(--ash); color: white;">
       Aufgabe hinzufügen
     </button>
     <div class="table-responsive">
@@ -147,7 +147,7 @@
                   <td>@at.AssigneeType</td>
                   <td>@at.AssignedRole</td>
                   <td>@at.DueIn.Label</td>
-                  <td class="d-flex flex-row justify-content-evenly gap-3">
+                  <td>
                     <a href="/AssignmentTemplate/Edit/@at.Id"><i class="far fa-edit"
                         style="font-size: 20px; color: rgb(0, 0, 0)"></i></a>
                     <button type="button" class="btn-close" type="button" aria-label="Close"
@@ -174,7 +174,8 @@
   </fieldset>
   <!-- Ende: Aufgaben Select -->
   <div style="margin-top: 36px;">
-    <button asp-action="Edit" class="btn" type="submit" style="background-color: var(--lemming); color: white;">
+    <button aria-label="save-process-template-button" asp-action="Edit" class="btn" type="submit"
+      style="background-color: var(--lemming); color: white;">
       Bearbeitung speichern
     </button>
   </div>

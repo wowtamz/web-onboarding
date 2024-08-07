@@ -1,312 +1,329 @@
-//-------------------------
-// Author: Jan Pfluger 
-//-------------------------
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.IO;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
-using SeleniumExtras.WaitHelpers;
+using SoPro24Team06.Controllers;
 using SoPro24Team06.Data;
 using SoPro24Team06.Models;
+using SoPro24Team06.ViewModels;
 using Xunit;
 
-namespace SoPro24Team06.E2E
+namespace SoPro24Team06.E2E;
+
+public class AssignmentUiTestChangeAssignmentStatus
+    : IClassFixture<CustomWebApplicationFactory<Program>>,
+        IDisposable
 {
-    public class AssignmentUiTestChangeAssignmentStatus : IClassFixture<TestFixtures>
+    private readonly string baseurl = "https://localhost:7003/";
+    private readonly IWebDriver _driver;
+    private readonly WebDriverWait _wait;
+    private readonly CustomWebApplicationFactory<Program> _factory;
+    private readonly HttpClient _webClient;
+
+    public AssignmentUiTestChangeAssignmentStatus()
     {
-        private readonly TestFixtures _fixture;
-        private readonly ChromeDriver _driver;
-        private readonly WebDriverWait _wait;
-        private readonly string _errorLocationClass = "AssignmentUiTestChangeAssignmentStatus: ";
-
-        public AssignmentUiTestChangeAssignmentStatus(TestFixtures fixture)
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+        _factory = new CustomWebApplicationFactory<Program>();
+        _webClient = _factory.CreateDefaultClient();
+        using (var scope = _factory.Services.CreateScope())
         {
-            _fixture = fixture;
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArguments("--headless");
-            chromeOptions.AddArguments("--disable-dev-shm-usage");
-            chromeOptions.AddArguments("--no-sandbox");
-            chromeOptions.AddArguments("--window-size=1920,1080");
+            // Resolve the UserManager Role Manager and context from the scope
+            var userManager = scope.ServiceProvider.GetRequiredService<
+                UserManager<ApplicationUser>
+            >();
+            var roleManager = scope.ServiceProvider.GetRequiredService<
+                RoleManager<ApplicationRole>
+            >();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
 
-            var chromeDriverService = ChromeDriverService.CreateDefaultService();
-            _driver = new ChromeDriver(chromeDriverService, chromeOptions);
-
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(60));
+            SetTestData(context, userManager, roleManager).Wait();
         }
 
-        private void WaitForElement(By by, int timeoutInSeconds = 60)
+        Environment.SetEnvironmentVariable("DISPLAY", ":99");
+
+        var options = new ChromeOptions();
+        options.AddArguments(
+            "--no-sandbox",
+            "--headless",
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
+            "--disable-extensions",
+            "--disable-infobars",
+            "--remote-debugging-port=9222",
+            "--window-size=2560,1440",
+            "enable-automation",
+            "--disable-browser-side-navigation",
+            "--ignore-certificate-errors"
+        );
+
+        var service = ChromeDriverService.CreateDefaultService();
+        service.LogPath = "chromedriver.log";
+        service.EnableVerboseLogging = true;
+
+        _driver = new ChromeDriver(service, options);
+        _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(60));
+    }
+
+    public void Dispose()
+    {
+        _driver.Quit();
+        _driver.Dispose();
+        _webClient.Dispose();
+        _factory.Dispose();
+    }
+
+
+    //-------------------------
+    // Author: Vincent Steiner
+    //-------------------------
+    [Fact]
+    public void New_Employee_Change_AssignmentStatus()
+    {
+        _driver.Navigate().GoToUrl("https://localhost:7003/");
+
+        var emailElement = _wait.Until(
+            SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("Input_Email"))
+        );
+        emailElement.SendKeys("user@example.com");
+        var passwordElement = _wait.Until(
+            SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("Input_Password"))
+        );
+        passwordElement.SendKeys("User@123");
+        var loginButton = _wait.Until(
+            SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                By.CssSelector("[aria-label='login-submit']")
+            )
+        );
+        loginButton.Click();
+
+        _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.TitleContains("- SoPro24Team06"));
+
+        _driver
+            .Navigate()
+            .GoToUrl("https://localhost:7003/Assignment/ChangeTable?currentList=AllAssignments");
+
+        try
         {
-            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(timeoutInSeconds));
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(by));
-        }
-
-        public void Login(string email, string password)
-        {
-            _driver.Navigate().GoToUrl("https://localhost:7003/");
-
-            if (_driver.Url.Contains("Identity/Account/Login"))
-            {
-                try
-                {
-                    var emailElement = _wait.Until(
-                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
-                            By.Id("Input_Email")
-                        )
-                    );
-                    emailElement.SendKeys(email);
-
-                    var passwordElement = _wait.Until(
-                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
-                            By.Id("Input_Password")
-                        )
-                    );
-                    passwordElement.SendKeys(password);
-
-                    var loginButton = _wait.Until(
-                        SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
-                            By.CssSelector("button.btn.btn-primary")
-                        )
-                    );
-                    loginButton.Click();
-                }
-                catch (WebDriverTimeoutException ex)
-                {
-                    throw new Exception("Failed to find an element during login.", ex);
-                }
-            }
-        }
-        //-------------------------
-        // Author: Vincent Steiner
-        //-------------------------
-        //[Fact]
-        public void TestAssignmentStatus() // Versuch eines E2E Tests bin aber gescheitert, wie das restliche Team
-        {
-            try
-            {
-
-                _driver.Navigate().GoToUrl("https://localhost:7003/");
-                Login("user@example.com", "User@123");
-                _driver.Navigate().GoToUrl(_fixture.BaseUrl + "Assignment");
-
-                WaitForElement(By.TagName("tbody")); 
-
-                var assignmentList = _driver.FindElement(By.TagName("tbody"));
-                var rows = assignmentList.FindElements(By.TagName("tr"));
-
-                if (rows.Count == 0)
-                {
-                    throw new Exception("No assignments available in the table.");
-                }
-
-                
-                var firstRow = rows[0];
-                var editButton = firstRow.FindElement(By.XPath(".//a[./i[contains(@class, 'fa-edit')]]"));
-                editButton.Click();
-
-                
-                WaitForElement(By.XPath("//h1[text()='Edit Assignment']"));
-
-                
-                var statusDropdown = _wait.Until(d => d.FindElement(By.Id("assignmentStatusDropdown")));
-                var selectElement = new SelectElement(statusDropdown);
-                selectElement.SelectByText("IN_PROGRESS");
-
-                var saveButton = _wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']")));
-                saveButton.Click();
-
-                
-                WaitForElement(By.TagName("tbody")); 
-                var updatedRows = _driver.FindElement(By.TagName("tbody")).FindElements(By.TagName("tr"));
-                var updatedFirstRow = updatedRows[0];
-                var statusCell = updatedFirstRow.FindElement(By.XPath(".//td[position()=5]"));
-
-                var statusText = statusCell.Text;
-                if (statusText != "IN_PROGRESS")
-                {
-                    throw new Exception($"Expected status 'IN_PROGRESS', but found '{statusText}'.");
-                }
-
-                editButton.Click();
-                statusDropdown = _wait.Until(d => d.FindElement(By.Id("assignmentStatusDropdown")));
-                selectElement = new SelectElement(statusDropdown);
-                selectElement.SelectByText("DONE");
-
-                saveButton = _wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']")));
-                saveButton.Click();
-
-                WaitForElement(By.TagName("tbody"));
-                var finalRows = _driver.FindElement(By.TagName("tbody")).FindElements(By.TagName("tr"));
-                var finalFirstRow = finalRows[0];
-                var finalStatusCell = finalFirstRow.FindElement(By.XPath(".//td[position()=5]"));
-
-                var finalStatusText = finalStatusCell.Text;
-                if (finalStatusText != "DONE")
-                {
-                    throw new Exception($"Expected status 'DONE', but found '{finalStatusText}'.");
-                }
-            }
-            catch (WebDriverTimeoutException ex)
-            {
-                throw new Exception("Timeout occurred during the test execution.", ex);
-            }
-            catch (NoSuchElementException ex)
-            {
-                throw new Exception("Element not found during the test execution.", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occurred during the test execution.", ex);
-            }
-        }
-
-        private async Task ClearDbSet<T>()
-            where T : class
-        {
-            var dbSet = _fixture.Context.Set<T>();
-            _fixture.Context.RemoveRange(dbSet);
-            await _fixture.Context.SaveChangesAsync();
-        }
-
-        public async Task SeedDatabase()
-        {
-            await ClearDbSet<Assignment>();
-            await ClearDbSet<Contract>();
-            await ClearDbSet<Department>();
-            await ClearDbSet<DueTime>();
-            await ClearDbSet<Process>();
-
-            string[] roleNames = { "Administrator", "User", "Personal" };
-            foreach (var roleName in roleNames)
-            {
-                ApplicationRole role = new ApplicationRole(roleName);
-                if (!await _fixture.RoleManager.RoleExistsAsync(role.Name))
-                    await _fixture.RoleManager.CreateAsync(role);
-                _fixture.Context.SaveChanges();
-            }
-
-
-            ApplicationUser admin = new ApplicationUser
-            {
-                UserName = "admin@example.com",
-                Email = "admin@example.com",
-                FullName = "Admin User"
-            };
-            if (await _fixture.UserManager.FindByEmailAsync(admin.Email) == null)
-            {
-                await _fixture.UserManager.CreateAsync(admin, "Admin@123");
-                await _fixture.UserManager.AddToRoleAsync(admin, "Administrator");
-            }
-
-            ApplicationUser user = new ApplicationUser
-            {
-                UserName = "user@example.com",
-                Email = "user@example.com",
-                FullName = "User User"
-            };
-            if (await _fixture.UserManager.FindByEmailAsync(user.Email) == null)
-            {
-                await _fixture.UserManager.CreateAsync(user, "User@123");
-                await _fixture.UserManager.AddToRoleAsync(user, "User");
-            }
-
-            ApplicationUser personal = new ApplicationUser
-            {
-                UserName = "personal@example.com",
-                Email = "personal@example.com",
-                FullName = "Personal User"
-            };
-            if (await _fixture.UserManager.FindByEmailAsync(personal.Email) == null)
-            {
-                await _fixture.UserManager.CreateAsync(personal, "Personal@123");
-                await _fixture.UserManager.AddToRoleAsync(personal, "Personal");
-            }
-
-            _fixture.Context.Contracts.Add(new Contract("Test"));
-            _fixture.Context.Departments.Add(new Department("Test"));
-            _fixture.Context.SaveChanges();
-
-            _fixture.Context.DueTimes.AddRange(
-                new DueTime("dueTime1", 1, 2, 3),
-                new DueTime("dueTime2", 3, 1, 2)
+            var assignmentsTable = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("allAssignmentsBody")
+                )
             );
+            var rows = assignmentsTable.FindElements(By.CssSelector("tbody tr"));
 
-            DateTime dueDate = DateTime.Today;
-            List<Assignment> assignments = new()
-            {
-                new Assignment(
-                    new AssignmentTemplate
-                    {
-                        Title = "TestRolePersonal",
-                        Instructions = "Test",
-                        AssigneeType = Enums.AssigneeType.ROLES,
-                        AssignedRole = await _fixture.RoleManager.FindByNameAsync("Personal"),
-                        DueIn = _fixture.Context.DueTimes.Find(1),
-                        ProcessTemplateId = 0
-                    },
-                    dueDate,
-                    personal
-                ),
-                new Assignment(
-                    new AssignmentTemplate
-                    {
-                        Title = "TestUserPersonal",
-                        Instructions = "Test",
-                        AssigneeType = Enums.AssigneeType.SUPERVISOR,
-                        DueIn = _fixture.Context.DueTimes.Find(2),
-                        ProcessTemplateId = 0
-                    },
-                    dueDate,
-                    personal
-                ),
-                new Assignment(
-                    new AssignmentTemplate
-                    {
-                        Title = "TestUserUser",
-                        Instructions = "Test",
-                        AssigneeType = Enums.AssigneeType.WORKER_OF_REF,
-                        DueIn = _fixture.Context.DueTimes.Find(1),
-                        ProcessTemplateId = 0
-                    },
-                    dueDate,
-                    user
-                ),
-                new Assignment(
-                    new AssignmentTemplate
-                    {
-                        Title = "TestUserUser",
-                        Instructions = "Test",
-                        AssigneeType = Enums.AssigneeType.SUPERVISOR,
-                        DueIn = _fixture.Context.DueTimes.Find(1),
-                        ProcessTemplateId = 0
-                    },
-                    dueDate,
-                    personal
-                )
-            };
-            _fixture.Context.Assignments.AddRange(assignments);
-            _fixture.Context.SaveChanges();
+            var editButton = rows[0].FindElement(By.CssSelector("[id^='Edit-']")); // Hier sollte der korrekte Selektor verwendet werden
+            editButton.Click();
 
-            List<Process> processes = new List<Process>
-            {
-                new Process(
-                    "Test",
-                    "Test",
-                    _fixture.Context.Assignments.ToList(),
-                    user,
-                    personal,
-                    _fixture.Context.Contracts.First(),
-                    _fixture.Context.Departments.First()
+            var dropdownElement = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("assignmentStatusDropdown")
                 )
-            };
-            _fixture.Context.Processes.AddRange(processes);
-            _fixture.Context.SaveChanges();
+            );
+            var selectElement = new SelectElement(dropdownElement);
+
+            selectElement.SelectByText("In Bearbeitung");
+
+            var submitButton = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                    By.Id("submitChanges")
+                )
+            );
+            submitButton.Click();
+
+            var statusElement = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("status"))
+            );
+            Assert.Equal("In Bearbeitung", statusElement.Text);
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var assignmentsList = context.Assignments.ToList();
+                var assignment = assignmentsList.FirstOrDefault(at => at.Title == "TestUserUser");
+                Assert.Equal("IN_PROGRESS", assignment.Status.ToString());
+            }
+
+            _driver
+                .Navigate()
+                .GoToUrl(
+                    "https://localhost:7003/Assignment/ChangeTable?currentList=AllAssignments"
+                );
+
+            assignmentsTable = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("allAssignmentsBody")
+                )
+            );
+            rows = assignmentsTable.FindElements(By.CssSelector("tbody tr"));
+
+            editButton = rows[0].FindElement(By.CssSelector("[id^='Edit-']"));
+            editButton.Click();
+
+            dropdownElement = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("assignmentStatusDropdown")
+                )
+            );
+            selectElement = new SelectElement(dropdownElement);
+
+            selectElement.SelectByText("Fertig");
+
+            submitButton = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                    By.Id("submitChanges")
+                )
+            );
+            submitButton.Click();
+
+            statusElement = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("status"))
+            );
+            Assert.Equal("Fertig", statusElement.Text);
+
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var assignmentsList = context.Assignments.ToList();
+                var assignment = assignmentsList.FirstOrDefault(at => at.Title == "TestUserUser");
+                Assert.Equal("DONE", assignment.Status.ToString());
+            }
         }
+        catch (NoSuchElementException ex)
+        {
+            Dispose();
+            throw new Exception("Failed to find an element during test execution.", ex);
+        }
+        finally
+        {
+            Dispose();
+        }
+    }
+
+    public async Task SetTestData(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager
+    )
+    {
+        //clear database to ensure an empty database
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.EnsureCreatedAsync();
+
+        //insert Required Roles:
+        string[] roleNames = { "Administrator", "User", "Personal" };
+        foreach (var roleName in roleNames)
+        {
+            ApplicationRole role = new ApplicationRole(roleName);
+            if (await roleManager.RoleExistsAsync(role.Name) == false)
+                await roleManager.CreateAsync(role);
+            await context.SaveChangesAsync();
+        }
+
+        //insert Required Users
+        ApplicationUser admin = new ApplicationUser
+        {
+            UserName = "admin@example.com",
+            Email = "admin@example.com",
+            FullName = "Admin User"
+        };
+        if (await userManager.FindByEmailAsync(admin.Email) == null)
+        {
+            await userManager.CreateAsync(admin, "Admin@123");
+            await userManager.AddToRoleAsync(admin, "Administrator");
+        }
+
+        ApplicationUser user = new ApplicationUser
+        {
+            UserName = "user@example.com",
+            Email = "user@example.com",
+            FullName = "User User"
+        };
+        if (await userManager.FindByEmailAsync(user.Email) == null)
+        {
+            await userManager.CreateAsync(user, "User@123");
+            await userManager.AddToRoleAsync(user, "User");
+        }
+        ApplicationUser personal = new ApplicationUser
+        {
+            UserName = "personal@example.com",
+            Email = "personal@example.com",
+            FullName = "Personal User"
+        };
+        if (await userManager.FindByEmailAsync(personal.Email) == null)
+        {
+            await userManager.CreateAsync(personal, "Personal@123");
+            await userManager.AddToRoleAsync(personal, "Personal");
+        }
+        //create Deparments and Contracts
+        context.Contracts.Add(new Contract("Test"));
+        context.Departments.Add(new Department("Test"));
+        context.SaveChanges();
+        //create DueTime
+        context.DueTimes.AddRange(
+            new DueTime("dueTime1", 1, 0, 0),
+            new DueTime("dueTime2", 2, 0, 0),
+            new DueTime("dueTime3", -2, 0, 0)
+        );
+        //create Assignments
+        DateTime DueDate = DateTime.Today;
+        List<Assignment> assignmens =
+            new()
+            {
+                new AssignmentTemplate
+                {
+                    Title = "TestRolePersonal",
+                    Instructions = "Test",
+                    AssigneeType = Enums.AssigneeType.ROLES,
+                    AssignedRole = await roleManager.FindByNameAsync("Personal"),
+                    DueIn = context.DueTimes.Find(1),
+                    ProcessTemplateId = 0
+                }.ToAssignment(personal, DateTime.Today),
+                new AssignmentTemplate
+                {
+                    Title = "TestUserPersonal",
+                    Instructions = "Test",
+                    AssigneeType = Enums.AssigneeType.SUPERVISOR,
+                    DueIn = context.DueTimes.Find(2),
+                    ProcessTemplateId = 0
+                }.ToAssignment(personal, DateTime.Today),
+                new AssignmentTemplate
+                {
+                    Title = "TestUserUser",
+                    Instructions = "Test",
+                    AssigneeType = Enums.AssigneeType.WORKER_OF_REF,
+                    DueIn = context.DueTimes.Find(1),
+                    ProcessTemplateId = 0
+                }.ToAssignment(user, DateTime.Today),
+                new AssignmentTemplate
+                {
+                    Title = "TestUserUserOverDue",
+                    Instructions = "Test",
+                    AssigneeType = Enums.AssigneeType.WORKER_OF_REF,
+                    DueIn = context.DueTimes.Find(3),
+                    ProcessTemplateId = 0
+                }.ToAssignment(user, DateTime.Today)
+            };
+        await context.Assignments.AddRangeAsync(assignmens);
+        await context.SaveChangesAsync();
+
+        List<Process> processes = new List<Process>
+        {
+            new Process(
+                "Test",
+                "Test",
+                context.Assignments.ToList(),
+                user,
+                personal,
+                context.Contracts.First(),
+                context.Departments.First()
+            )
+        };
+        await context.Processes.AddRangeAsync(processes);
+        await context.SaveChangesAsync();
     }
 }

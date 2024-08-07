@@ -1,33 +1,73 @@
-using SoPro24Team06.Controllers;
-using SoPro24Team06.Models;
-using SoPro24Team06.ViewModels;
+//-------------------------
+// Author: Tamas Varadi
+//-------------------------
+
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using SoPro24Team06.Controllers;
+using SoPro24Team06.Data;
+using SoPro24Team06.Enums;
+using SoPro24Team06.Models;
+using SoPro24Team06.ViewModels;
 using Xunit;
 
 namespace SoPro24Team06.E2E;
 
-public class ProcessUiTest : IDisposable
+[Collection("Sequential")]
+public class ProcessUiTest :
+    IClassFixture<CustomWebApplicationFactory<Program>>,
+    IDisposable
 {
     private readonly string baseurl = "https://localhost:7003/";
     private readonly IWebDriver _driver;
     private readonly WebDriverWait _wait;
+    private readonly CustomWebApplicationFactory<Program> _factory;
+    private readonly HttpClient _webClient;
+
 
     public ProcessUiTest()
     {
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+        _factory = new CustomWebApplicationFactory<Program>();
+        _webClient = _factory.CreateDefaultClient();
+        using (var scope = _factory.Services.CreateScope())
+        {
+            // Resolve the UserManager Role Manager and context from the scope
+            var userManager = scope.ServiceProvider.GetRequiredService<
+                UserManager<ApplicationUser>
+            >();
+            var roleManager = scope.ServiceProvider.GetRequiredService<
+                RoleManager<ApplicationRole>
+            >();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
+
+            SetTestData(context, userManager, roleManager).Wait();
+        }
+
         Environment.SetEnvironmentVariable("DISPLAY", ":99");
 
         var options = new ChromeOptions();
-        options.AddArguments("--no-sandbox");
-        options.AddArguments("--headless");
-        options.AddArguments("--disable-gpu");
-        options.AddArguments("--disable-dev-shm-usage");
-        options.AddArguments("--disable-extensions");
-        options.AddArguments("--disable-infobars");
-        options.AddArguments("--remote-debugging-port=9222");
+        options.AddArguments(
+            "--no-sandbox",
+            "--headless",
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
+            "--disable-extensions",
+            "--disable-infobars",
+            "--remote-debugging-port=9222",
+            "--window-size=2560,1440",
+            "enable-automation",
+            "--disable-browser-side-navigation",
+            "--ignore-certificate-errors"
+        );
 
         var service = ChromeDriverService.CreateDefaultService();
         service.LogPath = "chromedriver.log";
@@ -36,356 +76,340 @@ public class ProcessUiTest : IDisposable
         _driver = new ChromeDriver(service, options);
         _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(60));
     }
-    public void Dispose() 
+
+    public void Dispose()
     {
-        _driver.Quit(); 
-        _driver.Dispose(); 
+        _driver.Quit();
+        _driver.Dispose();
+        _webClient.Dispose();
+        _factory.Dispose();
     }
-    
-    [Fact] 
-    public void StartProcessFromProcessTemplate()
+
+    public void Login()
     {
-        _driver.Navigate().GoToUrl(baseurl);
-        
-        // Login
-        if (_driver.Url.Contains("Identity/Account/Login"))
+        _driver.Navigate().GoToUrl("https://localhost:7003/");
+
+        try
         {
-            try
-            {
-                var emailElement = _wait.Until(
-                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
-                        By.Id("Input_Email")
-                    )
-                );
-                emailElement.SendKeys("user@example.com");
-
-                var passwordElement = _wait.Until(
-                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
-                        By.Id("Input_Password")
-                    )
-                );
-                passwordElement.SendKeys("User@123");
-
-                var loginButton = _wait.Until(
-                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
-                        By.CssSelector("[aria-label='login-submit']")
-                    )
-                );
-                loginButton.Click();
-            }
-            catch (WebDriverTimeoutException exception)
-            {
-                throw new Exception(
-                    "WedDriver timedout during loginAttempt" + exception.Message
-                );
-            }
+            var emailElement = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("Input_Email"))
+            );
+            emailElement.SendKeys("personal@example.com");
+            var passwordElement = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id("Input_Password")
+                )
+            );
+            passwordElement.SendKeys("Personal@123");
+            var loginButton = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
+                    By.CssSelector("[aria-label='login-submit']")
+                )
+            );
+            loginButton.Click();
         }
-        
-        // Go to ProcessTemplates
-        _driver.Navigate().GoToUrl(baseurl+"ProcessTemplate/");
-        if (_driver.Title.Contains("Prozesse"))
+        catch (WebDriverTimeoutException ex)
         {
-            try
-            {
-                IWebElement linkElement = _wait.Until(driver =>
-                {
-                    return driver.FindElement(By.XPath("//a[contains(@href, '/Process/Start/')]"));
-                });
-                
-                linkElement.Click();
-                
-            }
-            catch (WebDriverTimeoutException exception)
-            {
-                throw new Exception(
-                    "WedDriver timedout during ProcessTemplate View" + exception.Message
-                );
-            }
+            throw new Exception("Failed to find an element during login.", ex);
         }
-
-        string processTitle = "";
-        
-        // Check if at Process Start
-        if (_driver.Title.Contains("Vorgang starten"))
-        {
-            try
-            {
-                IWebElement inputTitle = _wait.Until(driver =>
-                {
-                    IWebElement element = driver.FindElement(By.Id("Title"));
-
-                    return element.Displayed ? element : null;
-                });
-
-                if (inputTitle != null)
-                {
-                    processTitle = inputTitle.GetAttribute("value");
-                }
-                
-                // Select WorkerOfReference
-                IWebElement dropdownWorkerOfRef = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("workerOfRefDropdown")));
-                SelectElement selectWorkerOfRef = new SelectElement(dropdownWorkerOfRef);
-                selectWorkerOfRef.SelectByIndex(1);
-                
-                // Select ContractOfRefWorker
-                IWebElement dropdownContract = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("contractDropdown")));
-                SelectElement selectContract = new SelectElement(dropdownContract);
-                selectContract.SelectByIndex(1);
-                
-                // Select DepartmentOfRefWorker
-                IWebElement dropdownDepartment = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("departmentDropdown")));
-                SelectElement selectDepartment = new SelectElement(dropdownDepartment);
-                selectDepartment.SelectByIndex(1);
-                
-                // Click Start Button
-                IWebElement startButton = _wait.Until(driver =>
-                {
-                    var buttons = driver.FindElements(By.TagName("button"));
-                    IWebElement button = buttons.FirstOrDefault(b => b.Text.Equals("Starten", StringComparison.OrdinalIgnoreCase));
-                
-                    return button;
-                });
-                
-                startButton.Click();
-                
-            }
-            catch (NoSuchElementException)
-            {
-                Console.WriteLine("Element not found.");
-            }
-            catch (WebDriverTimeoutException exception)
-            {
-                throw new Exception(
-                    "WedDriver timedout during Process Start View" + exception.Message
-                );
-            }
-        }
-        
-        _driver.Navigate().GoToUrl(baseurl+"Process");
-        if (_driver.Title.Contains("Vorgänge"))
-        {
-
-            try
-            {
-                IWebElement tdElement = _wait.Until(driver =>
-                {
-                    IWebElement element = driver.FindElement(By.XPath($"//td[text()='{processTitle}']"));
-                    return element.Displayed ? element : null;
-                });
-                
-                Assert.NotNull(tdElement);
-            }
-            catch (NoSuchElementException)
-            {
-                Console.WriteLine("Element not found.");
-            }
-            catch (WebDriverTimeoutException exception)
-            {
-                throw new Exception(
-                    "WedDriver timedout during Process View" + exception.Message
-                );
-            }
-        }
-        
-        
     }
     
     [Fact]
-    public void StartProcessFromTemplateAddCustomAssignment()
+    public void StartProcessFromProcessTemplateTest()
     {
-        _driver.Navigate().GoToUrl(baseurl);
+
+        Login();
+
+        _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.TitleContains("- SoPro24Team06"));
+
+        IWebElement processLinkElement = FindWebElementByTagAndValue("a", "Vorgänge");
+        processLinkElement.Click();
         
-        // Login
-        if (_driver.Url.Contains("Identity/Account/Login"))
-        {
-            try
-            {
-                var emailElement = _wait.Until(
-                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
-                        By.Id("Input_Email")
-                    )
-                );
-                emailElement.SendKeys("user@example.com");
-
-                var passwordElement = _wait.Until(
-                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
-                        By.Id("Input_Password")
-                    )
-                );
-                passwordElement.SendKeys("User@123");
-
-                var loginButton = _wait.Until(
-                    SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(
-                        By.CssSelector("[aria-label='login-submit']")
-                    )
-                );
-                loginButton.Click();
-            }
-            catch (WebDriverTimeoutException exception)
-            {
-                throw new Exception(
-                    "WedDriver timedout during loginAttempt" + exception.Message
-                );
-            }
-        }
+        AssertUrlContains("Process");
+        AssertTitleContains("Vorgänge");
         
-        // Go to ProcessTemplates
-        _driver.Navigate().GoToUrl(baseurl+"ProcessTemplate/");
-        if (_driver.Title.Contains("Prozesse"))
-        {
-            try
-            {
-                IWebElement linkElement = _wait.Until(driver =>
-                {
-                    return driver.FindElement(By.XPath("//a[contains(@href, '/Process/Start/')]"));
-                });
-                
-                linkElement.Click();
-                
-            }
-            catch (WebDriverTimeoutException exception)
-            {
-                throw new Exception(
-                    "WedDriver timedout during ProcessTemplate View" + exception.Message
-                );
-            }
-        }
-
-        string processTitle = "";
+        IWebElement linkElement = FindWebElementByXPath("//a[contains(@href, '/Process/Start')]");
+        linkElement.Click();
         
-        // Check if at Process Start
-        if (_driver.Title.Contains("Vorgang starten"))
+        AssertUrlContains("Process/Start");
+        AssertTitleContains("Vorgang starten");
+
+        IWebElement dropdownTemplate = FindWebElementById("processTemplateDropdown");
+        SelectElement selectTemplate = new SelectElement(dropdownTemplate);
+        selectTemplate.SelectByIndex(1);
+
+        string processTitle = "Test process title";
+        IWebElement inputTitle = FindWebElementById("Title");
+        inputTitle.Clear();
+        inputTitle.SendKeys(processTitle);
+
+        IWebElement dropdownWorkerOfRef = FindWebElementById("workerOfRefDropdown");
+        SelectElement selectWorkerOfRef = new SelectElement(dropdownWorkerOfRef);
+        selectWorkerOfRef.SelectByIndex(1);
+        
+        IWebElement dropdownContract = FindWebElementById("contractDropdown");
+        SelectElement selectContract = new SelectElement(dropdownContract);
+        selectContract.SelectByIndex(1);
+
+        
+        IWebElement dropdownDepartment = FindWebElementById("departmentDropdown");
+        SelectElement selectDepartment = new SelectElement(dropdownDepartment);
+        selectDepartment.SelectByIndex(1);
+
+        IWebElement startButton = FindWebElementByTagAndValue("button", "Starten");
+        startButton.Click();
+        
+        AssertTitleContains("Vorgänge");
+        
+        IWebElement tdElement = FindWebElementByXPath($"//td[text()='{processTitle}']");
+        Assert.NotNull(tdElement);
+    }
+
+    public void AssertUrlContains(string url)
+    {
+        if (!_driver.Url.Contains(url))
         {
-            try
-            {
-                
-                IWebElement inputTitle = _wait.Until(driver =>
-                {
-                    IWebElement element = driver.FindElement(By.Id("Title"));
-
-                    return element.Displayed ? element : null;
-                });
-                
-                if (inputTitle != null)
-                {
-                    processTitle = inputTitle.GetAttribute("value");
-                }
-                
-                // Select WorkerOfReference
-                IWebElement dropdownWorkerOfRef = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("workerOfRefDropdown")));
-                SelectElement selectWorkerOfRef = new SelectElement(dropdownWorkerOfRef);
-                selectWorkerOfRef.SelectByIndex(1);
-                
-                // Select ContractOfRefWorker
-                IWebElement dropdownContract = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("contractDropdown")));
-                SelectElement selectContract = new SelectElement(dropdownContract);
-                selectContract.SelectByIndex(1);
-                
-                // Select DepartmentOfRefWorker
-                IWebElement dropdownDepartment = _wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("departmentDropdown")));
-                SelectElement selectDepartment = new SelectElement(dropdownDepartment);
-                selectDepartment.SelectByIndex(1);
-                
-                // Add new Assignment
-                IWebElement addAssignmentButton = _wait.Until(driver =>
-                {
-                    var buttons = driver.FindElements(By.TagName("button"));
-                    IWebElement button = buttons.FirstOrDefault(b => b.Text.Equals("Aufgabe hinzufügen", StringComparison.OrdinalIgnoreCase));
-                
-                    return button;
-                });
-
-                if (_driver.Url.Contains("AssignmentTemplate/Create"))
-                {
-                    try
-                    {
-                        inputTitle = _wait.Until(driver =>
-                        {
-                            IWebElement element = driver.FindElement(By.Id("Title"));
-
-                            return element.Displayed ? element : null;
-                        });
-                        
-                        if (inputTitle != null)
-                        {
-                            inputTitle.Clear();
-                            inputTitle.SendKeys("Task 1");
-                        }
-                        else
-                        {
-                            _driver.Navigate().GoToUrl(baseurl+"/Process/Start");
-                        }
-                        
-                        IWebElement createButton = _wait.Until(driver =>
-                        {
-                            var buttons = driver.FindElements(By.TagName("button"));
-                            IWebElement button = buttons.FirstOrDefault(b => b.Text.Equals("Erstellen", StringComparison.OrdinalIgnoreCase));
-                
-                            return button;
-                        });
-                        
-                        createButton.Click();
-                    }
-                    catch (NoSuchElementException)
-                    {
-                        Console.WriteLine("Element not found.");
-                    }
-                    catch (WebDriverTimeoutException exception)
-                    {
-                        throw new Exception(
-                            "WedDriver timedout during ProcessTemplate View" + exception.Message
-                        );
-                    }
-                }
-                
-                
-                // Click Start Button
-                IWebElement startButton = _wait.Until(driver =>
-                {
-                    var buttons = driver.FindElements(By.TagName("button"));
-                    IWebElement button = buttons.FirstOrDefault(b => b.Text.Equals("Starten", StringComparison.OrdinalIgnoreCase));
-                
-                    return button;
-                });
-                
-                startButton.Click();
-                
-            }
-            catch (NoSuchElementException)
-            {
-                Console.WriteLine("Element not found.");
-            }
-            catch (WebDriverTimeoutException exception)
-            {
-                throw new Exception(
-                    "WedDriver timedout during ProcessTemplate View" + exception.Message
-                );
-            }
-            
-            _driver.Navigate().GoToUrl(baseurl+"Process");
-            if (_driver.Title.Contains("Vorgänge"))
-            {
-                try
-                {
-                    IWebElement tdElement = _wait.Until(driver =>
-                    {
-                        IWebElement element = driver.FindElement(By.XPath($"//td[text()='{processTitle}']"));
-                        return element.Displayed ? element : null;
-                    });
-                
-                    Assert.NotNull(tdElement);
-                }
-                catch (NoSuchElementException)
-                {
-                    Console.WriteLine("Element not found.");
-                }
-                catch (WebDriverTimeoutException exception)
-                {
-                    throw new Exception(
-                        "WedDriver timedout during Process View" + exception.Message
-                    );
-                }
-            }
+            throw new Exception($"Page url does not contain: {url}");
         }
     }
+
+    public void AssertTitleContains(string title)
+    {
+        if (!_driver.Title.Contains(title))
+        {
+            throw new Exception($"Page title does not contain: {title}");
+        }
+    }
+
+    public IWebElement FindWebElementById(string id)
+    {
+        IWebElement webElement = null;
+        try
+        {
+             webElement = _wait.Until(
+                SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(
+                    By.Id(id)
+                )
+            );
+        }
+        catch (NoSuchElementException)
+        {
+            throw new Exception($"No element was found with id: {id}");
+        }
+        catch (WebDriverTimeoutException exception)
+        {
+            throw new Exception($"WedDriver timedout during wait for element with id {id}: " + exception.Message);
+        }
+        
+        return webElement;
+    }
+
+    public IWebElement FindWebElementByTagAndValue(string tag, string value)
+    {
+        IWebElement webElement = null;
+        try
+        {
+            webElement = _wait.Until(driver =>
+            {
+                var buttons = driver.FindElements(By.TagName(tag));
+                IWebElement button = buttons.FirstOrDefault(b =>
+                    b.Text.Equals(value, StringComparison.OrdinalIgnoreCase)
+                );
+
+                return button;
+            });
+        }
+        catch (NoSuchElementException)
+        {
+            throw new Exception($"No element was found with tag ({tag}) and value ({value})");
+        }
+        catch (WebDriverTimeoutException exception)
+        {
+            throw new Exception($"WedDriver timedout during wait for element tag ({tag}) and value ({value}): " + exception.Message);
+        }
+
+        return webElement;
+    }
+
+    public IWebElement FindWebElementByXPath(string expression)
+    {
+        IWebElement webElement = null;
+        try
+        {
+            webElement = _wait.Until(driver =>
+            {
+                IWebElement element = driver.FindElement(By.XPath(expression));
+                return element.Displayed ? element : null;
+            });
+        }
+        catch (NoSuchElementException)
+        {
+            throw new Exception($"No element was found with xpath: {expression})");
+        }
+        catch (WebDriverTimeoutException exception)
+        {
+            throw new Exception($"WedDriver timedout during wait for element with xpath ({expression}): " + exception.Message);
+        }
+
+        return webElement;
+    }
+    
+    public async Task SetTestData(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager
+    )
+    {
+        //clear database to ensure an empty database
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.EnsureCreatedAsync();
+
+        //insert Required Roles:
+        string[] roleNames = { "Administrator", "User", "Personal" };
+        foreach (var roleName in roleNames)
+        {
+            ApplicationRole role = new ApplicationRole(roleName);
+            if (await roleManager.RoleExistsAsync(role.Name) == false)
+                await roleManager.CreateAsync(role);
+            await context.SaveChangesAsync();
+        }
+
+        //insert Required Users
+        ApplicationUser admin = new ApplicationUser
+        {
+            UserName = "admin@example.com",
+            Email = "admin@example.com",
+            FullName = "Admin User"
+        };
+        if (await userManager.FindByEmailAsync(admin.Email) == null)
+        {
+            await userManager.CreateAsync(admin, "Admin@123");
+            await userManager.AddToRoleAsync(admin, "Administrator");
+        }
+
+        ApplicationUser user = new ApplicationUser
+        {
+            UserName = "user@example.com",
+            Email = "user@example.com",
+            FullName = "User User"
+        };
+        if (await userManager.FindByEmailAsync(user.Email) == null)
+        {
+            await userManager.CreateAsync(user, "User@123");
+            await userManager.AddToRoleAsync(user, "User");
+        }
+        ApplicationUser personal = new ApplicationUser
+        {
+            UserName = "personal@example.com",
+            Email = "personal@example.com",
+            FullName = "Personal User"
+        };
+        if (await userManager.FindByEmailAsync(personal.Email) == null)
+        {
+            await userManager.CreateAsync(personal, "Personal@123");
+            await userManager.AddToRoleAsync(personal, "Personal");
+        }
+        //create Deparments and Contracts
+        context.Contracts.Add(new Contract("Test"));
+        context.Departments.Add(new Department("Test"));
+        context.SaveChanges();
+       
+        //create DueTime
+        context.DueTimes.Add(new DueTime("ASAP", 1, 0, 0));
+        context.DueTimes.Add(new DueTime("2 Wochen vor Start", 0, -2, 0));
+        context.DueTimes.Add(new DueTime("3 Wochen nach Arbeitsbeginn", 0, 3, 0));
+        context.SaveChanges();
+        
+        //create Assignments
+        DateTime DueDate = DateTime.Today;
+        List<Assignment> assignmens =
+            new()
+            {
+                new AssignmentTemplate
+                {
+                    Title = "TestRolePersonal",
+                    Instructions = "Test",
+                    AssigneeType = Enums.AssigneeType.ROLES,
+                    AssignedRole = await roleManager.FindByNameAsync("Personal"),
+                    DueIn = context.DueTimes.Find(1),
+                    ProcessTemplateId = 0
+                }.ToAssignment(personal, DateTime.Today),
+                new AssignmentTemplate
+                {
+                    Title = "TestUserPersonal",
+                    Instructions = "Test",
+                    AssigneeType = Enums.AssigneeType.SUPERVISOR,
+                    DueIn = context.DueTimes.Find(2),
+                    ProcessTemplateId = 0
+                }.ToAssignment(personal, DateTime.Today),
+                new AssignmentTemplate
+                {
+                    Title = "TestUserUser",
+                    Instructions = "Test",
+                    AssigneeType = Enums.AssigneeType.WORKER_OF_REF,
+                    DueIn = context.DueTimes.Find(1),
+                    ProcessTemplateId = 0
+                }.ToAssignment(user, DateTime.Today),
+                new AssignmentTemplate
+                {
+                    Title = "TestUserUserOverDue",
+                    Instructions = "Test",
+                    AssigneeType = Enums.AssigneeType.WORKER_OF_REF,
+                    DueIn = context.DueTimes.Find(3),
+                    ProcessTemplateId = 0
+                }.ToAssignment(user, DateTime.Today)
+            };
+        await context.Assignments.AddRangeAsync(assignmens);
+        await context.SaveChangesAsync();
+
+        List<AssignmentTemplate> assignmentTemplates =
+            new()
+            {
+                new AssignmentTemplate
+                {
+                    AssignedRole = context.Roles.First(),
+                    AssigneeType = AssigneeType.ROLES,
+                    DueIn = context.DueTimes.FirstOrDefault(),
+                    ForContractsList = new List<Contract> { context.Contracts.First() },
+                    ForDepartmentsList = new List<Department> { context.Departments.First() },
+                    Instructions = "Instructions",
+                    Title = "assignment template"
+                }
+            };
+
+        await context.AssignmentTemplates.AddRangeAsync(assignmentTemplates);
+        await context.SaveChangesAsync();
+
+        List<ProcessTemplate> processTemplates = new List<ProcessTemplate>
+        {
+            new ProcessTemplate
+            {
+                AssignmentTemplates = new List<AssignmentTemplate> { context.AssignmentTemplates.First() },
+                ContractOfRefWorker = context.Contracts.First(),
+                DepartmentOfRefWorker = context.Departments.First(),
+                Description = "Description",
+                RolesWithAccess = context.Roles.Where(r => r.Name == "Personal").ToList(),
+                Title = "Prozess Title"
+            }
+        };
+
+        await context.ProcessTemplates.AddRangeAsync(processTemplates);
+        await context.SaveChangesAsync();
+
+        List<Process> processes = new List<Process>
+        {
+            new Process(
+                "Test",
+                "Test",
+                context.Assignments.ToList(),
+                user,
+                personal,
+                context.Contracts.First(),
+                context.Departments.First()
+            )
+        };
+        await context.Processes.AddRangeAsync(processes);
+        await context.SaveChangesAsync();
+    }
+
 }

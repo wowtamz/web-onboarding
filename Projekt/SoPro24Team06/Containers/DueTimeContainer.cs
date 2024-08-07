@@ -19,13 +19,13 @@ public class DueTimeContainer : IDueTime
         _context = context;
     }
 
-    public void AddDueTime(DueTime dueIn)
+    public async Task AddDueTime(DueTime dueIn)
     {
         _context.DueTimes.Add(dueIn);
         _context.SaveChanges();
     }
 
-    public DueTime GetDueTime(string label)
+    public async Task<DueTime> GetDueTime(string label)
     {
         if (_context.DueTimes != null)
         {
@@ -38,7 +38,7 @@ public class DueTimeContainer : IDueTime
         return null;
     }
 
-    public void DeleteDueTime(int id)
+    public async Task DeleteDueTime(int id)
     {
         if (_context.DueTimes != null)
         {
@@ -51,7 +51,7 @@ public class DueTimeContainer : IDueTime
         }
     }
 
-    public List<DueTime> GetAllDueTimes()
+    public async Task<List<DueTime>> GetAllDueTimes()
     {
         List<DueTime> dueTimeList = new List<DueTime>();
         if (_context.DueTimes != null)

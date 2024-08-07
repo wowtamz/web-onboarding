@@ -1,12 +1,12 @@
 @model SoPro24Team06.ViewModels.CreateEditAssignmentTemplateViewModel
 @using SoPro24Team06.Enums
 @using SoPro24Team06.Models
+@using SoPro24Team06.Helpers
 @using Microsoft.AspNetCore.Identity
 
+<!-- Author: Vincent Steiner -->
+
 @{
-    //-------------------------
-    // Author: Vincent Steiner
-    //-------------------------
     List<ApplicationRole> roleList = ViewData["roles"] as List<ApplicationRole> ?? new List<ApplicationRole>();
     List<Department> departmentList = ViewData["departments"] as List<Department> ?? new List<Department>();
     List<DueTime> dueInList = ViewData["dueIns"] as List<DueTime> ?? new List<DueTime>();
@@ -20,21 +20,29 @@
     {
 
         <body>
-            <form asp-controller="AssignmentTemplate" asp-action="Create" method="post">
-                <input hidden asp-for="processId" value="@Model.processId" />
-                <fieldset>
-                    <legend>Titel</legend>
-                    <input class="form-control" type="text" asp-for="Title">
-                    <span asp-validation-for="Title" class="text-danger"></span>
-                </fieldset>
-                <fieldset style="margin-top: 8px;">
-                    <legend>Anweisungen</legend>
-                    <textarea class="form-control" placeholder="Schritt 1... " asp-for="Instructions"></textarea>
-                </fieldset>
-                <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
-                <div>
-                    <select asp-for="AssigneeType" class="form-select" id="assigneeType"
-                        asp-items="Html.GetEnumSelectList<AssigneeType>()"></select>
+    <form asp-controller="AssignmentTemplate" asp-action="Create" method="post">
+        <input hidden asp-for="processId" value="@Model.processId" />
+        <fieldset>
+            <legend>Titel</legend>
+            <input class="form-control" type="text" asp-for="Title">
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend>Anweisungen</legend>
+            <textarea class="form-control" placeholder="Schritt 1... " asp-for="Instructions"></textarea>
+        </fieldset>
+        <legend style="margin-top: 4px;">Aufgabenzuständiger</legend>
+        <div>
+            <select class="form-select valid" id="assigneeType" data-val="true"
+                data-val-required="Ein Aufgabenverantwortlicher ist erforderlich" name="AssigneeType"
+                aria-describedby="assigneeType-error" aria-invalid="false">
+                @foreach (AssigneeType x in Enum.GetValues(typeof(AssigneeType)).Cast<AssigneeType>().Where(t => t !=
+                       AssigneeType.USER))
+                        {
+                            int i = (int)x;
+                            <option value="@i">@EnumHelper.GetDisplayName(x)</option>
+                        }
+                    </select>
                 </div>
                 <div id="roleSelect" style="margin-top: 8px;">
                     <select asp-for="AssignedRole" class="form-select">
@@ -106,7 +114,8 @@
                         <span asp-validation-for="ForDepartmentsList" class="text-danger"></span>
                     </div>
                 </fieldset>
-                <button class="btn btn-dark" type="submit" style="margin-top: 12px;">Erstellen</button>
+                <button aria-label="save-assignment-button" class="btn btn-dark" type="submit"
+                    style="margin-top: 12px;">Erstellen</button>
             </form>
 
             @section Scripts {

@@ -144,7 +144,10 @@ namespace SoPro24Team06.Controllers
                     _logger.LogInformation("EditAssignment AssigneeType Error");
                 }
                 //checks if Status is set
-                if (model.Assignment.Status == null)
+                if (
+                    model.Assignment.Status == null
+                    && Enum.IsDefined<AssignmentStatus>(model.Assignment.Status)
+                )
                 {
                     ModelState.AddModelError(
                         "Assignment.Status",
@@ -166,16 +169,6 @@ namespace SoPro24Team06.Controllers
             // if Model State is InValid, reinitialize all properties of model where necessary and return to view
             if (!ModelState.IsValid)
             {
-                // foreach (var modelStateEntry in ModelState.Values)
-                // {
-                //     foreach (var error in modelStateEntry.Errors)
-                //     {
-                //         var errorMessage = error.ErrorMessage;
-                //         var exception = error.Exception;
-                //     }
-                // }
-                // return BadRequest(ModelState);
-
                 //checks if Model Stat is Invalid because of missing assignment, if yes show NotFoundError
                 if (model.Assignment == null)
                     return NotFound("Error: Assignment not found");
@@ -185,12 +178,13 @@ namespace SoPro24Team06.Controllers
                     p.Assignments.Contains(model.Assignment)
                 );
                 //get List of all Users which are not locked
-                List<ApplicationUser> userList = _userManager.Users.ToList();
+                List<ApplicationUser> userList = new List<ApplicationUser>();
+                List<ApplicationUser> tempUserList = _userManager.Users.ToList();
 
-                foreach (ApplicationUser u in userList)
+                foreach (ApplicationUser u in tempUserList)
                 {
-                    if (await _userManager.IsLockedOutAsync(u))
-                        userList.Remove(u);
+                    if (!await _userManager.IsLockedOutAsync(u))
+                        userList.Add(u);
                 }
                 //get List of all Roles
                 List<ApplicationRole> roleList = _roleManager.Roles.ToList();
@@ -219,17 +213,15 @@ namespace SoPro24Team06.Controllers
             if (assignment.AssigneeType == AssigneeType.ROLES)
             {
                 assignment.AssignedRole = selectedRole;
-                _context.Assignments.Update(assignment);
-                _context.Entry(assignment).Reference(a => a.Assignee).CurrentValue = null;
+                assignment.Assignee = null;
             }
             if (assignment.AssigneeType == AssigneeType.USER)
             {
                 assignment.Assignee = selectedUser;
-                _context.Assignments.Update(assignment);
-                _context.Entry(assignment).Reference(a => a.AssignedRole).CurrentValue = null;
+                assignment.AssignedRole = null;
             }
+            await _assignmentContainer.SaveEditedAssignment(assignment);
             //save changes in database
-            await _context.SaveChangesAsync();
 
             //Author: Tamas Varadi
             // Begin
@@ -311,7 +303,10 @@ namespace SoPro24Team06.Controllers
                     );
                 }
                 //checks if Assignment Status is set
-                if (model.Assignment.Status == null)
+                if (
+                    model.Assignment.Status == null
+                    && Enum.IsDefined<AssignmentStatus>(model.Assignment.Status)
+                )
                 {
                     ModelState.AddModelError(
                         "Assignment.Status",
@@ -331,12 +326,13 @@ namespace SoPro24Team06.Controllers
                     p.Assignments.Contains(model.Assignment)
                 );
                 //get List of all Users which are not LockedOut
-                List<ApplicationUser> userList = _userManager.Users.ToList();
+                List<ApplicationUser> userList = new List<ApplicationUser>();
+                List<ApplicationUser> tempUserList = _userManager.Users.ToList();
 
-                foreach (ApplicationUser u in userList)
+                foreach (ApplicationUser u in tempUserList)
                 {
-                    if (await _userManager.IsLockedOutAsync(u))
-                        userList.Remove(u);
+                    if (!await _userManager.IsLockedOutAsync(u))
+                        userList.Add(u);
                 }
                 //get list of all Roles
                 List<ApplicationRole> roleList = _roleManager.Roles.ToList();
@@ -346,9 +342,7 @@ namespace SoPro24Team06.Controllers
                 return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
             }
             //check if Assignment can be found in database if not return not found
-            Assignment? assignment = await _context.Assignments.FirstOrDefaultAsync(a =>
-                a.Id == model.Assignment.Id
-            );
+            Assignment? assignment = _assignmentContainer.GetAssignmentById(model.Assignment.Id);
             if (assignment == null)
             {
                 return NotFound();
@@ -362,26 +356,22 @@ namespace SoPro24Team06.Controllers
             //set changes for AssingeeType, AssignedRole and Assignee
             if (assignment.AssigneeType == AssigneeType.ROLES)
             {
-                _logger.LogInformation("AssingeeType == ROLES" + assignment.AssigneeType);
                 assignment.AssignedRole = selectedRole;
-                _context.Assignments.Update(assignment);
-                _context.Entry(assignment).Reference(a => a.Assignee).CurrentValue = null;
+                assignment.Assignee = null;
             }
             if (assignment.AssigneeType == AssigneeType.USER)
             {
                 assignment.Assignee = selectedUser;
-                _context.Assignments.Update(assignment);
-                _context.Entry(assignment).Reference(a => a.AssignedRole).CurrentValue = null;
+                assignment.AssignedRole = null;
             }
             //save changes to database
-            await _context.SaveChangesAsync();
+            await _assignmentContainer.SaveEditedAssignment(assignment);
             //return to Index
             return RedirectToAction("Index");
         }
 
         //Author: Tamas Varadi
         // Begin
-
 
         public IActionResult OnEditCanceled()
         {
@@ -437,12 +427,21 @@ namespace SoPro24Team06.Controllers
                 }
 
                 Process process = await _processContainer.GetProcessByIdAsync(processId);
-
-                List<ApplicationUser> userList = _userManager.Users.ToList();
-                foreach (ApplicationUser u in userList)
+                if (process.IsArchived)
                 {
-                    if (await _userManager.IsLockedOutAsync(u))
-                        userList.Remove(u);
+                    AssignmentDetailsViewModel model = new AssignmentDetailsViewModel(
+                        assignment,
+                        process
+                    );
+                    return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
+                }
+                List<ApplicationUser> userList = new List<ApplicationUser>();
+                List<ApplicationUser> tempUserList = _userManager.Users.ToList();
+
+                foreach (ApplicationUser u in tempUserList)
+                {
+                    if (!await _userManager.IsLockedOutAsync(u))
+                        userList.Add(u);
                 }
                 List<ApplicationRole> roleList = _roleManager.Roles.ToList();
                 ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
@@ -460,7 +459,7 @@ namespace SoPro24Team06.Controllers
                     );
                     return View("~/Views/Assignments/EditAssignment.cshtml", model);
                 }
-                else
+                else if (assignment.Assignee != null && assignment.Assignee == user)
                 {
                     EditAssignmentLimitedViewModel model = new EditAssignmentLimitedViewModel(
                         assignment,
@@ -470,9 +469,25 @@ namespace SoPro24Team06.Controllers
                     );
                     return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
                 }
+                else if (process != null && process.WorkerOfReference == user)
+                {
+                    AssignmentDetailsViewModel model = new AssignmentDetailsViewModel(
+                        assignment,
+                        process
+                    );
+                    return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
+                }
             }
+            string refererUrl = Request.Headers["Referer"].ToString();
 
-            return RedirectToAction("Index");
+            if (!string.IsNullOrEmpty(refererUrl))
+            {
+                return Redirect(refererUrl);
+            }
+            else
+            {
+                return RedirectToAction("Index");
+            }
         }
 
         // End
@@ -495,11 +510,13 @@ namespace SoPro24Team06.Controllers
             Process? process = processList.FirstOrDefault(p =>
                 p.Assignments != null && p.Assignments.Contains(assignment)
             );
-            List<ApplicationUser> userList = _userManager.Users.ToList();
-            foreach (ApplicationUser u in userList)
+            List<ApplicationUser> userList = new List<ApplicationUser>();
+            List<ApplicationUser> tempUserList = _userManager.Users.ToList();
+
+            foreach (ApplicationUser u in tempUserList)
             {
-                if (await _userManager.IsLockedOutAsync(u))
-                    userList.Remove(u);
+                if (!await _userManager.IsLockedOutAsync(u))
+                    userList.Add(u);
             }
             List<ApplicationRole> roleList = _roleManager.Roles.ToList();
             ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
@@ -590,25 +607,45 @@ namespace SoPro24Team06.Controllers
             // get current User and Roles current user
             ApplicationUser user = await _userManager.GetUserAsync(HttpContext.User);
             List<string> roles = new List<string>(await _userManager.GetRolesAsync(user));
-
-            List<Process> processList = await _processContainer.GetActiveProcessesAsync();
-            // überprüfung einfügen ob Process noch nicht Archiviert ist.
+            //get all not archived Processes
+            List<Process> tempProcessList = await _processContainer.GetActiveProcessesAsync();
+            //filter processes for wich user has access (needs to be able to filter for that process)
+            List<Process> processList = new List<Process>();
+            if (!roles.Contains("Administrator"))
+            {
+                foreach (Process p in tempProcessList)
+                {
+                    //check if user has access and add to list if true
+                    if (
+                        //if user is supervisor he has acess
+                        p.Supervisor == user
+                        //if he is Assignee of atleast one Assignment
+                        || p.Assignments.Any(a =>
+                            (
+                                a.AssigneeType == AssigneeType.USER
+                                && a.Assignee != null
+                                && a.Assignee == user
+                            )
+                            //if he has the role to wich atleast one Assignment is Assigned
+                            || (
+                                a.AssigneeType == AssigneeType.ROLES
+                                && a.AssignedRole != null
+                                && roles.Contains(a.AssignedRole.ToString())
+                            )
+                        )
+                    )
+                    {
+                        processList.Add(p);
+                    }
+                }
+            }
+            else
+            {
+                //if he is Admin he has Access to all active Processes
+                processList = tempProcessList;
+            }
             List<Assignment> assignmentList = new List<Assignment>();
             //changes contents of Lists depending on which list was selected in Index ViewModel
-
-            processList = processList
-                .Where(p =>
-                    p.Assignments.Any(a =>
-                        (
-                            a.AssignedRole != null
-                            && a.AssigneeType == AssigneeType.ROLES
-                            && roles.Contains(a.AssignedRole.ToString())
-                        )
-                        || (p.Supervisor == user)
-                        || (a.Assignee != null && a.Assignee.Id == user.Id)
-                    )
-                )
-                .ToList();
 
             switch (HttpContext.Session.GetString("currentList"))
             {
@@ -632,14 +669,11 @@ namespace SoPro24Team06.Controllers
                     //if roles of current user contains Administrator show all Assignments
                     if (roles.Contains("Administrator"))
                     {
-                        processList = await _processContainer.GetActiveProcessesAsync();
-                        
                         foreach (Process p in processList)
                         {
                             foreach (Assignment a in p.Assignments)
                             {
                                 assignmentList.Add(a);
-                                _logger.LogInformation(a.Title);
                             }
                         }
                     }
@@ -654,7 +688,6 @@ namespace SoPro24Team06.Controllers
                                 {
                                     assignmentList.Add(a);
                                 }
-                                assignmentList = _context.Assignments.ToList();
                             }
                             else
                             {
@@ -667,7 +700,8 @@ namespace SoPro24Team06.Controllers
                                             && roles.Contains(a.AssignedRole.ToString())
                                         )
                                     )
-                                        assignmentList.Add(a);
+                                        if (!assignmentList.Contains(a))
+                                            assignmentList.Add(a);
                                 }
                             }
                         }
@@ -687,7 +721,6 @@ namespace SoPro24Team06.Controllers
                                     assignmentList.Add(a);
                             }
                         }
-                        HttpContext.Session.SetString("currentList", "MyAssignments");
                     }
                     break;
                 default:
@@ -715,9 +748,13 @@ namespace SoPro24Team06.Controllers
 
             //filter list
             int? selectedProcess = HttpContext.Session.GetInt32("selectedProcessId");
-            if (selectedProcess.HasValue)
+            if (selectedProcess.HasValue && processList.Any(p => p.Id == selectedProcess))
             {
                 model.FilterAssignments(selectedProcess.Value);
+            }
+            else
+            {
+                HttpContext.Session.Remove("selectedProcessId");
             }
 
             //sort Lists
@@ -733,4 +770,4 @@ namespace SoPro24Team06.Controllers
     }
 }
 
-//end codeownership Jan Pfluger
+//end codeownership Jan  Pfluger

@@ -1,4 +1,5 @@
 @using Microsoft.AspNetCore.Identity
+@using SoPro24Team06.Helpers
 @model SoPro24Team06.ViewModels.ProcessTemplateViewModel
 @{
     //-------------------------
@@ -91,7 +92,7 @@
     <!-- Start: Aufgaben Select -->
     <fieldset style="margin-top: 12px;">
         <legend>Aufgaben</legend>
-        <button asp-action="RedirectAssignmentTemplateCreate" type="submit" class="btn "
+        <button aria-label="create-assignment-button" asp-action="RedirectAssignmentTemplateCreate" type="submit" class="btn "
             style="background-color: var(--ash); color: white;">
             Aufgabe hinzufügen
         </button>
@@ -139,7 +140,7 @@
                                 <tr>
                                     <td>@at.Title</td>
                                     <td>@at.Instructions</td>
-                                    <td>@at.AssigneeType</td>
+                                    <td>@EnumHelper.GetDisplayName(@at.AssigneeType)</td>
                                     <td>@at.AssignedRole</td>
                                     <td>@at.DueIn.Label</td>
                                     <td class="d-flex flex-row justify-content-evenly gap-3">

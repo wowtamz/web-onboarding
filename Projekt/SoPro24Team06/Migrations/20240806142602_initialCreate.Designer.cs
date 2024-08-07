@@ -11,8 +11,8 @@ using SoPro24Team06.Data;
 namespace SoPro24Team06.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240728220550_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240806142602_initialCreate")]
+    partial class initialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -442,6 +442,9 @@ namespace SoPro24Team06.Migrations
 
                     b.Property<bool>("IsArchived")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SupervisorId")
                         .IsRequired()

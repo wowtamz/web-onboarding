@@ -440,6 +440,9 @@ namespace SoPro24Team06.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SupervisorId")
                         .IsRequired()
                         .HasColumnType("TEXT");

@@ -19,7 +19,7 @@ public class AssignmentTemplateContainer : IAssignmentTemplate
         _context = context;
     }
 
-    public AssignmentTemplate AddAssignmentTemplate( // Assignment Templates werden zur DB hinzugefügt
+    public async Task<AssignmentTemplate> AddAssignmentTemplate( // Assignment Templates werden zur DB hinzugefügt
         string title,
         string? instructions,
         DueTime dueIn,
@@ -52,11 +52,11 @@ public class AssignmentTemplateContainer : IAssignmentTemplate
         }
     }
 
-    public void DeleteAssignmentTemplate(int id) // Assignment Templates werden aus der DB gelöscht
+    public async Task DeleteAssignmentTemplate(int id) // Assignment Templates werden aus der DB gelöscht
     {
         if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = GetAssignmentTemplateWithDepartmentsAsync(id);
+            AssignmentTemplate? assignmentTemplate =  await GetAssignmentTemplateWithDepartmentsAsync(id);
             if (assignmentTemplate != null)
             {
                 _context.AssignmentTemplates.Remove(assignmentTemplate!);
@@ -65,7 +65,7 @@ public class AssignmentTemplateContainer : IAssignmentTemplate
         }
     }
 
-    public void EditAssignmentTemplates( // Assignment Templates aus der DB werden editiert und dann wieder zurück gespeichert
+    public async Task EditAssignmentTemplates( // Assignment Templates aus der DB werden editiert und dann wieder zurück gespeichert
         int id,
         string title,
         string? instructions,
@@ -79,7 +79,7 @@ public class AssignmentTemplateContainer : IAssignmentTemplate
         if (_context.AssignmentTemplates != null)
         {
             try{
-            AssignmentTemplate? assignmentTemplate = GetAssignmentTemplateWithDepartmentsAsync(id);
+            AssignmentTemplate? assignmentTemplate = await GetAssignmentTemplateWithDepartmentsAsync(id);
             if (assignmentTemplate != null)
             {
                 assignmentTemplate.Title = title;
@@ -100,11 +100,11 @@ public class AssignmentTemplateContainer : IAssignmentTemplate
         }
     }
 
-    public AssignmentTemplate GetAssignmentTemplate(int id) // Gewuünschtes Assignment Template wird mit der ID ausgegeben
+    public async Task<AssignmentTemplate> GetAssignmentTemplate(int id) // Gewuünschtes Assignment Template wird mit der ID ausgegeben
     {
         if (_context.AssignmentTemplates != null)
         {
-            AssignmentTemplate? assignmentTemplate = GetAssignmentTemplateWithDepartmentsAsync(id);
+            AssignmentTemplate? assignmentTemplate = await GetAssignmentTemplateWithDepartmentsAsync(id);
 
             if (assignmentTemplate != null)
             {
@@ -115,7 +115,7 @@ public class AssignmentTemplateContainer : IAssignmentTemplate
         return null;
     }
 
-    public AssignmentTemplate? GetAssignmentTemplateWithDepartmentsAsync(int id) // Laden der Daten aus der Datenbank 
+    public async Task<AssignmentTemplate?> GetAssignmentTemplateWithDepartmentsAsync(int id) // Laden der Daten aus der Datenbank 
     {
         AssignmentTemplate? at = _context
             .AssignmentTemplates.Include(at => at.ForDepartmentsList)
@@ -126,7 +126,7 @@ public class AssignmentTemplateContainer : IAssignmentTemplate
         return at;
     }
 
-    public List<AssignmentTemplate> GetAllAssignmentTemplates() // Alle AssignmentTemplates werden ausgegeben
+    public async Task<List<AssignmentTemplate>> GetAllAssignmentTemplates() // Alle AssignmentTemplates werden ausgegeben
     {
         List<AssignmentTemplate> assignmentTemplateList = new List<AssignmentTemplate>();
         if (_context.AssignmentTemplates != null)

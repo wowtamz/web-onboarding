@@ -82,7 +82,10 @@ namespace SoPro24Team06.Models
         /// <summary>
         /// creates Empty Assignment
         /// </summary>
-        public Assignment() { }
+        public Assignment()
+        {
+            Title = "";
+        }
 
         /// <summary>
         /// Returns Days Till DueDate of this Assignment

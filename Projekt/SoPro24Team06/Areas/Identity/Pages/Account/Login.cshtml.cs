@@ -83,7 +83,8 @@ namespace SoPro24Team06.Areas.Identity.Pages.Account
         /// </summary>
         /// <param name="returnUrl"> Redirection Url after Login </param>
         /// <returns></returns>
-        public async Task<IActionResult> OnPostAsync(string? returnUrl = null) 
+    
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
 
@@ -101,7 +102,7 @@ namespace SoPro24Team06.Areas.Identity.Pages.Account
                 }
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning("Benutzer ausgeloggt.");
+                    _logger.LogWarning("Benutzerkonto gesperrt.");
                     return RedirectToPage("./Lockout");
                 }
                 else
@@ -114,5 +115,6 @@ namespace SoPro24Team06.Areas.Identity.Pages.Account
 
             return Page();
         }
+
     }
 }
