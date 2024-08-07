@@ -76,6 +76,11 @@ public class EditProcessViewModel
         this.DepartmentOfRefWorker = new Department("Operations");
     }
 
+    /// <summary>
+    /// Converts EditProcessViewModel to a process
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public Process ToProcess()
     {
         return new Process(
@@ -89,6 +94,11 @@ public class EditProcessViewModel
         );
     }
 
+    /// <summary>
+    /// Converts AssigneeType to string literal
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public string AssigneeTypeAsString(AssigneeType type)
     {
         if (type == AssigneeType.ROLES)

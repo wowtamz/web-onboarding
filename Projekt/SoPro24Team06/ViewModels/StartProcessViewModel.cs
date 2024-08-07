@@ -40,6 +40,11 @@ public class StartProcessViewModel
     [Required(ErrorMessage = "Abteilung ist erforderlich")]
     public Department DepartmentOfRefWorker { get; set; }
 
+    /// <summary>
+    /// Create new StartProcessViewModel from
+    /// process
+    /// </summary>
+    /// <param name="process"></param>
     public StartProcessViewModel(Process process)
     {
         this.Title = process.Title;
@@ -52,6 +57,11 @@ public class StartProcessViewModel
         this.DepartmentOfRefWorker = process.DepartmentOfRefWorker;
     }
 
+    /// <summary>
+    /// Create new StartProcessViewModel from
+    /// ProcessTemplate
+    /// </summary>
+    /// <param name="process"></param>
     public StartProcessViewModel(ProcessTemplate? processTemplate)
     {
         if (processTemplate != null)
@@ -67,6 +77,10 @@ public class StartProcessViewModel
         }
     }
 
+    /// <summary>
+    /// Create new emptyStartProcessViewModel
+    /// </summary>
+    /// <param name="process"></param>
     public StartProcessViewModel()
     {
         this.Id = null;
@@ -80,7 +94,11 @@ public class StartProcessViewModel
         this.ContractOfRefWorker = new Contract("Vollzeit");
         this.DepartmentOfRefWorker = new Department("Operations");
     }
-
+    
+    /// <summary>
+    /// Converts the StartProcessViewModel to a Process
+    /// </summary>
+    /// <returns>Process with attributes of StartProcessViewModel</returns>
     public Process ToProcess()
     {
         List<Assignment> assignmentList = new List<Assignment> { };
@@ -115,12 +133,21 @@ public class StartProcessViewModel
         );
     }
 
+    /// <summary>
+    /// Converts StartProcessViewModel to a ProcessViewModel
+    /// </summary>
+    /// <returns></returns>
     public ProcessViewModel ToProcessViewModel()
     {
         ProcessViewModel processViewModel = new ProcessViewModel(this.Template);
         return processViewModel;
     }
 
+    /// <summary>
+    /// Converts AssigneeType to a string literal
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public string AssigneeTypeAsString(AssigneeType type)
     {
         if (type == AssigneeType.ROLES)

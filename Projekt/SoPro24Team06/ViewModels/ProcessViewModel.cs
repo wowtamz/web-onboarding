@@ -75,6 +75,10 @@ public class ProcessViewModel
         this.DepartmentOfRefWorker = new Department();
     }
 
+    /// <summary>
+    /// Converts ProcessViewModel to a process
+    /// </summary>
+    /// <returns></returns>
     public Process ToProcess()
     {
         return new Process(
