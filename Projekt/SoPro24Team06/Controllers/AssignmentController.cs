@@ -373,7 +373,6 @@ namespace SoPro24Team06.Controllers
         //Author: Tamas Varadi
         // Begin
 
-
         public IActionResult OnEditCanceled()
         {
             if (TempData["detailProcessId"] != null)
@@ -428,6 +427,14 @@ namespace SoPro24Team06.Controllers
                 }
 
                 Process process = await _processContainer.GetProcessByIdAsync(processId);
+                if (process.IsArchived)
+                {
+                    AssignmentDetailsViewModel model = new AssignmentDetailsViewModel(
+                        assignment,
+                        process
+                    );
+                    return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
+                }
                 List<ApplicationUser> userList = new List<ApplicationUser>();
                 List<ApplicationUser> tempUserList = _userManager.Users.ToList();
 

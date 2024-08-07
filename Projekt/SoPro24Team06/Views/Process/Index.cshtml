@@ -116,7 +116,7 @@
                             <td>@process.DepartmentOfRefWorker.Name</td>
                             <td>@process.WorkerOfReference.FullName</td>
                             <td>@process.DueDate.ToString()</td>
-                            <td class="d-flex flex-row justify-content-evenly">
+                            <td>
                                 @if (User.IsInRole("Administrator") || process.Supervisor.Id == userId)
                                 {
                                 <a href="/Process/Edit/@id">
@@ -176,7 +176,7 @@
                             <td>@process.DepartmentOfRefWorker.Name</td>
                             <td>@process.WorkerOfReference.FullName</td>
                             <td>@process.DueDate.ToString()</td>
-                            <td class="d-flex flex-row justify-content-evenly">
+                            <td>
                                 @if (User.IsInRole("Administrator") || process.Supervisor.Id == userId)
                                 {
                                 <a href="/Process/Edit/@id">
@@ -236,7 +236,7 @@
                             <td>@process.DepartmentOfRefWorker.Name</td>
                             <td>@process.WorkerOfReference.FullName</td>
                             <td>@process.DueDate.ToString()</td>
-                            <td class="d-flex flex-row justify-content-evenly">
+                            <td>
                             </td>
                         </tr>
                     }
@@ -283,7 +283,7 @@
                             <td>@process.DepartmentOfRefWorker.Name</td>
                             <td>@process.WorkerOfReference.FullName</td>
                             <td>@process.DueDate.ToString()</td>
-                            <td class="d-flex flex-row justify-content-evenly">
+                            <td>
                             </td>
                         </tr>
                     }
