@@ -32,7 +32,10 @@ public class ProcessContainer
         _roleManager = roleManager;
     }
 
-    // Alle Vorgänge lesen
+    /// <summary>
+    /// Gets all processes from context
+    /// </summary>
+    /// <returns>List of all processes</returns>
     public async Task<List<Process>> GetProcessesAsync()
     {
         List<Process> processList = await _context
@@ -47,7 +50,11 @@ public class ProcessContainer
             .ToListAsync();
         return processList;
     }
-
+    
+    /// <summary>
+    /// Gets all processes which are active
+    /// </summary>
+    /// <returns>List of all arctive processes</returns>
     public async Task<List<Process>> GetActiveProcessesAsync()
     {
         List<Process> processList = await GetProcessesAsync();
@@ -63,7 +70,11 @@ public class ProcessContainer
 
         return activeProcesses;
     }
-
+    
+    /// <summary>
+    /// Gets all processes which are archived
+    /// </summary>
+    /// <returns>List of all archived processes </returns>
     public async Task<List<Process>> GetArchivedProcessesAsync()
     {
         List<Process> processList = await GetProcessesAsync();
@@ -80,7 +91,12 @@ public class ProcessContainer
         return archivedProcesses;
     }
 
-    // Vorgang per Id lesen
+    /// <summary>
+    /// Get process by its Id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns>Process with the id passed as "id"</returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public async Task<Process> GetProcessByIdAsync(int id)
     {
         Process process =
@@ -99,7 +115,11 @@ public class ProcessContainer
         return process;
     }
 
-    // Alle Vorgänge die mit den Benutzer (userId) in Beziehung stehen
+    /// <summary>
+    /// Gets all processes which are related to a user Id
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns>List of all processes which are assoziated with the "userId"</returns>
     public async Task<List<Process>> GetProcessesOfUserAsync(string userId)
     {
         List<Process> processList = new List<Process> { };
@@ -136,21 +156,17 @@ public class ProcessContainer
                     processList.Add(p);
                     continue;
                 }
-
-                // Nach dem Merge wieder hinzufügen
-                /*
-                if (a.Assignee != null && a.Assignee.Id == userId)
-                {
-                    processList.Add(p);
-                    continue;
-                }
-                */
             }
         }
 
         return processList;
     }
 
+    /// <summary>
+    /// Gets all active processes which are related to a user Id
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns>List of all processes which are assoziated with the "userId" and are active</returns>
     public async Task<List<Process>> GetActiveProcessesOfUserAsync(string userId)
     {
         List<Process> processList = await GetProcessesOfUserAsync(userId);
@@ -167,6 +183,11 @@ public class ProcessContainer
         return activeProcesses;
     }
 
+    /// <summary>
+    /// Gets all archived processes which are related to a user Id
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns>List of all processes which are assoziated with the "userId" and are archived</returns>
     public async Task<List<Process>> GetArchivedProcessesOfUserAsync(string userId)
     {
         List<Process> processList = await GetProcessesOfUserAsync(userId);
@@ -183,7 +204,11 @@ public class ProcessContainer
         return archivedProcesses;
     }
 
-    // Alle Vorgänge die mit der Rolle (roleId) in Beziehung stehen
+    /// <summary>
+    /// Gets all processes related to a specific role
+    /// </summary>
+    /// <param name="roleId"></param>
+    /// <returns>List of processes which are associated with "roleId"</returns>
     public async Task<List<Process>> GetProcessesOfRoleAsync(string roleId)
     {
         List<Process> processList = new List<Process> { };
@@ -207,7 +232,11 @@ public class ProcessContainer
         return processList;
     }
 
-    // Neue Vorgang hinzufügen
+    /// <summary>
+    /// Adds a new process to the database with the attributes of "processToAdd"
+    /// </summary>
+    /// <param name="processToAdd"></param>
+    /// <returns>Process if successfully add to the database, otherwise null</returns>
     public async Task<Process?> AddProcessAsync(Process processToAdd)
     {
         // Zuerst Assignments dem Context hinzufügen
@@ -249,7 +278,19 @@ public class ProcessContainer
         return process.Entity;
     }
 
-    // Vorgang Bearbeiten
+    /// <summary>
+    /// Updates the values of the process attribute
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="title"></param>
+    /// <param name="description"></param>
+    /// <param name="assignments"></param>
+    /// <param name="supervisor"></param>
+    /// <param name="workerOfRef"></param>
+    /// <param name="contractOfRefWorker"></param>
+    /// <param name="departmentOfRefWorker"></param>
+    /// <param name="dueDate"></param>
+    /// <exception cref="InvalidOperationException"></exception>
     public async Task UpdateProcessAsync(
         int id,
         string title,
@@ -314,17 +355,18 @@ public class ProcessContainer
         await _context.SaveChangesAsync();
     }
 
-    // Vorgang anhalten und archivieren
+    /// <summary>
+    /// Stops an active process and marks it as archived
+    /// </summary>
+    /// <param name="id"></param>
+    /// <exception cref="InvalidOperationException"></exception>
     public async Task StopProcess(int id)
     {
         Process processToStop =
             await _context.Processes.FirstOrDefaultAsync(x => x.Id.Equals(id))
             ?? throw new InvalidOperationException($"No Process found with Id {id}");
-
-        // Vorgang als Archiviert markieren
+        
         processToStop.IsArchived = true;
-
-        // Änderungen speicher
         await _context.SaveChangesAsync();
     }
 }

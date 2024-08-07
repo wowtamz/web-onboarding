@@ -54,6 +54,10 @@ namespace SoPro24Team06.Models
         [JsonProperty("isArchived")]
         public bool IsArchived { get; set; }
 
+        /// <summary>
+        /// Creates new process using a process template as base
+        /// </summary>
+        /// <param name="Template"></param>
         public Process(ProcessTemplate Template)
         {
             this.Title = Template.Title;
@@ -104,7 +108,17 @@ namespace SoPro24Team06.Models
                 this.DueDate = DateTime.Now;
             }
         }
-
+        
+        /// <summary>
+        /// Default contructor a process
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="description"></param>
+        /// <param name="assignments"></param>
+        /// <param name="workerOfReference"></param>
+        /// <param name="supervisor"></param>
+        /// <param name="contractOfRefWorker"></param>
+        /// <param name="departmentOfRefWorker"></param>
         public Process(
             string title,
             string description,
@@ -133,6 +147,9 @@ namespace SoPro24Team06.Models
             }
         }
 
+        /// <summary>
+        /// Empty contructor for process
+        /// </summary>
         public Process()
         {
             this.Title = "";

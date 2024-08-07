@@ -40,7 +40,11 @@ public class DetailProcessViewModel
         this.DepartmentOfRefWorker = process.DepartmentOfRefWorker;
         this.IsArchived = process.IsArchived;
     }
-
+    /// <summary>
+    /// Converts DetailProcessViewModel to a process
+    /// </summary>
+    /// <returns></returns>
+    /// 
     public Process ToProcess()
     {
         return new Process(

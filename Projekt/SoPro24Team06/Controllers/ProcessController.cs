@@ -51,7 +51,11 @@ namespace SoPro24Team06.Controllers
             _processTemplateContainer = new ProcessTemplateContainer(context);
             _assignmentTemplateContainer = new AssignmentTemplateContainer(context);
         }
-
+        
+        /// <summary>
+        /// Page view for a list of the users processes
+        /// </summary>
+        /// <returns>View with ProcessListViewModel</returns>
         public async Task<IActionResult> Index()
         {
             string userId = (string)GetCurrentUserId();
@@ -80,7 +84,11 @@ namespace SoPro24Team06.Controllers
             return View(processListViewModel);
         }
 
-        // Vorgang starten Seite mit Prozess vorausgewählt
+        /// <summary>
+        /// Start page for processes
+        /// </summary>
+        /// <param name="templateId"></param>
+        /// <returns>View with StartProcessViewModel</returns>
         [HttpGet("/Process/Start/{templateId}")]
         [HttpGet("/Process/Start")]
         public async Task<IActionResult> Start(int? templateId)
@@ -177,7 +185,13 @@ namespace SoPro24Team06.Controllers
 
             return RedirectToAction("Index");
         }
-
+        
+        /// <summary>
+        /// Destination for a POST-request from the start process view
+        /// </summary>
+        /// <param name="startProcessViewModel"></param>
+        /// <returns>View/Redirect to process index page</returns>
+        /// <exception cref="ArgumentNullException"></exception>
         [HttpPost("/Process/Start/{templateId}")]
         [HttpPost("/Process/Start")]
         public async Task<IActionResult> Start(
@@ -289,6 +303,7 @@ namespace SoPro24Team06.Controllers
             return View("Start", startProcessViewModel);
         }
 
+        /*
         public async Task<IActionResult> StartRedirectToNewAssignment(
             [Bind(
                 "Title, Template, Description, DueDate, Template, AssignmentTemplates, Supervisor, WorkerOfReference, ContractOfRefWorker, DepartmentOfRefWorker"
@@ -329,7 +344,7 @@ namespace SoPro24Team06.Controllers
 
             return RedirectToAction("Index");
         }
-
+        
         public async Task<IActionResult> EditRedirectToNewAssignment(
             [Bind(
                 "Id, Title, Description, DueDate, WorkerOfReference, Supervisor, Assignments, AssignmentTemplates, ContractOfRefWorker, DepartmentOfRefWorker"
@@ -353,7 +368,14 @@ namespace SoPro24Team06.Controllers
 
             return RedirectToAction("Index");
         }
+        */
 
+        /// <summary>
+        /// Redirects the user from process edit view to edit assignment view
+        /// </summary>
+        /// <param name="assignmentId"></param>
+        /// <param name="editProcessViewModel"></param>
+        /// <returns>Redirect to Action in AssignmentController</returns>
         public async Task<IActionResult> EditRedirectEditAssignment(
             int assignmentId,
             [Bind(
@@ -376,7 +398,13 @@ namespace SoPro24Team06.Controllers
 
             return RedirectToAction("Index");
         }
-
+        
+        /// <summary>
+        /// Redirects the user from process detail view to edit assignment view
+        /// </summary>
+        /// <param name="processId"></param>
+        /// <param name="assignmentId"></param>
+        /// <returns>Redirect to Action in AssignmentController</returns>
         [HttpGet("/Process/DetailRedirectEditAssignment/{processId}")]
         public async Task<IActionResult> DetailRedirectEditAssignment(
             int processId,
@@ -397,7 +425,12 @@ namespace SoPro24Team06.Controllers
             }
             return RedirectToAction("Index");
         }
-
+        
+        /// <summary>
+        /// Action for editing a process where Id = "id"
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Edit view of the process with the Id = "id"</returns>
         public async Task<IActionResult> Edit(int id)
         {
             ActiveProcess process = await _processContainer.GetProcessByIdAsync(id);
@@ -428,6 +461,12 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Destination of edit post-request, to save changes
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="editProcessViewModel"></param>
+        /// <returns>Redirect to process index incase successfull</returns>
         [HttpPost("/Process/Edit/{id}")]
         public async Task<IActionResult> Edit(
             int id,
@@ -518,7 +557,6 @@ namespace SoPro24Team06.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    Console.WriteLine("Modelstate Invalid");
                     return View("Edit", editProcessViewModel);
                 }
 
@@ -564,6 +602,11 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// View for process details for the process with Id = "id"
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>View of process details</returns>
         public async Task<IActionResult> Detail(int id)
         {
             ApplicationUser user = await GetCurrentUser();
@@ -594,43 +637,11 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
-        /*
-        [HttpGet("/Process/UpdateAssignmentStatus/{processId}")]
-        public async Task<IActionResult> UpdateAssignmentStatus(
-            int processId,
-            [FromQuery] int assignmentId,
-            [FromQuery] AssignmentStatus status
-        )
-        {
-
-            ActiveProcess process = await _processContainer.GetProcessByIdAsync(processId);
-            ApplicationUser user = await GetCurrentUser();
-            List<string> roles = (List<string>) await _userManager.GetRolesAsync(user);
-
-            foreach (Assignment a in process.Assignments)
-            {
-                if (a.Id == assignmentId && ( await UserIsAssignee(a) || User.IsInRole("Administrator")))
-                {
-                    a.Status = status;
-                }
-            }
-
-            await _processContainer.UpdateProcessAsync(
-                processId,
-                process.Title,
-                process.Description,
-                process.Assignments,
-                process.Supervisor,
-                process.WorkerOfReference,
-                process.ContractOfRefWorker,
-                process.DepartmentOfRefWorker,
-                process.DueDate
-            );
-
-            return RedirectToAction("Detail", new { id = processId });
-        }
-        */
-
+        /// <summary>
+        /// Stops a specific process with the "id"
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Redirect to process index</returns>
         [HttpPost("/Process/Stop/{id}")]
         public async Task<IActionResult> Stop(int id)
         {
@@ -651,13 +662,20 @@ namespace SoPro24Team06.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Filters a list of assignment templates according to
+        /// a contract and department
+        /// </summary>
+        /// <param name="assignmentTemplates"></param>
+        /// <param name="contractId"></param>
+        /// <param name="departmentId"></param>
+        /// <returns>List of the filtered assignment templates</returns>
         public List<AssignmentTemplate> GetFilteredAssignmentTemplates(
             List<AssignmentTemplate> assignmentTemplates,
             int contractId,
             int departmentId
         )
         {
-            Console.WriteLine($"ASSIGNMENT COUNT: {assignmentTemplates.Count()}");
 
             List<AssignmentTemplate> filteredAssignmentTemplates = new List<AssignmentTemplate>();
             assignmentTemplates.ForEach(a =>
@@ -692,7 +710,13 @@ namespace SoPro24Team06.Controllers
             });
             return filteredAssignmentTemplates;
         }
-
+        
+        /// <summary>
+        /// Stores all users, process templates, assignments,
+        /// contracts and departments in a ViewDate for
+        /// any views for displaying information about
+        /// these entities
+        /// </summary>
         public async Task AddModelsToViewData()
         {
             ApplicationUser user = await GetCurrentUser();
@@ -750,6 +774,10 @@ namespace SoPro24Team06.Controllers
             ViewData["Departments"] = departments;
         }
 
+        /// <summary>
+        /// Checks if a user roles have access rights to any process template/s
+        /// </summary>
+        /// <returns>True if user is authorised to access a process template, otherwise false</returns>
         public async Task<bool> UserCanStartProcesses()
         {
             ApplicationUser user = await GetCurrentUser();
@@ -773,6 +801,11 @@ namespace SoPro24Team06.Controllers
             return false;
         }
 
+        /// <summary>
+        /// Checks if the user is an assignee of an assignment
+        /// </summary>
+        /// <param name="assignment"></param>
+        /// <returns>True if user is assignee of "assignment", otherwise false</returns>
         public async Task<bool> UserIsAssignee(Assignment assignment)
         {
             ApplicationUser user = await GetCurrentUser();
@@ -784,11 +817,19 @@ namespace SoPro24Team06.Controllers
             );
         }
 
+        /// <summary>
+        /// Gets the Id of the currently logged in user
+        /// </summary>
+        /// <returns>Id of current user if logged in, otherwise null </returns>
         public string? GetCurrentUserId()
         {
             return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
-
+        
+        /// <summary>
+        /// Gets the currently logged in user
+        /// </summary>
+        /// <returns>ApplicationUser of current user</returns>
         public async Task<ApplicationUser?> GetCurrentUser()
         {
             string? userId = GetCurrentUserId();
