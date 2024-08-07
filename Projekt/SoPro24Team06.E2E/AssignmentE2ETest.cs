@@ -95,19 +95,9 @@ namespace SoPro24Team06.E2E
                         + "could not change to Assignments"
                 );
             }
-            //find the assignmentListBody
-            // IWebElement assignmentListBody = _wait.Until(d =>
-            // {
-            //     return d.FindElement(By.Id("allAssignmentsBody"));
-            // });
             IWebElement assignmentListBody;
             try
             {
-                // assignmentListBody = _wait.Until(
-                //     SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
-                //         By.XPath(".//div[@class='table-responsive']/table/tbody")
-                //     )
-                // );
                 assignmentListBody = _wait.Until(
                     SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
                         By.Id("allAssignmentsBody")
@@ -390,19 +380,10 @@ namespace SoPro24Team06.E2E
                         + "could not change to Assignments"
                 );
             }
-            //find the assignmentListBody
-            // IWebElement assignmentListBody = _wait.Until(d =>
-            // {
-            //     return d.FindElement(By.Id("allAssignmentsBody"));
-            // });
+
             IWebElement assignmentListBody;
             try
             {
-                // assignmentListBody = _wait.Until(
-                //     SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
-                //         By.XPath(".//div[@class='table-responsive']/table/tbody")
-                //     )
-                // );
                 assignmentListBody = _wait.Until(
                     SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
                         By.Id("allAssignmentsBody")
@@ -640,107 +621,6 @@ namespace SoPro24Team06.E2E
                     );
                 }
             }
-
-            //     if (_driver.Url.Contains("Identity/Account/Login"))
-            //     {
-            //         throw new Exception(
-            //             "" + _errorLocationClass + errorLocationFunktion + "redirected To Login Page"
-            //         );
-            //     }
-            //     check if changes are visable at the main View
-            //     try
-            //     {
-            //         assignmentListBody = _wait.Until(
-            //             SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(
-            //                 By.XPath(".//div[@class='table-responsive']/table/tbody")
-            //             )
-            //         );
-            //     }
-            //     catch
-            //     {
-            //         throw new Exception(
-            //             ""
-            //                 + _errorLocationClass
-            //                 + errorLocationFunktion
-            //                 + "AssignmentListBody is not Found (after changes)"
-            //         );
-            //     }
-            //     if (
-            //         assignmentListBody == null
-            //         || assignmentListBody.GetAttribute("id") != "allAssignmentsBody"
-            //     )
-            //     {
-            //         throw new Exception(
-            //             ""
-            //                 + _errorLocationClass
-            //                 + errorLocationFunktion
-            //                 + "AssignmentList is not allAssignmentsBody (befor changes)"
-            //         );
-            //     }
-
-            //     check if Assignments are Present
-            //     try
-            //     {
-            //         assignmentListBody.FindElement(
-            //             By.XPath(".//tr/td[text()='Keine Aufgaben vorhanden']")
-            //         );
-            //         throw new Exception(
-            //             ""
-            //                 + _errorLocationClass
-            //                 + errorLocationFunktion
-            //                 + "AssignmentList-noAssignments-Check: noAssignmentsFound"
-            //         );
-            //     }
-            //     catch (Exception e)
-            //     {
-            //         if (
-            //             e.Message
-            //             == (
-            //                 ""
-            //                 + _errorLocationClass
-            //                 + errorLocationFunktion
-            //                 + "AssignmentList-noAssignments-Check: noAssignmentsFound"
-            //             )
-            //         )
-            //             throw new Exception(e.Message);
-            //     }
-
-            //     //get list of All Assignments in List
-            //     assignmentListContent = assignmentListBody.FindElements(By.XPath(".//tr")).ToList();
-
-            //     if (assignmentListContent.Count == 0)
-            //     {
-            //         throw new Exception(
-            //             ""
-            //                 + _errorLocationClass
-            //                 + errorLocationFunktion
-            //                 + "AssignmentList-does not contain any elements"
-            //         );
-            //     }
-
-            //     //set the assignment wich should be tested
-            //     foreach (var e in assignmentListContent)
-            //     {
-            //         var title = e.FindElement(By.XPath(".//td[1]"));
-            //         if (title.Text == assignmentTitle)
-            //         {
-            //             assignmentToTest = e;
-            //             break;
-            //         }
-            //     }
-
-            //     IWebElement aufgabenverantwortlich = assignmentToTest.FindElement(By.XPath("./td[3]"));
-
-            //     if (aufgabenverantwortlich.Text != "Benutzer : Admin User")
-            //     {
-            //         throw new Exception(
-            //             ""
-            //                 + _errorLocationClass
-            //                 + errorLocationFunktion
-            //                 + "Assignment Responsibility not set correctly"
-            //         );
-            //     }
-            // }
         }
 
         [Fact]
