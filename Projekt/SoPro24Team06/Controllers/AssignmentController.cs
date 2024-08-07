@@ -459,7 +459,7 @@ namespace SoPro24Team06.Controllers
                     );
                     return View("~/Views/Assignments/EditAssignment.cshtml", model);
                 }
-                else
+                else if (assignment.Assignee != null && assignment.Assignee == user)
                 {
                     EditAssignmentLimitedViewModel model = new EditAssignmentLimitedViewModel(
                         assignment,
@@ -469,9 +469,25 @@ namespace SoPro24Team06.Controllers
                     );
                     return View("~/Views/Assignments/EditAssignmentLimited.cshtml", model);
                 }
+                else if (process != null && process.WorkerOfReference == user)
+                {
+                    AssignmentDetailsViewModel model = new AssignmentDetailsViewModel(
+                        assignment,
+                        process
+                    );
+                    return View("~/Views/Assignments/AssignmentDetails.cshtml", model);
+                }
             }
+            string refererUrl = Request.Headers["Referer"].ToString();
 
-            return RedirectToAction("Index");
+            if (!string.IsNullOrEmpty(refererUrl))
+            {
+                return Redirect(refererUrl);
+            }
+            else
+            {
+                return RedirectToAction("Index");
+            }
         }
 
         // End

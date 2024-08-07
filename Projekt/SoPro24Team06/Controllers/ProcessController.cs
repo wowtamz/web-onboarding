@@ -390,6 +390,11 @@ namespace SoPro24Team06.Controllers
                 TempData["detailProcessId"] = processId;
                 return Redirect($"/Assignment/Edit/{assignmentId}");
             }
+            else if (process.WorkerOfReference.Id == GetCurrentUserId())
+            {
+                TempData["detailProcessId"] = processId;
+                return Redirect($"/Assignment/Edit/{assignmentId}");
+            }
             return RedirectToAction("Index");
         }
 
