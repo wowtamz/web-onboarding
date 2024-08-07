@@ -9,7 +9,14 @@ namespace SoPro24Team06.ViewModels
 {
     public class AssignmentDetailsViewModel
     {
+        /// <summary>
+        /// Assignemnt wich is to be displayed
+        /// </summary>
         public Assignment Assignment { get; set; }
+
+        /// <summary>
+        /// Title of the Process to wich the Assignemnt belongsS
+        /// </summary>
         public string? ProcessTitle { get; set; }
 
         /// <summary>
