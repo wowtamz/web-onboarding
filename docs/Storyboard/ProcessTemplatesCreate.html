@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>storyboard</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto&amp;display=swap">
+    <link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/bs-theme-overrides.css">
+    <link rel="stylesheet" href="assets/css/Navbar-Centered-Links-icons.css">
+</head>
+
+<body>
+    <!-- Start: Navbar Makandra -->
+    <nav class="navbar navbar-expand-md sticky-top bg-primary bg-opacity-75 border rounded-pill shadow-sm mx-auto py-3" style="border-radius: 25;padding: 8px;padding-left: 13px;margin: 12px auto;margin-left: auto;width: 1200px;height: auto;max-height: 60px;margin-top: 12px;margin-right: auto;margin-bottom: 12px;">
+        <div class="container-md"><a class="navbar-brand d-flex align-items-center" href="Homepage.html"><span><img src="assets/img/logo.svg" width="146" height="48"></span></a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-3"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navcol-3">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link active fs-5" href="Process.html" style="font-size: 24px;font-weight: bold;">Vorgänge</a></li>
+                    <li class="nav-item"><a class="nav-link active fs-5" href="ProcessTemplates.html" style="font-size: 24px;font-weight: bold;">Prozesse</a></li>
+                    <li class="nav-item"><a class="nav-link active fs-5" href="AssignmentTemplate.html" style="font-size: 24px;font-weight: bold;">Aufgaben</a></li>
+                    <li class="nav-item"><a class="nav-link active fs-5" href="Administration.html" style="font-size: 24px;font-weight: bold;">Verwaltung</a></li>
+                </ul><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-envelope-exclamation-fill" style="font-size: 34px;">
+                    <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.026A2 2 0 0 0 2 14h6.256A4.493 4.493 0 0 1 8 12.5a4.49 4.49 0 0 1 1.606-3.446l-.367-.225L8 9.586l-1.239-.757ZM16 4.697v4.974A4.491 4.491 0 0 0 12.5 8a4.49 4.49 0 0 0-1.965.45l-.338-.207z"></path>
+                    <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1.5a.5.5 0 0 1-1 0V11a.5.5 0 0 1 1 0m0 3a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"></path>
+                </svg>
+            </div>
+        </div>
+    </nav><!-- End: Navbar Makandra -->
+    <form>
+        <fieldset style="margin-top: 8px;">
+            <legend>Prozesstitel</legend><input class="form-control" type="text">
+        </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend>Vertragstyp</legend><button class="btn btn-primary" type="button" data-bs-target="#modal-1" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;">Vertragstyp</button>
+        </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend>Rolle</legend><button class="btn btn-primary" type="button" data-bs-target="#modal-2" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;margin-right: 12px;">Rolle</button>
+        </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend>Abteilung</legend><button class="btn btn-primary" type="button" data-bs-target="#modal-1" data-bs-toggle="modal" style="margin-top: 0px;margin-bottom: 0px;">Abteilung</button>
+        </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend>Beschreibung</legend><textarea class="form-control"></textarea>
+        </fieldset>
+        <fieldset style="margin-top: 8px;">
+            <legend>Aufgaben<button class="btn btn-primary" type="button" style="margin-left: 16px;" data-bs-target="#modal-1" data-bs-toggle="modal">Aufgaben hinzufügen</button></legend>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Titel</th>
+                            <th>Anleitung</th>
+                            <th>Aufgabenzuständiger</th>
+                            <th>Vertragsart</th>
+                            <th>Abteilung</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SSH Key erstellen</td>
+                            <td><a href="#" data-bs-target="#modal-3" data-bs-toggle="modal">Mehr anzeigen</a></td>
+                            <td>IT</td>
+                            <td>Werkstudent</td>
+                            <td>Developer</td>
+                            <td>1Wochen vor Start</td>
+                            <td class="d-flex flex-row justify-content-evenly"><a data-bs-target="#modal-1" data-bs-toggle="modal"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
+                                        <path fill-rule="evenodd" d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5"></path>
+                                        <path fill-rule="evenodd" d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z"></path>
+                                    </svg></a><a href="AssignmentTemplateEdit.html"><i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i></a><button class="btn-close" type="button" aria-label="Close"></button></td>
+                        </tr>
+                        <tr>
+                            <td>Laptop einrichten</td>
+                            <td><a href="#">Mehr anzeigen</a></td>
+                            <td>Bezugsperson</td>
+                            <td>Werkstudent</td>
+                            <td>Developer</td>
+                            <td>2 Wochen vor Start</td>
+                            <td class="d-flex flex-row justify-content-evenly"><a data-bs-target="#modal-1" data-bs-toggle="modal"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
+                                        <path fill-rule="evenodd" d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5"></path>
+                                        <path fill-rule="evenodd" d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z"></path>
+                                    </svg></a><a href="AssignmentTemplateEdit.html"><i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i></a><button class="btn-close" type="button" aria-label="Close"></button></td>
+                        </tr>
+                        <tr>
+                            <td>Vertrag abschließen</td>
+                            <td><a href="#">Mehr anzeigen</a></td>
+                            <td>Geschäftsleitung</td>
+                            <td>Vollzeit</td>
+                            <td>Personal</td>
+                            <td>1 Wochen vor Start</td>
+                            <td class="d-flex flex-row justify-content-evenly"><a data-bs-target="#modal-1" data-bs-toggle="modal"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-box-arrow-up-left fs-4">
+                                        <path fill-rule="evenodd" d="M7.364 3.5a.5.5 0 0 1 .5-.5H14.5A1.5 1.5 0 0 1 16 4.5v10a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 14.5V7.864a.5.5 0 1 1 1 0V14.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-10a.5.5 0 0 0-.5-.5H7.864a.5.5 0 0 1-.5-.5"></path>
+                                        <path fill-rule="evenodd" d="M0 .5A.5.5 0 0 1 .5 0h5a.5.5 0 0 1 0 1H1.707l8.147 8.146a.5.5 0 0 1-.708.708L1 1.707V5.5a.5.5 0 0 1-1 0z"></path>
+                                    </svg></a><a href="AssignmentTemplateEdit.html"><i class="far fa-edit" style="font-size: 20px;color: rgb(0,0,0);"></i></a><button class="btn-close" type="button" aria-label="Close"></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </fieldset><button class="btn btn-primary" type="submit" style="margin-top: 12px;">Erstellen</button>
+    </form><!-- Start: AufgabenModal -->
+    <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Füge weitere Aufgaben hinzu</h4><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Aufgabentitel</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>SSH Key erstellen</td>
+                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-check-lg fs-3 text-success">
+                                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022"></path>
+                                        </svg></td>
+                                </tr>
+                                <tr>
+                                    <td>Laptop einrichten</td>
+                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-check-lg fs-3 text-success">
+                                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022"></path>
+                                        </svg></td>
+                                </tr>
+                                <tr>
+                                    <td>Vertrag abschließen</td>
+                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-ban fs-3 text-danger">
+                                            <path d="M15 8a6.973 6.973 0 0 0-1.71-4.584l-9.874 9.875A7 7 0 0 0 15 8M2.71 12.584l9.874-9.875a7 7 0 0 0-9.874 9.874ZM16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"></path>
+                                        </svg></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button><button class="btn btn-primary" type="button">Speichern</button></div>
+            </div>
+        </div>
+    </div><!-- End: AufgabenModal -->
+    <!-- Start: RollenModal -->
+    <div class="modal fade visible" role="dialog" tabindex="-1" id="modal-2">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Füge weitere Rollen hinzu</h4><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Rolle</th>
+                                    <th>Aktion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Developer</td>
+                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-check-lg fs-3 text-success">
+                                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022"></path>
+                                        </svg></td>
+                                </tr>
+                                <tr>
+                                    <td>Personaler</td>
+                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-check-lg fs-3 text-success">
+                                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022"></path>
+                                        </svg></td>
+                                </tr>
+                                <tr>
+                                    <td>Externer</td>
+                                    <td class="text-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-ban fs-3 text-danger">
+                                            <path d="M15 8a6.973 6.973 0 0 0-1.71-4.584l-9.874 9.875A7 7 0 0 0 15 8M2.71 12.584l9.874-9.875a7 7 0 0 0-9.874 9.874ZM16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"></path>
+                                        </svg></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Zurück</button><button class="btn btn-primary" type="button">Speichern</button></div>
+            </div>
+        </div>
+    </div><!-- End: RollenModal -->
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>
