@@ -1,0 +1,99 @@
+﻿@inject IServiceProvider ServiceProvider
+@using Microsoft.AspNetCore.Identity
+@using SoPro24Team06.Models
+@using System.Security.Claims
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SoPro24Team06</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto&amp;display=swap">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="~/css/bs-theme-overrides.css">
+    <link rel="stylesheet" href="~/css/Navbar-Centered-Links-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+</head>
+
+<body>
+    <!-- Start: Navbar Makandra -->
+    <nav class="navbar navbar-expand-sm sticky-top bg-primary bg-opacity-75 border rounded-pill shadow-sm my-2 maw-1200"
+        style="height: 60px;">
+        <div class="container-md">
+            <!-- Link to Homepage -->
+            <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                <img src="~/img/logo.svg" width="146" height="48" alt="Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navcol-1"
+                aria-controls="navcol-1" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navcol-1">
+                @if (User.Identity.IsAuthenticated && !(await User.IsLockedOutAsync(ServiceProvider)))
+                {
+                    <ul class="navbar-nav mx-auto">
+                        <!-- Link to Process -->
+                        <li class="nav-item">
+                            <a class="nav-link fs-5 text-dark" asp-controller="Process" asp-action="Index">Vorgänge</a>
+                        </li>
+                        <!-- Link to ProcessTemplates -->
+                        <li class="nav-item">
+                            <a class="nav-link fs-5 text-dark" asp-controller="ProcessTemplate"
+                                asp-action="Index">Prozesse</a>
+                        </li>
+                        <!-- Link to AssignmentTemplates -->
+                        <li class="nav-item">
+                            <a class="nav-link fs-5 text-dark" asp-controller="Assignment"
+                                asp-action="Index">Aufgaben</a>
+                        </li>
+                        @if (User.IsInRole("Administrator"))
+                        {
+                            <!-- Link to Administration -->
+                            <li class="nav-item">
+                                <a class="nav-link fs-5 text-dark" asp-area="" asp-controller="Administration"
+                                    asp-action="Index">Verwaltung</a>
+                            </li>
+                        }
+                    </ul>
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home")"
+                        method="post" class="d-inline">
+                        <button type="submit" class="btn btn-link btn-spacing mx-1"
+                            style="background-color: transparent; border: none;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="black"
+                                class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                    d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z" />
+                                <path fill-rule="evenodd"
+                                    d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
+                            </svg>
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </nav>
+    <!-- End: Navbar Makandra -->
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top text-muted py-3">
+        <div class="container">
+            &copy; 2024 - SoPro24Team06
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+
+</html>
