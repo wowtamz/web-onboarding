@@ -1,0 +1,1737 @@
+{
+    "Roles":[
+        "Administrator",
+        "IT",
+        "Backoffice",
+        "Geschäftsleitung",
+        "Personal"
+    ],
+    "Users":[
+        {
+            "FullName":"Admin",
+            "Email":"admin@replay.de",
+            "Password":"Admin1!",
+            "Roles":[
+                "Administrator"
+            ],
+            "Locked":false
+        },
+        {
+            "FullName":"Koenig v. Augsburg",
+            "Email":"koenig@replay.de",
+            "Password":"GHLutz13!",
+            "Roles":[
+                "Geschäftsleitung"
+            ],
+            "Locked":false
+        },
+        {
+            "FullName":"Gerhard",
+            "Email":"gerhard@replay.de",
+            "Password":"Gerhard1!",
+            "Roles":[
+                "Backoffice"
+            ],
+            "Locked":false
+        },
+        {
+            "FullName":"Bill Yard",
+            "Email":"bill@replay.de",
+            "Password":"B1llard!",
+            "Roles":[
+                "Backoffice"
+            ],
+            "Locked":false
+        },
+        {
+            "FullName":"Karl Toffel",
+            "Email":"karl@replay.de",
+            "Password":"Erdapfel1!",
+            "Roles":[
+                "IT"
+            ],
+            "Locked":false
+        },
+        {
+            "FullName":"Wilma Ruhe",
+            "Email":"wilma@replay.de",
+            "Password":"Pssssst1!",
+            "Roles":[
+                
+            ],
+            "Locked":false
+        }
+    ],
+    "Departments":[
+        {
+            "Id":1,
+            "Name":"Entwicklung"
+        },
+        {
+            "Id":2,
+            "Name":"Operations"
+        },
+        {
+            "Id":3,
+            "Name":"UI/UX"
+        },
+        {
+            "Id":4,
+            "Name":"Projektmanagement"
+        },
+        {
+            "Id":5,
+            "Name":"Backoffice"
+        },
+        {
+            "Id":6,
+            "Name":"Sales"
+        },
+        {
+            "Id":7,
+            "Name":"People & Culture"
+        }
+    ],
+    "DueTimes":[
+        {
+            "Id":1,
+            "Label":"ASAP",
+            "Days":0,
+            "Weeks":0,
+            "Months":0
+        },
+        {
+            "Id":2,
+            "Label":"2 Wochen vor Start",
+            "Days":0,
+            "Weeks":-2,
+            "Months":0
+        },
+        {
+            "Id":3,
+            "Label":"3 Wochen nach Arbeitsbeginn",
+            "Days":21,
+            "Weeks":0,
+            "Months":0
+        },
+        {
+            "Id":4,
+            "Label":"3 Monate nach Arbeitsbeginn",
+            "Days":0,
+            "Weeks":0,
+            "Months":3
+        },
+        {
+            "Id":5,
+            "Label":"6 Monate nach Arbeitsbeginn",
+            "Days":0,
+            "Weeks":0,
+            "Months":6
+        },
+        {
+            "Id":6,
+            "Label":"1 Monat vor Arbeitsbeginn",
+            "Days":0,
+            "Weeks":0,
+            "Months":-1
+        },
+        {
+            "Id":7,
+            "Label":"1 Monat vor Arbeitsbeginn",
+            "Days":0,
+            "Weeks":-2,
+            "Months":0
+        }
+    ],
+    "Contracts":[
+        {
+            "Id":1,
+            "Label":"Festanstellung"
+        },
+        {
+            "Id":2,
+            "Label":"Trainee"
+        },
+        {
+            "Id":3,
+            "Label":"Praktikant"
+        },
+        {
+            "Id":4,
+            "Label":"Werkstudent"
+        }
+    ],
+    "ProcessTemplates":[
+        {
+            "Title":"Onboarding",
+            "Description":"Description for Process Template 1",
+            "RolesWithAccess":[
+                "Administrator",
+                "Geschäftsleitung",
+                "Personal"
+            ],
+            "ContractOfRefWorkerId":1,
+            "DepartmentOfRefWorkerId":2,
+            "AssignmentTemplates":[
+                {
+                    "Title":"Informationen zu Rahmenbedingungen des Vertrags einholen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Informationen zu Rahmenbedingungen des Vertrags einholen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Vertrag erstellen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Vertrag vor ab neuen Mitarbeitenden per Mail senden",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Vertrag unterschreiben lassen durch Geschäftsführung",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Personalbogen inkl. erforderlicher Unterlagen per Mail an neuen MA zusenden und ablegen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Unterstützung für Umzug (500 €) ja/nein abfragen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Unterstützung für Umzug (500 €) an Personal kommunizieren",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"GSuite-Konto erstellen",
+                    "Instructions":"Erstellen Sie ein GSuite-Konto für den neuen Mitarbeiter und stellen Sie sicher, dass die Zugangsdaten sicher gespeichert und übergeben werden. Lassen Sie GSuite ein zufälliges Passwort erstellen und kopieren Sie dieses in die Zwischenablage. In Ihrem persönlichen Bereich auf GDrive erstellen Sie ein neues Dokument mit der Vorlage 'Initiale Zugangsdaten' und fügen die GSuite-Zugangsdaten in dieses Dokument ein. Drucken Sie das Dokument aus und legen Sie die Papier-Version in einen Umschlag, den Sie dem neuen Mitarbeiter übergeben können. Löschen Sie anschließend das Dokument aus Ihrem GDrive. Fügen Sie den Benutzer in die organisatorische Einheit ein, die am besten zu seiner Tätigkeit passt, und klicken Sie auf 'Speichern'. Wenn der neue Mitarbeiter ein technischer Mitarbeiter ist, fügen Sie ihn in die Gruppen alle und entwickler hinzu. Informieren Sie Anne Kolbe aus der Personalabteilung, dass das E-Mail-Konto nun bereit ist. Sie wird dann ein Konto mit Time Machine für den neuen Mitarbeiter erstellen.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT"
+                },
+                {
+                    "Title":"GitLab-Konto für technische Mitarbeiter erstellen",
+                    "Instructions":"Erstellen Sie ein GitLab-Konto für den neuen technischen Mitarbeiter und senden Sie ihm das Passwort per E-Mail. Gehen Sie auf GitLab (https://code.sopro.de/admin/users/new), erstellen Sie ein Konto für den Benutzer und sorgen Sie dafür, dass das Passwort an ihn gesendet wird.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Departments":[
+                        {
+                            "DepartmentId":1
+                        }
+                    ]
+                },
+                {
+                    "Title":"Kartendecks Einladung",
+                    "Instructions":"Laden Sie den neuen Mitarbeiter zu den relevanten Kartendecks ein, damit er Zugang zu den notwendigen Informationen und Projekten hat. Dies beinhaltet die Kartendecks dev, orga, besprechungsprotokolle, zammad, sopro operations, sopro projektvorstellungen und sopro-projektleitung-curriculum.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT"
+                },
+                {
+                    "Title":"Slack-Einladung",
+                    "Instructions":"Fordern Sie eine Einladung für den neuen Mitarbeiter in Slack an, damit er mit dem Team kommunizieren kann. Nutzen Sie den Button oben rechts, der sopro sagt, und füllen Sie das Formular aus. Die Anfrage wird automatisch genehmigt, weil die E-Mail mit @sopro.de endet.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT"
+                },
+                {
+                    "Title":"Unterlagen in den jeweiligen Monatsordner für Gehaltsabrechnung DSG hochladen (Vertrag, PB, Perso, SV-Ausweis) und in der Übersicht Änderungen einpÍegen",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Mail an Ops wegen Vorbereitung/ Bestellung Hardware (Laptop, Handy, etc.) und Einrichtung Accounts",
+                    "Instructions":"Mail Vorlage:\n\nBetreff: Neue MA: XXX \n\nLiebes Ops-Team, \n\nbitte bereitet a) Hardware und b) Accounts für unseren neuen Mitarbeitenden XXX vor. Er beginnt am XX.YY.ZZZZ als XXX und bekommt die Default-Ausstattung. Bitte gebt mir Bescheid, ob und wann die Ausrüstung bereit liegt. \n\nDanke und viele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Backoffice bezüglich Informationen und Termin anschreiben",
+                    "Instructions":"\n\n- Backoffice bezüglich Informationen und Termin anschreiben \nMail Vorlage:\n\nLiebes Backoffice-Team, \n\nwir bekommen am XX.YY.ZZZZ einen neuen Mitarbeitenden: XXX in der Position als XXX. Bitte bereitet unseren sopro-Rucksack inklusive Karte sowie Schlüssel vor und bestellt ein vegetarisches Mittagessen für sie/ihn. \n\nPlant am zweiten Tag auch eine kleine Führung durch unser Büro und auch unser Gebäude mit ein und stellt hier gleich einen Termin mit mir ein. \n\nBitte versendet auch das Willkommenspaket etwa vier Wochen vor Arbeitsbeginn folgende Privatadresse: XXX. \n\nÜber die genaue Uhrzeit am ersten Arbeitstag informiere ich euch noch in einer extra E-Mail. \n\nBuddy wird XXX sein und ist bereits informiert. Bitte gebt mir Bescheid, ob und wann die Ausrüstung bereit liegt. \n\nDanke und viele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Buddy Anfragen",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Einladung neuer MA zu anstehenden Teamevents",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Vernetzung über Soziale Medien",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Versand Willkommens-Box",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":2,
+                    "AssignedRole":"Backoffice"
+                },
+                {
+                    "Title":"Mail zum 1. Tag im Büro, Vorabinformationen (One Pager - FAQs erster Tag), Uhrzeit, Parkmöglichkeiten, Kleidergröße und Ansprechpartnern vor Ort",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Anlegen in der Time Machine, Einrichten Deskbot-Account und erfragen Mailadresse bei Ops",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Einträge im Bereich Team: Senior-Peer, Bereich, Festanstellung seit, Position und Position seit",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Klären Zuordnung Monthly Peer mit GL-Runde",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Klären Zuordnung Buddy",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Mail an BackoÎce zur genauen Uhrzeit und Kleidergröße",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Mail Ops wegen Ansprechpartner vor Ort",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Mail Buddy wegen Anwesenheit im Büro",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Brief ausdrucken",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Willkommensmail an das Team über alle@ versenden",
+                    "Instructions":"### Festangestellt\n\nLiebes Team,\n\n_Vorname_ _Nachname_ wird uns ab dem DD.MM.YYYY im Bereich Entwicklung / Backoffice / Operations / UI/UX / Marketing unterstützen.\n\nHerzlich Willkommen bei sopro!\n\nViele Grüße\n\n\n### Trainee\n\nLiebes Team,\n\n_Vorname_ _Nachname_ wird ab dem DD.MM.YYYY unser Trainee-Programm im Bereich Entwicklung / Operations absolvieren.\n\nHerzlich Willkommen bei sopro und viel Erfolg!\n\nViele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Empfang durch BackoÎce und People & Culture",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":7,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Übergabe Package, Schlüssel, Karte und Hardware",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Begleitung durch Ops bei der Einrichtung PC",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Büroführung, Vorstellung Kolleg*innen und Schlüssel-/ Kartenübergabe durch BackoÎce",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Gemeinsames Mittagessen mit Buddy",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Erklärung Organisatorisches und fehlende Unterlagen (NachwG, Datenschutz) durch People & Culture",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Einrichtung PC und Accounts abschließen inkl. Erstellung Sicherungskopie mit Ops",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Begrüßung im Weekly",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Vorstellung Buddy",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":7,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"nach drei Wochen: Angekommen? Erwartungen? Fragen? Onboarding-Card 2. Teil? (People & Culture)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"nach drei Monaten: Angekommen? Erwartungen und Zufriedenheit? Verbesserungsvorschläge? (People & Culture)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"nach sechs Monaten: Angekommen? Perspektiven? Probezeitende (Geschäftsführung)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Termine für Onboarding-Gespräche",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Termine für Probezeit und Festanstellung Trainee",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal"
+                },
+                {
+                    "Title":"Hardware",
+                    "Instructions":"Die Hardware, die wir für die Arbeit im Büro zur Verfügung stellen:\n- Notebook\n- Externe USB-Festplatte zum Erstellen von Backups deines Laptops\n- Tastatur\n- Headset (Beachte: Bei unserem Standard-Headset gibt es am Kabel einen Schalter, der am Anfang auf stumm gestellt ist.)\n- Maus\n- Mauspad\n- In-Ear-Kopfhörer zum Hören von Musik. Verwende dazu bitte keine Over-Ear-Kopfhörer (es sei denn, sie haben ein geschlossenes Design), da andere Personen im selben Raum alles hören können.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Grundlagen der Büro-IT-Sicherheit",
+                    "Instructions":"Lies dir durch und merk dir, wie wir mit Passwörtern, Browsererweiterungen und Sicherheitsgrundlagen umgehen. Frag unseren Informationssicherheitsbeauftragten (ISB), wie wir mit Passwörtern umgehen. Es wird von dir erwartet, dass du eindeutige, nicht speicherbare Passwörter für jedes deiner Konten in Keepass erstellst und dir niemals ein Passwort merkst, außer für deine Festplattenverschlüsselung, deinen Linux-Benutzer und dein Keepass. Bitte verwende keine privaten Geräte für die Arbeit, außer bei den im Lauf des Onboardings ausdrücklich genannten Ausnahmen.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":""
+                },
+                {
+                    "Title":"Anmeldedaten einrichten",
+                    "Instructions":"Stelle sicher, dass du deine Passwörter nicht mit der Google Chrome Cloud synchronisierst.\n(P) Erstelle einen neuen Basic-Auth-Passwort-Hash und schicke ihn per E-Mail an ops@sopro.de.\n(P) Sende diesen Passwort-Hash an ops@sopro.de und bitte darum, in die allgemeine Basisauthentifizierung von sopro aufgenommen zu werden.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Contracts":[
+                        {
+                            "ContractId":1
+                        }
+                    ]
+                },
+                {
+                    "Title":"Erste Schritte mit GitLab",
+                    "Instructions":"(T) Ops hat einen Gitlab-Benutzer für dich erstellt. Du solltest eine E-Mail mit einem temporären Passwort erhalten haben.\n(T) Füge deinen SSH-Schlüssel in dein GitLab-Profil ein.\nDu darfst dein privates Smartphone für die erforderliche Zwei-Faktoren-Authentifizierung verwenden.\n(T) Richte eine vernünftige git-config ein.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Departments":[
+                        {
+                            "DepartmentId":1
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "Processes":[
+        {
+            "Title":"Neuzugang HR",
+            "Description":"Demo Daten für SoProAbnahme",
+            "Supervisor":"koenig@replay.de",
+            "WorkerOfReference":"bill@replay.de",
+            "Department":7,
+            "ContractOfRefWorker":2,
+            "StartDate":"06-08-2024",
+            "DueDate":"13-09-2024",
+            "isArchived":false,
+            "Assignments":[
+                {
+                    "Title":"Informationen zu Rahmenbedingungen des Vertrags einholen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Informationen zu Rahmenbedingungen des Vertrags einholen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Vertrag erstellen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Vertrag vor ab neuen Mitarbeitenden per Mail senden",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Vertrag unterschreiben lassen durch Geschäftsführung",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Personalbogen inkl. erforderlicher Unterlagen per Mail an neuen MA zusenden und ablegen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Unterstützung für Umzug (500 €) ja/nein abfragen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Unterstützung für Umzug (500 €) an Personal kommunizieren",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"GSuite-Konto erstellen",
+                    "Instructions":"Erstellen Sie ein GSuite-Konto für den neuen Mitarbeiter und stellen Sie sicher, dass die Zugangsdaten sicher gespeichert und übergeben werden. Lassen Sie GSuite ein zufälliges Passwort erstellen und kopieren Sie dieses in die Zwischenablage. In Ihrem persönlichen Bereich auf GDrive erstellen Sie ein neues Dokument mit der Vorlage 'Initiale Zugangsdaten' und fügen die GSuite-Zugangsdaten in dieses Dokument ein. Drucken Sie das Dokument aus und legen Sie die Papier-Version in einen Umschlag, den Sie dem neuen Mitarbeiter übergeben können. Löschen Sie anschließend das Dokument aus Ihrem GDrive. Fügen Sie den Benutzer in die organisatorische Einheit ein, die am besten zu seiner Tätigkeit passt, und klicken Sie auf 'Speichern'. Wenn der neue Mitarbeiter ein technischer Mitarbeiter ist, fügen Sie ihn in die Gruppen alle und entwickler hinzu. Informieren Sie Anne Kolbe aus der Personalabteilung, dass das E-Mail-Konto nun bereit ist. Sie wird dann ein Konto mit Time Machine für den neuen Mitarbeiter erstellen.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":0
+                },
+                {
+                    "Title":"GitLab-Konto für technische Mitarbeiter erstellen",
+                    "Instructions":"Erstellen Sie ein GitLab-Konto für den neuen technischen Mitarbeiter und senden Sie ihm das Passwort per E-Mail. Gehen Sie auf GitLab (https://code.sopro.de/admin/users/new), erstellen Sie ein Konto für den Benutzer und sorgen Sie dafür, dass das Passwort an ihn gesendet wird.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":0,
+                    "Departments":[
+                        {
+                            "DepartmentId":1
+                        }
+                    ]
+                },
+                {
+                    "Title":"Kartendecks Einladung",
+                    "Instructions":"Laden Sie den neuen Mitarbeiter zu den relevanten Kartendecks ein, damit er Zugang zu den notwendigen Informationen und Projekten hat. Dies beinhaltet die Kartendecks dev, orga, besprechungsprotokolle, zammad, sopro operations, sopro projektvorstellungen und sopro-projektleitung-curriculum.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":0
+                },
+                {
+                    "Title":"Slack-Einladung",
+                    "Instructions":"Fordern Sie eine Einladung für den neuen Mitarbeiter in Slack an, damit er mit dem Team kommunizieren kann. Nutzen Sie den Button oben rechts, der sopro sagt, und füllen Sie das Formular aus. Die Anfrage wird automatisch genehmigt, weil die E-Mail mit @sopro.de endet.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":0
+                },
+                {
+                    "Title":"Unterlagen in den jeweiligen Monatsordner für Gehaltsabrechnung DSG hochladen (Vertrag, PB, Perso, SV-Ausweis) und in der Übersicht Änderungen einpÍegen",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Mail an Ops wegen Vorbereitung/ Bestellung Hardware (Laptop, Handy, etc.) und Einrichtung Accounts",
+                    "Instructions":"Mail Vorlage:\n\nBetreff: Neue MA: XXX \n\nLiebes Ops-Team, \n\nbitte bereitet a) Hardware und b) Accounts für unseren neuen Mitarbeitenden XXX vor. Er beginnt am XX.YY.ZZZZ als XXX und bekommt die Default-Ausstattung. Bitte gebt mir Bescheid, ob und wann die Ausrüstung bereit liegt. \n\nDanke und viele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Backoffice bezüglich Informationen und Termin anschreiben",
+                    "Instructions":"\n\n- Backoffice bezüglich Informationen und Termin anschreiben \nMail Vorlage:\n\nLiebes Backoffice-Team, \n\nwir bekommen am XX.YY.ZZZZ einen neuen Mitarbeitenden: XXX in der Position als XXX. Bitte bereitet unseren sopro-Rucksack inklusive Karte sowie Schlüssel vor und bestellt ein vegetarisches Mittagessen für sie/ihn. \n\nPlant am zweiten Tag auch eine kleine Führung durch unser Büro und auch unser Gebäude mit ein und stellt hier gleich einen Termin mit mir ein. \n\nBitte versendet auch das Willkommenspaket etwa vier Wochen vor Arbeitsbeginn folgende Privatadresse: XXX. \n\nÜber die genaue Uhrzeit am ersten Arbeitstag informiere ich euch noch in einer extra E-Mail. \n\nBuddy wird XXX sein und ist bereits informiert. Bitte gebt mir Bescheid, ob und wann die Ausrüstung bereit liegt. \n\nDanke und viele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Buddy Anfragen",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Einladung neuer MA zu anstehenden Teamevents",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Vernetzung über Soziale Medien",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Versand Willkommens-Box",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":2,
+                    "AssignedRole":"Backoffice",
+                    "Status":0
+                },
+                {
+                    "Title":"Mail zum 1. Tag im Büro, Vorabinformationen (One Pager - FAQs erster Tag), Uhrzeit, Parkmöglichkeiten, Kleidergröße und Ansprechpartnern vor Ort",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Anlegen in der Time Machine, Einrichten Deskbot-Account und erfragen Mailadresse bei Ops",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Einträge im Bereich Team: Senior-Peer, Bereich, Festanstellung seit, Position und Position seit",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Klären Zuordnung Monthly Peer mit GL-Runde",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Klären Zuordnung Buddy",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Mail an BackoÎce zur genauen Uhrzeit und Kleidergröße",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Mail Ops wegen Ansprechpartner vor Ort",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Mail Buddy wegen Anwesenheit im Büro",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Brief ausdrucken",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Willkommensmail an das Team über alle@ versenden",
+                    "Instructions":"### Festangestellt\n\nLiebes Team,\n\n_Vorname_ _Nachname_ wird uns ab dem DD.MM.YYYY im Bereich Entwicklung / Backoffice / Operations / UI/UX / Marketing unterstützen.\n\nHerzlich Willkommen bei sopro!\n\nViele Grüße\n\n\n### Trainee\n\nLiebes Team,\n\n_Vorname_ _Nachname_ wird ab dem DD.MM.YYYY unser Trainee-Programm im Bereich Entwicklung / Operations absolvieren.\n\nHerzlich Willkommen bei sopro und viel Erfolg!\n\nViele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Empfang durch BackoÎce und People & Culture",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":7,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Übergabe Package, Schlüssel, Karte und Hardware",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Begleitung durch Ops bei der Einrichtung PC",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Büroführung, Vorstellung Kolleg*innen und Schlüssel-/ Kartenübergabe durch BackoÎce",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Gemeinsames Mittagessen mit Buddy",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Erklärung Organisatorisches und fehlende Unterlagen (NachwG, Datenschutz) durch People & Culture",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Einrichtung PC und Accounts abschließen inkl. Erstellung Sicherungskopie mit Ops",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Begrüßung im Weekly",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Vorstellung Buddy",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":7,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"nach drei Wochen: Angekommen? Erwartungen? Fragen? Onboarding-Card 2. Teil? (People & Culture)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"nach drei Monaten: Angekommen? Erwartungen und Zufriedenheit? Verbesserungsvorschläge? (People & Culture)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"nach sechs Monaten: Angekommen? Perspektiven? Probezeitende (Geschäftsführung)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Termine für Onboarding-Gespräche",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Termine für Probezeit und Festanstellung Trainee",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":0
+                },
+                {
+                    "Title":"Hardware",
+                    "Instructions":"Die Hardware, die wir für die Arbeit im Büro zur Verfügung stellen:\n- Notebook\n- Externe USB-Festplatte zum Erstellen von Backups deines Laptops\n- Tastatur\n- Headset (Beachte: Bei unserem Standard-Headset gibt es am Kabel einen Schalter, der am Anfang auf stumm gestellt ist.)\n- Maus\n- Mauspad\n- In-Ear-Kopfhörer zum Hören von Musik. Verwende dazu bitte keine Over-Ear-Kopfhörer (es sei denn, sie haben ein geschlossenes Design), da andere Personen im selben Raum alles hören können.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Grundlagen der Büro-IT-Sicherheit",
+                    "Instructions":"Lies dir durch und merk dir, wie wir mit Passwörtern, Browsererweiterungen und Sicherheitsgrundlagen umgehen. Frag unseren Informationssicherheitsbeauftragten (ISB), wie wir mit Passwörtern umgehen. Es wird von dir erwartet, dass du eindeutige, nicht speicherbare Passwörter für jedes deiner Konten in Keepass erstellst und dir niemals ein Passwort merkst, außer für deine Festplattenverschlüsselung, deinen Linux-Benutzer und dein Keepass. Bitte verwende keine privaten Geräte für die Arbeit, außer bei den im Lauf des Onboardings ausdrücklich genannten Ausnahmen.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":0
+                },
+                {
+                    "Title":"Anmeldedaten einrichten",
+                    "Instructions":"Stelle sicher, dass du deine Passwörter nicht mit der Google Chrome Cloud synchronisierst.\n(P) Erstelle einen neuen Basic-Auth-Passwort-Hash und schicke ihn per E-Mail an ops@sopro.de.\n(P) Sende diesen Passwort-Hash an ops@sopro.de und bitte darum, in die allgemeine Basisauthentifizierung von sopro aufgenommen zu werden.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":0,
+                    "Contracts":[
+                        {
+                            "ContractId":1
+                        }
+                    ]
+                },
+                {
+                    "Title":"Erste Schritte mit GitLab",
+                    "Instructions":"(T) Ops hat einen Gitlab-Benutzer für dich erstellt. Du solltest eine E-Mail mit einem temporären Passwort erhalten haben.\n(T) Füge deinen SSH-Schlüssel in dein GitLab-Profil ein.\nDu darfst dein privates Smartphone für die erforderliche Zwei-Faktoren-Authentifizierung verwenden.\n(T) Richte eine vernünftige git-config ein.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":0,
+                    "Departments":[
+                        {
+                            "DepartmentId":1
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Title":"Neuzugang IT",
+            "Description":"Demo Daten für SoProAbnahme",
+            "Supervisor":"gerhard@replay.de",
+            "WorkerOfReference":"karl@replay.de",
+            "Department":1,
+            "ContractOfRefWorker":1,
+            "StartDate":"06-08-2024",
+            "DueDate":"27-07-2024",
+            "isArchived":true,
+            "Assignments":[
+                {
+                    "Title":"Informationen zu Rahmenbedingungen des Vertrags einholen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Informationen zu Rahmenbedingungen des Vertrags einholen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Vertrag erstellen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Vertrag vor ab neuen Mitarbeitenden per Mail senden",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Vertrag unterschreiben lassen durch Geschäftsführung",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Personalbogen inkl. erforderlicher Unterlagen per Mail an neuen MA zusenden und ablegen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Unterstützung für Umzug (500 €) ja/nein abfragen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Unterstützung für Umzug (500 €) an Personal kommunizieren",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"GSuite-Konto erstellen",
+                    "Instructions":"Erstellen Sie ein GSuite-Konto für den neuen Mitarbeiter und stellen Sie sicher, dass die Zugangsdaten sicher gespeichert und übergeben werden. Lassen Sie GSuite ein zufälliges Passwort erstellen und kopieren Sie dieses in die Zwischenablage. In Ihrem persönlichen Bereich auf GDrive erstellen Sie ein neues Dokument mit der Vorlage 'Initiale Zugangsdaten' und fügen die GSuite-Zugangsdaten in dieses Dokument ein. Drucken Sie das Dokument aus und legen Sie die Papier-Version in einen Umschlag, den Sie dem neuen Mitarbeiter übergeben können. Löschen Sie anschließend das Dokument aus Ihrem GDrive. Fügen Sie den Benutzer in die organisatorische Einheit ein, die am besten zu seiner Tätigkeit passt, und klicken Sie auf 'Speichern'. Wenn der neue Mitarbeiter ein technischer Mitarbeiter ist, fügen Sie ihn in die Gruppen alle und entwickler hinzu. Informieren Sie Anne Kolbe aus der Personalabteilung, dass das E-Mail-Konto nun bereit ist. Sie wird dann ein Konto mit Time Machine für den neuen Mitarbeiter erstellen.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":2
+                },
+                {
+                    "Title":"GitLab-Konto für technische Mitarbeiter erstellen",
+                    "Instructions":"Erstellen Sie ein GitLab-Konto für den neuen technischen Mitarbeiter und senden Sie ihm das Passwort per E-Mail. Gehen Sie auf GitLab (https://code.sopro.de/admin/users/new), erstellen Sie ein Konto für den Benutzer und sorgen Sie dafür, dass das Passwort an ihn gesendet wird.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":2,
+                    "Departments":[
+                        {
+                            "DepartmentId":1
+                        }
+                    ]
+                },
+                {
+                    "Title":"Kartendecks Einladung",
+                    "Instructions":"Laden Sie den neuen Mitarbeiter zu den relevanten Kartendecks ein, damit er Zugang zu den notwendigen Informationen und Projekten hat. Dies beinhaltet die Kartendecks dev, orga, besprechungsprotokolle, zammad, sopro operations, sopro projektvorstellungen und sopro-projektleitung-curriculum.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":2
+                },
+                {
+                    "Title":"Slack-Einladung",
+                    "Instructions":"Fordern Sie eine Einladung für den neuen Mitarbeiter in Slack an, damit er mit dem Team kommunizieren kann. Nutzen Sie den Button oben rechts, der sopro sagt, und füllen Sie das Formular aus. Die Anfrage wird automatisch genehmigt, weil die E-Mail mit @sopro.de endet.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":2
+                },
+                {
+                    "Title":"Unterlagen in den jeweiligen Monatsordner für Gehaltsabrechnung DSG hochladen (Vertrag, PB, Perso, SV-Ausweis) und in der Übersicht Änderungen einpÍegen",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail an Ops wegen Vorbereitung/ Bestellung Hardware (Laptop, Handy, etc.) und Einrichtung Accounts",
+                    "Instructions":"Mail Vorlage:\n\nBetreff: Neue MA: XXX \n\nLiebes Ops-Team, \n\nbitte bereitet a) Hardware und b) Accounts für unseren neuen Mitarbeitenden XXX vor. Er beginnt am XX.YY.ZZZZ als XXX und bekommt die Default-Ausstattung. Bitte gebt mir Bescheid, ob und wann die Ausrüstung bereit liegt. \n\nDanke und viele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Backoffice bezüglich Informationen und Termin anschreiben",
+                    "Instructions":"\n\n- Backoffice bezüglich Informationen und Termin anschreiben \nMail Vorlage:\n\nLiebes Backoffice-Team, \n\nwir bekommen am XX.YY.ZZZZ einen neuen Mitarbeitenden: XXX in der Position als XXX. Bitte bereitet unseren sopro-Rucksack inklusive Karte sowie Schlüssel vor und bestellt ein vegetarisches Mittagessen für sie/ihn. \n\nPlant am zweiten Tag auch eine kleine Führung durch unser Büro und auch unser Gebäude mit ein und stellt hier gleich einen Termin mit mir ein. \n\nBitte versendet auch das Willkommenspaket etwa vier Wochen vor Arbeitsbeginn folgende Privatadresse: XXX. \n\nÜber die genaue Uhrzeit am ersten Arbeitstag informiere ich euch noch in einer extra E-Mail. \n\nBuddy wird XXX sein und ist bereits informiert. Bitte gebt mir Bescheid, ob und wann die Ausrüstung bereit liegt. \n\nDanke und viele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Buddy Anfragen",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Einladung neuer MA zu anstehenden Teamevents",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Vernetzung über Soziale Medien",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Versand Willkommens-Box",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":2,
+                    "AssignedRole":"Backoffice",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail zum 1. Tag im Büro, Vorabinformationen (One Pager - FAQs erster Tag), Uhrzeit, Parkmöglichkeiten, Kleidergröße und Ansprechpartnern vor Ort",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Anlegen in der Time Machine, Einrichten Deskbot-Account und erfragen Mailadresse bei Ops",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Einträge im Bereich Team: Senior-Peer, Bereich, Festanstellung seit, Position und Position seit",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Klären Zuordnung Monthly Peer mit GL-Runde",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Klären Zuordnung Buddy",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail an BackoÎce zur genauen Uhrzeit und Kleidergröße",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail Ops wegen Ansprechpartner vor Ort",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail Buddy wegen Anwesenheit im Büro",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Brief ausdrucken",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Willkommensmail an das Team über alle@ versenden",
+                    "Instructions":"### Festangestellt\n\nLiebes Team,\n\n_Vorname_ _Nachname_ wird uns ab dem DD.MM.YYYY im Bereich Entwicklung / Backoffice / Operations / UI/UX / Marketing unterstützen.\n\nHerzlich Willkommen bei sopro!\n\nViele Grüße\n\n\n### Trainee\n\nLiebes Team,\n\n_Vorname_ _Nachname_ wird ab dem DD.MM.YYYY unser Trainee-Programm im Bereich Entwicklung / Operations absolvieren.\n\nHerzlich Willkommen bei sopro und viel Erfolg!\n\nViele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Empfang durch BackoÎce und People & Culture",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":7,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Übergabe Package, Schlüssel, Karte und Hardware",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Begleitung durch Ops bei der Einrichtung PC",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Büroführung, Vorstellung Kolleg*innen und Schlüssel-/ Kartenübergabe durch BackoÎce",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Gemeinsames Mittagessen mit Buddy",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Erklärung Organisatorisches und fehlende Unterlagen (NachwG, Datenschutz) durch People & Culture",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Einrichtung PC und Accounts abschließen inkl. Erstellung Sicherungskopie mit Ops",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Begrüßung im Weekly",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Vorstellung Buddy",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":7,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"nach drei Wochen: Angekommen? Erwartungen? Fragen? Onboarding-Card 2. Teil? (People & Culture)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"nach drei Monaten: Angekommen? Erwartungen und Zufriedenheit? Verbesserungsvorschläge? (People & Culture)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"nach sechs Monaten: Angekommen? Perspektiven? Probezeitende (Geschäftsführung)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Termine für Onboarding-Gespräche",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Termine für Probezeit und Festanstellung Trainee",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Hardware",
+                    "Instructions":"Die Hardware, die wir für die Arbeit im Büro zur Verfügung stellen:\n- Notebook\n- Externe USB-Festplatte zum Erstellen von Backups deines Laptops\n- Tastatur\n- Headset (Beachte: Bei unserem Standard-Headset gibt es am Kabel einen Schalter, der am Anfang auf stumm gestellt ist.)\n- Maus\n- Mauspad\n- In-Ear-Kopfhörer zum Hören von Musik. Verwende dazu bitte keine Over-Ear-Kopfhörer (es sei denn, sie haben ein geschlossenes Design), da andere Personen im selben Raum alles hören können.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Grundlagen der Büro-IT-Sicherheit",
+                    "Instructions":"Lies dir durch und merk dir, wie wir mit Passwörtern, Browsererweiterungen und Sicherheitsgrundlagen umgehen. Frag unseren Informationssicherheitsbeauftragten (ISB), wie wir mit Passwörtern umgehen. Es wird von dir erwartet, dass du eindeutige, nicht speicherbare Passwörter für jedes deiner Konten in Keepass erstellst und dir niemals ein Passwort merkst, außer für deine Festplattenverschlüsselung, deinen Linux-Benutzer und dein Keepass. Bitte verwende keine privaten Geräte für die Arbeit, außer bei den im Lauf des Onboardings ausdrücklich genannten Ausnahmen.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Anmeldedaten einrichten",
+                    "Instructions":"Stelle sicher, dass du deine Passwörter nicht mit der Google Chrome Cloud synchronisierst.\n(P) Erstelle einen neuen Basic-Auth-Passwort-Hash und schicke ihn per E-Mail an ops@sopro.de.\n(P) Sende diesen Passwort-Hash an ops@sopro.de und bitte darum, in die allgemeine Basisauthentifizierung von sopro aufgenommen zu werden.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":2,
+                    "Contracts":[
+                        {
+                            "ContractId":1
+                        }
+                    ]
+                },
+                {
+                    "Title":"Erste Schritte mit GitLab",
+                    "Instructions":"(T) Ops hat einen Gitlab-Benutzer für dich erstellt. Du solltest eine E-Mail mit einem temporären Passwort erhalten haben.\n(T) Füge deinen SSH-Schlüssel in dein GitLab-Profil ein.\nDu darfst dein privates Smartphone für die erforderliche Zwei-Faktoren-Authentifizierung verwenden.\n(T) Richte eine vernünftige git-config ein.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":2,
+                    "Departments":[
+                        {
+                            "DepartmentId":1
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Title":"Neuzugang IT/Trainee",
+            "Description":"Demo Daten für SoProAbnahme",
+            "Supervisor":"bill@replay.de",
+            "WorkerOfReference":"wilma@replay.de",
+            "Department":1,
+            "ContractOfRefWorker":1,
+            "StartDate":"06-08-2024",
+            "DueDate":"13-10-2024",
+            "isArchived":false,
+            "Assignments":[
+                {
+                    "Title":"Informationen zu Rahmenbedingungen des Vertrags einholen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Informationen zu Rahmenbedingungen des Vertrags einholen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Vertrag erstellen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Vertrag vor ab neuen Mitarbeitenden per Mail senden",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Vertrag unterschreiben lassen durch Geschäftsführung",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Personalbogen inkl. erforderlicher Unterlagen per Mail an neuen MA zusenden und ablegen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Unterstützung für Umzug (500 €) ja/nein abfragen",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Unterstützung für Umzug (500 €) an Personal kommunizieren",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"GSuite-Konto erstellen",
+                    "Instructions":"Erstellen Sie ein GSuite-Konto für den neuen Mitarbeiter und stellen Sie sicher, dass die Zugangsdaten sicher gespeichert und übergeben werden. Lassen Sie GSuite ein zufälliges Passwort erstellen und kopieren Sie dieses in die Zwischenablage. In Ihrem persönlichen Bereich auf GDrive erstellen Sie ein neues Dokument mit der Vorlage 'Initiale Zugangsdaten' und fügen die GSuite-Zugangsdaten in dieses Dokument ein. Drucken Sie das Dokument aus und legen Sie die Papier-Version in einen Umschlag, den Sie dem neuen Mitarbeiter übergeben können. Löschen Sie anschließend das Dokument aus Ihrem GDrive. Fügen Sie den Benutzer in die organisatorische Einheit ein, die am besten zu seiner Tätigkeit passt, und klicken Sie auf 'Speichern'. Wenn der neue Mitarbeiter ein technischer Mitarbeiter ist, fügen Sie ihn in die Gruppen alle und entwickler hinzu. Informieren Sie Anne Kolbe aus der Personalabteilung, dass das E-Mail-Konto nun bereit ist. Sie wird dann ein Konto mit Time Machine für den neuen Mitarbeiter erstellen.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":0
+                },
+                {
+                    "Title":"GitLab-Konto für technische Mitarbeiter erstellen",
+                    "Instructions":"Erstellen Sie ein GitLab-Konto für den neuen technischen Mitarbeiter und senden Sie ihm das Passwort per E-Mail. Gehen Sie auf GitLab (https://code.sopro.de/admin/users/new), erstellen Sie ein Konto für den Benutzer und sorgen Sie dafür, dass das Passwort an ihn gesendet wird.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":2,
+                    "Departments":[
+                        {
+                            "DepartmentId":1
+                        }
+                    ]
+                },
+                {
+                    "Title":"Kartendecks Einladung",
+                    "Instructions":"Laden Sie den neuen Mitarbeiter zu den relevanten Kartendecks ein, damit er Zugang zu den notwendigen Informationen und Projekten hat. Dies beinhaltet die Kartendecks dev, orga, besprechungsprotokolle, zammad, sopro operations, sopro projektvorstellungen und sopro-projektleitung-curriculum.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":2
+                },
+                {
+                    "Title":"Slack-Einladung",
+                    "Instructions":"Fordern Sie eine Einladung für den neuen Mitarbeiter in Slack an, damit er mit dem Team kommunizieren kann. Nutzen Sie den Button oben rechts, der sopro sagt, und füllen Sie das Formular aus. Die Anfrage wird automatisch genehmigt, weil die E-Mail mit @sopro.de endet.",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"IT",
+                    "Status":2
+                },
+                {
+                    "Title":"Unterlagen in den jeweiligen Monatsordner für Gehaltsabrechnung DSG hochladen (Vertrag, PB, Perso, SV-Ausweis) und in der Übersicht Änderungen einpÍegen",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail an Ops wegen Vorbereitung/ Bestellung Hardware (Laptop, Handy, etc.) und Einrichtung Accounts",
+                    "Instructions":"Mail Vorlage:\n\nBetreff: Neue MA: XXX \n\nLiebes Ops-Team, \n\nbitte bereitet a) Hardware und b) Accounts für unseren neuen Mitarbeitenden XXX vor. Er beginnt am XX.YY.ZZZZ als XXX und bekommt die Default-Ausstattung. Bitte gebt mir Bescheid, ob und wann die Ausrüstung bereit liegt. \n\nDanke und viele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Backoffice bezüglich Informationen und Termin anschreiben",
+                    "Instructions":"\n\n- Backoffice bezüglich Informationen und Termin anschreiben \nMail Vorlage:\n\nLiebes Backoffice-Team, \n\nwir bekommen am XX.YY.ZZZZ einen neuen Mitarbeitenden: XXX in der Position als XXX. Bitte bereitet unseren sopro-Rucksack inklusive Karte sowie Schlüssel vor und bestellt ein vegetarisches Mittagessen für sie/ihn. \n\nPlant am zweiten Tag auch eine kleine Führung durch unser Büro und auch unser Gebäude mit ein und stellt hier gleich einen Termin mit mir ein. \n\nBitte versendet auch das Willkommenspaket etwa vier Wochen vor Arbeitsbeginn folgende Privatadresse: XXX. \n\nÜber die genaue Uhrzeit am ersten Arbeitstag informiere ich euch noch in einer extra E-Mail. \n\nBuddy wird XXX sein und ist bereits informiert. Bitte gebt mir Bescheid, ob und wann die Ausrüstung bereit liegt. \n\nDanke und viele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Buddy Anfragen",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":6,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Einladung neuer MA zu anstehenden Teamevents",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Vernetzung über Soziale Medien",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Versand Willkommens-Box",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":2,
+                    "AssignedRole":"Backoffice",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail zum 1. Tag im Büro, Vorabinformationen (One Pager - FAQs erster Tag), Uhrzeit, Parkmöglichkeiten, Kleidergröße und Ansprechpartnern vor Ort",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":2,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Anlegen in der Time Machine, Einrichten Deskbot-Account und erfragen Mailadresse bei Ops",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Einträge im Bereich Team: Senior-Peer, Bereich, Festanstellung seit, Position und Position seit",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Klären Zuordnung Monthly Peer mit GL-Runde",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Klären Zuordnung Buddy",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail an BackoÎce zur genauen Uhrzeit und Kleidergröße",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail Ops wegen Ansprechpartner vor Ort",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Mail Buddy wegen Anwesenheit im Büro",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Brief ausdrucken",
+                    "Instructions":"",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Willkommensmail an das Team über alle@ versenden",
+                    "Instructions":"### Festangestellt\n\nLiebes Team,\n\n_Vorname_ _Nachname_ wird uns ab dem DD.MM.YYYY im Bereich Entwicklung / Backoffice / Operations / UI/UX / Marketing unterstützen.\n\nHerzlich Willkommen bei sopro!\n\nViele Grüße\n\n\n### Trainee\n\nLiebes Team,\n\n_Vorname_ _Nachname_ wird ab dem DD.MM.YYYY unser Trainee-Programm im Bereich Entwicklung / Operations absolvieren.\n\nHerzlich Willkommen bei sopro und viel Erfolg!\n\nViele Grüße",
+                    "AssigneeType":1,
+                    "DueInId":7,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Empfang durch BackoÎce und People & Culture",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":7,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Übergabe Package, Schlüssel, Karte und Hardware",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Begleitung durch Ops bei der Einrichtung PC",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Büroführung, Vorstellung Kolleg*innen und Schlüssel-/ Kartenübergabe durch BackoÎce",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Gemeinsames Mittagessen mit Buddy",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Erklärung Organisatorisches und fehlende Unterlagen (NachwG, Datenschutz) durch People & Culture",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Einrichtung PC und Accounts abschließen inkl. Erstellung Sicherungskopie mit Ops",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Begrüßung im Weekly",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":1,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Vorstellung Buddy",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":7,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"nach drei Wochen: Angekommen? Erwartungen? Fragen? Onboarding-Card 2. Teil? (People & Culture)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"nach drei Monaten: Angekommen? Erwartungen und Zufriedenheit? Verbesserungsvorschläge? (People & Culture)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"nach sechs Monaten: Angekommen? Perspektiven? Probezeitende (Geschäftsführung)",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Termine für Onboarding-Gespräche",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Termine für Probezeit und Festanstellung Trainee",
+                    "Instructions":"",
+                    "AssigneeType":0,
+                    "DueInId":5,
+                    "AssignedRole":"Personal",
+                    "Status":2
+                },
+                {
+                    "Title":"Hardware",
+                    "Instructions":"Die Hardware, die wir für die Arbeit im Büro zur Verfügung stellen:\n- Notebook\n- Externe USB-Festplatte zum Erstellen von Backups deines Laptops\n- Tastatur\n- Headset (Beachte: Bei unserem Standard-Headset gibt es am Kabel einen Schalter, der am Anfang auf stumm gestellt ist.)\n- Maus\n- Mauspad\n- In-Ear-Kopfhörer zum Hören von Musik. Verwende dazu bitte keine Over-Ear-Kopfhörer (es sei denn, sie haben ein geschlossenes Design), da andere Personen im selben Raum alles hören können.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Grundlagen der Büro-IT-Sicherheit",
+                    "Instructions":"Lies dir durch und merk dir, wie wir mit Passwörtern, Browsererweiterungen und Sicherheitsgrundlagen umgehen. Frag unseren Informationssicherheitsbeauftragten (ISB), wie wir mit Passwörtern umgehen. Es wird von dir erwartet, dass du eindeutige, nicht speicherbare Passwörter für jedes deiner Konten in Keepass erstellst und dir niemals ein Passwort merkst, außer für deine Festplattenverschlüsselung, deinen Linux-Benutzer und dein Keepass. Bitte verwende keine privaten Geräte für die Arbeit, außer bei den im Lauf des Onboardings ausdrücklich genannten Ausnahmen.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":2
+                },
+                {
+                    "Title":"Anmeldedaten einrichten",
+                    "Instructions":"Stelle sicher, dass du deine Passwörter nicht mit der Google Chrome Cloud synchronisierst.\n(P) Erstelle einen neuen Basic-Auth-Passwort-Hash und schicke ihn per E-Mail an ops@sopro.de.\n(P) Sende diesen Passwort-Hash an ops@sopro.de und bitte darum, in die allgemeine Basisauthentifizierung von sopro aufgenommen zu werden.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":2,
+                    "Contracts":[
+                        {
+                            "ContractId":1
+                        }
+                    ]
+                },
+                {
+                    "Title":"Erste Schritte mit GitLab",
+                    "Instructions":"(T) Ops hat einen Gitlab-Benutzer für dich erstellt. Du solltest eine E-Mail mit einem temporären Passwort erhalten haben.\n(T) Füge deinen SSH-Schlüssel in dein GitLab-Profil ein.\nDu darfst dein privates Smartphone für die erforderliche Zwei-Faktoren-Authentifizierung verwenden.\n(T) Richte eine vernünftige git-config ein.",
+                    "AssigneeType":2,
+                    "DueInId":1,
+                    "AssignedRole":"",
+                    "Status":2,
+                    "Departments":[
+                        {
+                            "DepartmentId":1
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
